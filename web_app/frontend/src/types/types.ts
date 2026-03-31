@@ -15,12 +15,54 @@ export interface TokenUsage {
 
 // 1.2. Chart config từ AI
 export interface ChartConfig {
-    type: 'bar' | 'line' | 'pie' | 'area';
+    type: 'bar' | 'line' | 'pie' | 'area' | 'stacked_bar' | 'horizontal_bar' | 'donut' | 'scatter' | 'radar' | 'treemap' | 'funnel' | 'composed';
     xKey: string;
-    yKey: string;
+    yKeys: string[];
+    yKey?: string;
 }
 
-// 1.3. Kiểu dữ liệu cho tin nhắn Chat.
+// 1.3. Building blocks — LLM tổ hợp các mảnh ghép này
+export interface StatCardItem {
+    label: string;
+    value: string;
+    subtitle?: string;
+    color?: string;
+}
+
+export interface DetailCardItem {
+    name: string;
+    metrics: Record<string, string>;
+    tag?: string;
+    tagColor?: string;
+}
+
+export interface StatCardsBlock {
+    type: 'stat_cards';
+    items: StatCardItem[];
+}
+
+export interface ChartBlock {
+    type: 'chart';
+    chartType: ChartConfig['type'];
+    xKey: string;
+    yKeys: string[];
+    yKey?: string;
+}
+
+export interface DetailCardsBlock {
+    type: 'detail_cards';
+    items: DetailCardItem[];
+}
+
+export interface HeadingBlock {
+    type: 'heading';
+    text: string;
+    level?: 'h2' | 'h3';
+}
+
+export type Block = StatCardsBlock | ChartBlock | DetailCardsBlock | HeadingBlock;
+
+// 1.4. Kiểu dữ liệu cho tin nhắn Chat.
 export interface Message {
     id: string;
     role: 'user' | 'assistant';
@@ -32,6 +74,8 @@ export interface Message {
     columns?: string[];
     rows?: string[][];
     chartConfig?: ChartConfig;
+    blocks?: Block[];
+    statusText?: string;
 }
 
 // 1.2. Kiểu dữ liệu cho mục menu trong Sidebar.

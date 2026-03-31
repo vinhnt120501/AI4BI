@@ -33,7 +33,39 @@ export default function ChatPage() {
         messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
-    // 3. Xử lý gửi tin nhắn
+    // 3. Cập nhật message theo từng SSE event
+    const updateMessage = (msgId: string, event: string, payload: Record<string, unknown>) => {
+        setMessages((prev) =>
+            prev.map((m) => {
+                if (m.id !== msgId) return m;
+                switch (event) {
+                    case 'status':
+                        return { ...m, statusText: payload.text as string };
+                    case 'thinking':
+                        setIsTyping(false);
+                        return { ...m, statusText: undefined, thinking: payload.thinking as string };
+                    case 'sql':
+                        return { ...m, sql: payload.sql as string, tokenUsage: payload.token_usage as Message['tokenUsage'] };
+                    case 'data':
+                        return { ...m, columns: payload.columns as string[], rows: payload.rows as string[][] };
+                    case 'reply':
+                        return {
+                            ...m,
+                            content: (payload.reply as string) || '',
+                            chartConfig: payload.chart_config as Message['chartConfig'],
+                            blocks: payload.blocks as Message['blocks'],
+                            replyTokenUsage: payload.reply_token_usage as Message['replyTokenUsage'],
+                        };
+                    case 'error':
+                        return { ...m, content: `Lỗi: ${payload.error}` };
+                    default:
+                        return m;
+                }
+            })
+        );
+    };
+
+    // 4. Xử lý gửi tin nhắn
     const handleSend = async () => {
         if (inputValue.trim() === '')
             return;
@@ -48,8 +80,11 @@ export default function ChatPage() {
         setInputValue('');
         setIsTyping(true);
 
-        // 3.2. Gọi Backend → Gemini → TiDB
+        // 3.2. Gọi Backend SSE → stream từng phần
         const aiMsgId = (Date.now() + 1).toString();
+        const emptyAiMsg: Message = { id: aiMsgId, role: 'assistant', content: '' };
+        setMessages((prev) => [...prev, emptyAiMsg]);
+
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
             const res = await fetch(`${API_URL}/chat`, {
@@ -57,33 +92,40 @@ export default function ChatPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: inputValue, sessionId }),
             });
-            const data = await res.json();
 
-            if (data.error) {
-                throw new Error(data.error);
+            const reader = res.body?.getReader();
+            const decoder = new TextDecoder();
+            if (!reader) throw new Error('No stream');
+
+            let buffer = '';
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                let currentEvent = '';
+                for (const line of lines) {
+                    if (line.startsWith('event: ')) {
+                        currentEvent = line.slice(7);
+                    } else if (line.startsWith('data: ') && currentEvent) {
+                        const payload = JSON.parse(line.slice(6));
+                        updateMessage(aiMsgId, currentEvent, payload);
+                        currentEvent = '';
+                    }
+                }
             }
-
-            const aiMsg: Message = {
-                id: aiMsgId,
-                role: 'assistant',
-                content: data.reply || '',
-                sql: data.sql,
-                thinking: data.thinking,
-                tokenUsage: data.token_usage,
-                replyTokenUsage: data.reply_token_usage,
-                columns: data.columns,
-                rows: data.rows,
-                chartConfig: data.chart_config,
-            };
-            setMessages((prev) => [...prev, aiMsg]);
             setIsTyping(false);
         } catch {
-            const errorMsg: Message = {
-                id: aiMsgId,
-                role: 'assistant',
-                content: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.',
-            };
-            setMessages((prev) => [...prev, errorMsg]);
+            setMessages((prev) =>
+                prev.map((m) =>
+                    m.id === aiMsgId
+                        ? { ...m, content: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.' }
+                        : m
+                )
+            );
             setIsTyping(false);
         }
     };
@@ -111,11 +153,19 @@ export default function ChatPage() {
                     {messages.map((msg) => (
                       <MessageBubble key={msg.id} message={msg} />
                     ))}
-                    {isTyping && (
-                      <div className="text-slate-400 text-sm animate-pulse">
-                        {UI_STRINGS.LOADING_TEXT}
-                      </div>
-                    )}
+                    {isTyping && (() => {
+                      const lastMsg = messages[messages.length - 1];
+                      const statusText = lastMsg?.statusText;
+                      return (
+                        <div className="flex items-center gap-2.5 text-sm text-slate-500">
+                          <svg className="animate-spin h-4 w-4 text-blue-500" viewBox="0 0 24 24" fill="none">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                          </svg>
+                          <span className="animate-pulse">{statusText || UI_STRINGS.LOADING_TEXT}</span>
+                        </div>
+                      );
+                    })()}
                     <div ref={messageEndRef} />
                   </div>
                 </div>

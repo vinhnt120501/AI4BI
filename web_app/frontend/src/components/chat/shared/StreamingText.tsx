@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 interface StreamingTextProps {
   text: string;
@@ -10,7 +11,7 @@ interface StreamingTextProps {
 }
 
 /**
- * StreamingText — Hiệu ứng streaming hiển thị từng ký tự
+ * StreamingText — Hiệu ứng streaming + render markdown
  */
 export default function StreamingText({ text, speed = 12, onComplete, className = '' }: StreamingTextProps) {
   const [displayed, setDisplayed] = useState('');
@@ -35,9 +36,14 @@ export default function StreamingText({ text, speed = 12, onComplete, className 
   }, [text, speed, onComplete]);
 
   return (
-    <span className={className}>
-      {displayed}
-      {!done && <span className="animate-pulse">|</span>}
-    </span>
+    <div className={`${className} prose prose-slate prose-sm max-w-none
+      prose-headings:text-slate-800 prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2
+      prose-p:my-2 prose-p:leading-relaxed
+      prose-ul:my-2 prose-li:my-0.5
+      prose-strong:text-slate-800`}
+    >
+      <ReactMarkdown>{displayed}</ReactMarkdown>
+      {!done && <span className="animate-pulse text-slate-400">|</span>}
+    </div>
   );
 }

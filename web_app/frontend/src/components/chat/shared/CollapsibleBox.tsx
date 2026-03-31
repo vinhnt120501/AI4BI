@@ -5,14 +5,15 @@ import React, { useState } from 'react';
 interface CollapsibleBoxProps {
   title: string;
   badge?: string;
+  defaultOpen?: boolean;
   children: React.ReactNode;
 }
 
 /**
  * CollapsibleBox — Box thu gọn, click để mở/đóng nội dung
  */
-export default function CollapsibleBox({ title, badge, children }: CollapsibleBoxProps) {
-  const [open, setOpen] = useState(false);
+export default function CollapsibleBox({ title, badge, defaultOpen = true, children }: CollapsibleBoxProps) {
+  const [open, setOpen] = useState(defaultOpen);
 
   return (
     <div className="border border-slate-200 rounded-xl overflow-hidden">

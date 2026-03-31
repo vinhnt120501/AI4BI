@@ -1,15 +1,21 @@
+import json
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 load_dotenv(Path(__file__).parent / ".env")
 
 from llm import text_to_sql, generate_reply
-from db import get_all_tables
+from db import get_all_tables, init_chat_history_table, save_chat
 
 app = FastAPI()
+
+# Tạo bảng chat_history khi khởi động
+init_chat_history_table()
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -23,35 +29,91 @@ class ChatRequest(BaseModel):
     sessionId: str = ""
 
 
+def sse_event(event: str, data: dict) -> str:
+    """Format 1 SSE event."""
+    return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+
+
 @app.post("/chat")
 async def chat(req: ChatRequest):
-    try:
-        sql_result = text_to_sql(req.message)
+    """SSE streaming: gửi từng phần khi có kết quả."""
 
-        reply_result = generate_reply(
-            req.message,
-            sql_result["columns"],
-            sql_result["rows"],
-        )
+    # Dùng list để lưu kết quả từ generator cho save_chat
+    chat_data = {}
 
-        sql_tokens = sql_result["token_usage"]
-        reply_tokens = reply_result["reply_token_usage"]
-        grand_total = {
-            "input": sql_tokens["input"] + reply_tokens["input"],
-            "thinking": sql_tokens["thinking"] + reply_tokens["thinking"],
-            "output": sql_tokens["output"] + reply_tokens["output"],
-            "total": sql_tokens["total"] + reply_tokens["total"],
-        }
+    def stream():
+        try:
+            # Bước 1: Sinh SQL
+            yield sse_event("status", {"step": 1, "text": "Đang phân tích câu hỏi và tạo truy vấn SQL..."})
+            sql_result = text_to_sql(req.message)
+            yield sse_event("thinking", {"thinking": sql_result["thinking"]})
+            yield sse_event("sql", {
+                "sql": sql_result["sql"],
+                "token_usage": sql_result["token_usage"],
+            })
 
-        return {
-            **sql_result,
-            "reply": reply_result["reply"],
-            "chart_config": reply_result["chart_config"],
-            "reply_token_usage": reply_tokens,
-            "grand_total": grand_total,
-        }
-    except Exception as e:
-        return {"error": str(e)}
+            # Bước 2: Data từ SQL
+            yield sse_event("status", {"step": 2, "text": "Đang truy vấn dữ liệu từ database..."})
+            yield sse_event("data", {
+                "columns": sql_result["columns"],
+                "rows": sql_result["rows"],
+            })
+
+            # Bước 3: Phân tích + reply + chart
+            yield sse_event("status", {"step": 3, "text": "Đang phân tích dữ liệu và vẽ biểu đồ..."})
+            reply_result = generate_reply(
+                req.message,
+                sql_result["columns"],
+                sql_result["rows"],
+            )
+            yield sse_event("reply", {
+                "reply": reply_result["reply"],
+                "chart_config": reply_result["chart_config"],
+                "blocks": reply_result.get("blocks"),
+                "reply_token_usage": reply_result["reply_token_usage"],
+            })
+
+            # Bước 4: Tổng kết token
+            sql_tokens = sql_result["token_usage"]
+            reply_tokens = reply_result["reply_token_usage"]
+            grand_total = {
+                "input": sql_tokens["input"] + reply_tokens["input"],
+                "thinking": sql_tokens["thinking"] + reply_tokens["thinking"],
+                "output": sql_tokens["output"] + reply_tokens["output"],
+                "total": sql_tokens["total"] + reply_tokens["total"],
+            }
+            yield sse_event("done", {"grand_total": grand_total})
+
+            # Lưu data để save sau khi stream xong
+            chat_data.update({
+                **sql_result,
+                "reply": reply_result["reply"],
+                "chart_config": reply_result["chart_config"],
+                "blocks": reply_result.get("blocks"),
+                "reply_token_usage": reply_tokens,
+                "grand_total": grand_total,
+            })
+
+        except Exception as e:
+            yield sse_event("error", {"error": str(e)})
+
+    async def response_with_save():
+        """Stream response rồi save chat history."""
+        for chunk in stream():
+            yield chunk
+        # Save sau khi stream xong
+        if chat_data:
+            try:
+                save_chat(req.sessionId, req.message, chat_data)
+                print(f"[save_chat OK] session={req.sessionId[:8]}... q={req.message[:30]}")
+            except Exception as e:
+                import traceback
+                print(f"[save_chat ERROR] {e}")
+                traceback.print_exc()
+        else:
+            print(f"[save_chat SKIP] No chat_data for: {req.message[:30]}")
+
+    return StreamingResponse(response_with_save(), media_type="text/event-stream")
 
 
 if __name__ == "__main__":

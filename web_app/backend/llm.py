@@ -1,9 +1,23 @@
 import os
 import json
-from google import genai
+from openai import OpenAI
 from db import get_schema_context, execute_sql
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY") or "local-9router-key"
+OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "http://localhost:20128/v1")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "cx/gpt-5-codex-mini")
+if OPENROUTER_MODEL.startswith("openai/cx/"):
+    OPENROUTER_MODEL = OPENROUTER_MODEL.replace("openai/", "", 1)
+
+client = OpenAI(
+    api_key=OPENROUTER_API_KEY,
+    base_url=OPENROUTER_BASE_URL,
+)
+
+EXTRA_HEADERS = {
+    "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "http://localhost:3000"),
+    "X-Title": os.getenv("OPENROUTER_APP_NAME", "AI4BI"),
+}
 
 SQL_SYSTEM_PROMPT = """
 Bạn là BI Analyst cho Nhà thuốc Long Châu, chuyển câu hỏi tiếng Việt thành SQL (MySQL/TiDB).
@@ -149,24 +163,48 @@ VIS_CONFIG:[{"type":"stat_cards","items":[{"label":"Tổng cửa hàng","value":
 
 
 def count_tokens(text: str) -> int:
-    result = client.models.count_tokens(model="gemini-2.5-flash", contents=text)
-    return result.total_tokens
+    # 9router/OpenAI-compatible endpoint does not guarantee a token-count API.
+    # Keep a stable approximation for existing telemetry fields.
+    return max(1, len(text) // 4)
 
 
 def extract_thinking(response) -> str:
-    for part in response.candidates[0].content.parts:
-        if hasattr(part, 'thought') and part.thought:
-            return part.text
+    # Most OpenAI-compatible providers do not expose thinking traces.
     return ""
 
 
 def extract_token_usage(usage) -> dict:
     return {
-        "input": usage.prompt_token_count,
-        "thinking": getattr(usage, 'thoughts_token_count', 0) or 0,
-        "output": usage.candidates_token_count,
-        "total": usage.total_token_count,
+        "input": getattr(usage, "prompt_tokens", 0) or 0,
+        "thinking": 0,
+        "output": getattr(usage, "completion_tokens", 0) or 0,
+        "total": getattr(usage, "total_tokens", 0) or 0,
     }
+
+
+def _message_text(message) -> str:
+    content = getattr(message, "content", "")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts = []
+        for item in content:
+            if isinstance(item, dict) and item.get("type") == "text":
+                parts.append(item.get("text", ""))
+        return "".join(parts)
+    return str(content or "")
+
+
+def generate_chat(system_prompt: str, user_prompt: str, temperature: float = 0.0):
+    return client.chat.completions.create(
+        model=OPENROUTER_MODEL,
+        temperature=temperature,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        extra_headers=EXTRA_HEADERS,
+    )
 
 
 def clean_sql(text: str) -> str:
@@ -245,23 +283,15 @@ def text_to_sql(question: str) -> dict:
 
     pre_input_tokens = count_tokens(system_prompt + "\n" + question)
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config={
-            "system_instruction": system_prompt,
-            "temperature": 0,
-            "thinking_config": {"include_thoughts": True, "thinking_budget": 2048},
-        },
-        contents=question,
-    )
+    response = generate_chat(system_prompt, question, temperature=0)
 
-    usage = extract_token_usage(response.usage_metadata)
+    usage = extract_token_usage(response.usage)
     usage["pre_input"] = pre_input_tokens
     usage["schema"] = count_tokens(schema)
     usage["instruction"] = count_tokens(system_prompt) - usage["schema"]
     usage["question"] = count_tokens(question)
 
-    sql = clean_sql(response.text)
+    sql = clean_sql(_message_text(response.choices[0].message))
     thinking = extract_thinking(response)
 
     # Thử chạy SQL, nếu lỗi thì retry 1 lần với thông báo lỗi
@@ -269,22 +299,18 @@ def text_to_sql(question: str) -> dict:
         db_result = execute_sql(sql)
     except Exception as e:
         error_msg = str(e)
-        retry_response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            config={
-                "system_instruction": system_prompt,
-                "temperature": 0,
-                "thinking_config": {"include_thoughts": True, "thinking_budget": 2048},
-            },
-            contents=f"{question}\n\nSQL trước đó bị lỗi: {error_msg}\nViết lại SQL khác, tránh lỗi này.",
+        retry_response = generate_chat(
+            system_prompt,
+            f"{question}\n\nSQL trước đó bị lỗi: {error_msg}\nViết lại SQL khác, tránh lỗi này.",
+            temperature=0,
         )
-        retry_usage = extract_token_usage(retry_response.usage_metadata)
+        retry_usage = extract_token_usage(retry_response.usage)
         usage["input"] += retry_usage["input"]
         usage["thinking"] += retry_usage["thinking"]
         usage["output"] += retry_usage["output"]
         usage["total"] += retry_usage["total"]
 
-        sql = clean_sql(retry_response.text)
+        sql = clean_sql(_message_text(retry_response.choices[0].message))
         thinking += "\n\n[Retry] " + extract_thinking(retry_response)
         db_result = execute_sql(sql)
 
@@ -308,18 +334,10 @@ def generate_reply(question: str, columns: list, rows: list) -> dict:
     data_tokens = count_tokens(data_text)
     question_tokens = count_tokens(question)
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config={
-            "system_instruction": REPLY_SYSTEM_PROMPT,
-            "temperature": 0.3,
-            "thinking_config": {"include_thoughts": True, "thinking_budget": 2048},
-        },
-        contents=contents,
-    )
+    response = generate_chat(REPLY_SYSTEM_PROMPT, contents, temperature=0.3)
 
-    reply_text, chart_config, blocks = parse_vis_config(response.text.strip())
-    reply_usage = extract_token_usage(response.usage_metadata)
+    reply_text, chart_config, blocks = parse_vis_config(_message_text(response.choices[0].message).strip())
+    reply_usage = extract_token_usage(response.usage)
     reply_usage["pre_input"] = pre_input_tokens
     reply_usage["instruction"] = instruction_tokens
     reply_usage["data"] = data_tokens

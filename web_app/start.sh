@@ -9,7 +9,7 @@ BACK_PID=$!
 cd "$DIR/frontend" && npm run dev &
 FRONT_PID=$!
 
-echo "Backend  PID=$BACK_PID  → http://localhost:8000"
+echo "Backend  PID=$BACK_PID  → http://localhost:8001"
 echo "Frontend PID=$FRONT_PID → http://localhost:3000"
 echo "Ctrl+C to stop"
 

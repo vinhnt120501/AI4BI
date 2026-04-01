@@ -121,7 +121,7 @@ if __name__ == "__main__":
     import uvicorn
 
     if "--serve" in sys.argv:
-        uvicorn.run(app, host="0.0.0.0", port=8000)
+        uvicorn.run(app, host="0.0.0.0", port=8001)
     else:
         data = get_all_tables()
         for i, (name, info) in enumerate(data.items(), 1):

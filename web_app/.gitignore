@@ -1,4 +1,42 @@
-venv/
-node_modules/
-__pycache__/
+# Monorepo ignores (Python backend + Next.js frontend)
+
+# OS / editor
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+*.pid
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python backend
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+backend/*.py[cod]
+backend/.pytest_cache/
+backend/.mypy_cache/
+backend/.ruff_cache/
+
+# Backend secrets / local runtime
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/.memory/
+
+# Next.js frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.turbo/
+frontend/.vercel/
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Frontend env (local only)
+frontend/.env.local
+frontend/.env*.local

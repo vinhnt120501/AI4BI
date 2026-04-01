@@ -226,11 +226,11 @@ Frontend nhận từng event và render ngay → UX mượt, user không phải 
 
 ```bash
 # start.sh khởi động cả 2:
-# Backend: python api.py --serve (port 8000)
+# Backend: python api.py --serve (port 8001)
 # Frontend: npm run dev (port 3000)
 ./start.sh
 ```
 
 **Environment:**
 - Backend: `.env` với Gemini API key + TiDB credentials
-- Frontend: `NEXT_PUBLIC_API_URL` (mặc định `localhost:8000`)
+- Frontend: `NEXT_PUBLIC_API_URL` (mặc định `localhost:8001`)

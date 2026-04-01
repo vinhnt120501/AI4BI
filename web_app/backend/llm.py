@@ -277,9 +277,12 @@ def parse_vis_config(text: str) -> tuple[str, dict | None, list | None]:
     return "\n".join(clean_lines).strip(), chart_config, blocks
 
 
-def text_to_sql(question: str) -> dict:
+def text_to_sql(question: str, memory_context: str = "") -> dict:
     schema = get_schema_context()
-    system_prompt = SQL_SYSTEM_PROMPT + f"Schema:\n{schema}"
+    if memory_context:
+        system_prompt = SQL_SYSTEM_PROMPT + f"\n\nMemory Context:\n{memory_context}\n\nSchema:\n{schema}"
+    else:
+        system_prompt = SQL_SYSTEM_PROMPT + f"Schema:\n{schema}"
 
     pre_input_tokens = count_tokens(system_prompt + "\n" + question)
 
@@ -323,11 +326,17 @@ def text_to_sql(question: str) -> dict:
     }
 
 
-def generate_reply(question: str, columns: list, rows: list) -> dict:
+def generate_reply(question: str, columns: list, rows: list, memory_context: str = "") -> dict:
     sample_rows = rows[:50]
     data_text = json.dumps({"columns": columns, "rows": sample_rows}, ensure_ascii=False)
     columns_hint = f"Danh sách cột: {json.dumps(columns, ensure_ascii=False)}"
-    contents = f"Câu hỏi: {question}\n\n{columns_hint}\n\nDữ liệu:\n{data_text}"
+    if memory_context:
+        contents = (
+            f"Memory Context:\n{memory_context}\n\n"
+            f"Câu hỏi: {question}\n\n{columns_hint}\n\nDữ liệu:\n{data_text}"
+        )
+    else:
+        contents = f"Câu hỏi: {question}\n\n{columns_hint}\n\nDữ liệu:\n{data_text}"
 
     pre_input_tokens = count_tokens(REPLY_SYSTEM_PROMPT + "\n" + contents)
     instruction_tokens = count_tokens(REPLY_SYSTEM_PROMPT)

@@ -76,6 +76,7 @@ def init_chat_history_table():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS `chat_history` (
             `id`                 INT AUTO_INCREMENT PRIMARY KEY,
+            `user_id`            VARCHAR(100) NOT NULL DEFAULT 'default_user',
             `session_id`         VARCHAR(100) NOT NULL,
             `created_at`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `question`           TEXT NOT NULL,
@@ -94,8 +95,40 @@ def init_chat_history_table():
             `token_reply_output`   INT DEFAULT 0,
             `token_reply_total`    INT DEFAULT 0,
             `token_grand_total`  INT DEFAULT 0,
+            INDEX idx_user_session (user_id, session_id),
             INDEX idx_session (session_id),
             INDEX idx_created (created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    """)
+    # Backward-compatible migration for existing table
+    cursor.execute("""
+        SELECT COUNT(*) FROM information_schema.columns
+        WHERE table_schema = DATABASE() AND table_name = 'chat_history' AND column_name = 'user_id'
+    """)
+    has_user_id = cursor.fetchone()[0] > 0
+    if not has_user_id:
+        cursor.execute("ALTER TABLE `chat_history` ADD COLUMN `user_id` VARCHAR(100) NOT NULL DEFAULT 'default_user' AFTER `id`")
+        cursor.execute("CREATE INDEX idx_user_session ON `chat_history`(`user_id`, `session_id`)")
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
+def init_memory_facts_table():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS `memory_facts` (
+            `id`           INT AUTO_INCREMENT PRIMARY KEY,
+            `user_id`      VARCHAR(100) NOT NULL,
+            `session_id`   VARCHAR(100) NOT NULL,
+            `category`     VARCHAR(50) NOT NULL,
+            `content`      TEXT NOT NULL,
+            `importance`   TINYINT NOT NULL DEFAULT 1,
+            `source_type`  VARCHAR(50) NOT NULL DEFAULT 'fact_extraction',
+            `created_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_mem_user_created (`user_id`, `created_at`),
+            INDEX idx_mem_user_category (`user_id`, `category`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     """)
     conn.commit()
@@ -103,7 +136,7 @@ def init_chat_history_table():
     conn.close()
 
 
-def save_chat(session_id: str, question: str, result: dict):
+def save_chat(session_id: str, question: str, result: dict, user_id: str = "default_user"):
     """Lưu toàn bộ thông tin 1 lần chat vào database."""
     conn = get_connection()
     cursor = conn.cursor()
@@ -114,13 +147,14 @@ def save_chat(session_id: str, question: str, result: dict):
 
     cursor.execute(
         """INSERT INTO `chat_history`
-        (session_id, created_at, question, sql_generated, thinking, reply,
+        (user_id, session_id, created_at, question, sql_generated, thinking, reply,
          columns_data, rows_data, chart_config,
          token_sql_input, token_sql_thinking, token_sql_output, token_sql_total,
          token_reply_input, token_reply_thinking, token_reply_output, token_reply_total,
          token_grand_total)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
         (
+            user_id,
             session_id,
             datetime.now(),
             question,
@@ -146,15 +180,103 @@ def save_chat(session_id: str, question: str, result: dict):
     conn.close()
 
 
-def get_chat_history(session_id: str, limit: int = 50) -> list:
+def get_chat_history(session_id: str, limit: int = 50, user_id: str = "default_user", cross_session: bool = False) -> list:
     """Lấy lịch sử chat theo session_id."""
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(
-        "SELECT * FROM `chat_history` WHERE session_id = %s ORDER BY created_at DESC LIMIT %s",
-        (session_id, limit),
-    )
+    if cross_session:
+        cursor.execute(
+            "SELECT * FROM `chat_history` WHERE user_id = %s ORDER BY created_at DESC LIMIT %s",
+            (user_id, limit),
+        )
+    else:
+        cursor.execute(
+            "SELECT * FROM `chat_history` WHERE user_id = %s AND session_id = %s ORDER BY created_at DESC LIMIT %s",
+            (user_id, session_id, limit),
+        )
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
     return rows
+
+
+def count_chat_turns(user_id: str, session_id: str) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT COUNT(*) FROM `chat_history` WHERE user_id = %s AND session_id = %s",
+        (user_id, session_id),
+    )
+    n = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return int(n)
+
+
+def insert_memory_fact(
+    user_id: str,
+    session_id: str,
+    category: str,
+    content: str,
+    importance: int = 1,
+    source_type: str = "fact_extraction",
+) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        """INSERT INTO `memory_facts`
+        (user_id, session_id, category, content, importance, source_type, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)""",
+        (user_id, session_id, category, content, importance, source_type, datetime.now()),
+    )
+    conn.commit()
+    new_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return int(new_id)
+
+
+def get_memory_facts(user_id: str, limit: int = 20, query: str = "") -> list:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    if query:
+        like = f"%{query}%"
+        cursor.execute(
+            """SELECT * FROM `memory_facts`
+               WHERE user_id = %s AND content LIKE %s
+               ORDER BY importance DESC, created_at DESC LIMIT %s""",
+            (user_id, like, limit),
+        )
+    else:
+        cursor.execute(
+            """SELECT * FROM `memory_facts`
+               WHERE user_id = %s
+               ORDER BY importance DESC, created_at DESC LIMIT %s""",
+            (user_id, limit),
+        )
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return rows
+
+
+def delete_memory_fact(user_id: str, memory_id: int) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM `memory_facts` WHERE user_id = %s AND id = %s", (user_id, memory_id))
+    deleted = cursor.rowcount
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return int(deleted)
+
+
+def reset_memory_facts(user_id: str) -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM `memory_facts` WHERE user_id = %s", (user_id,))
+    deleted = cursor.rowcount
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return int(deleted)

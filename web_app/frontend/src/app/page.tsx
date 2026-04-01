@@ -86,12 +86,21 @@ export default function ChatPage() {
         setMessages((prev) => [...prev, emptyAiMsg]);
 
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+            const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+            if (!API_URL) {
+                throw new Error('NEXT_PUBLIC_API_URL is empty');
+            }
+
             const res = await fetch(`${API_URL}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: inputValue, sessionId }),
             });
+
+            if (!res.ok) {
+                const bodyText = await res.text().catch(() => '');
+                throw new Error(`HTTP ${res.status}: ${bodyText || res.statusText}`);
+            }
 
             const reader = res.body?.getReader();
             const decoder = new TextDecoder();
@@ -118,11 +127,12 @@ export default function ChatPage() {
                 }
             }
             setIsTyping(false);
-        } catch {
+        } catch (err) {
+            const errMsg = err instanceof Error ? err.message : 'Unknown error';
             setMessages((prev) =>
                 prev.map((m) =>
                     m.id === aiMsgId
-                        ? { ...m, content: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.' }
+                        ? { ...m, content: `Lỗi kết nối API: ${errMsg}` }
                         : m
                 )
             );

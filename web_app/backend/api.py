@@ -1,7 +1,8 @@
 import json
+import os
 from pathlib import Path
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -9,12 +10,16 @@ from pydantic import BaseModel
 load_dotenv(Path(__file__).parent / ".env")
 
 from llm import text_to_sql, generate_reply
-from db import get_all_tables, init_chat_history_table, save_chat
+from db import get_all_tables, init_chat_history_table, init_memory_facts_table, save_chat
+from memory import MemoryService
 
 app = FastAPI()
 
 # Tạo bảng chat_history khi khởi động
 init_chat_history_table()
+init_memory_facts_table()
+memory_service = MemoryService()
+ADMIN_TOKEN = os.getenv("MEMORY_ADMIN_TOKEN", "").strip()
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +32,13 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
     sessionId: str = ""
+    userId: str = "default_user"
+
+
+class MemorySearchRequest(BaseModel):
+    userId: str = "default_user"
+    query: str
+    topK: int = 10
 
 
 def sse_event(event: str, data: dict) -> str:
@@ -43,9 +55,12 @@ async def chat(req: ChatRequest):
 
     def stream():
         try:
+            memory_ctx = memory_service.build_memory_context(req.userId, req.sessionId, req.message)
+            memory_context = memory_ctx.render()
+
             # Bước 1: Sinh SQL
             yield sse_event("status", {"step": 1, "text": "Đang phân tích câu hỏi và tạo truy vấn SQL..."})
-            sql_result = text_to_sql(req.message)
+            sql_result = text_to_sql(req.message, memory_context=memory_context)
             yield sse_event("thinking", {"thinking": sql_result["thinking"]})
             yield sse_event("sql", {
                 "sql": sql_result["sql"],
@@ -65,6 +80,7 @@ async def chat(req: ChatRequest):
                 req.message,
                 sql_result["columns"],
                 sql_result["rows"],
+                memory_context=memory_context,
             )
             yield sse_event("reply", {
                 "reply": reply_result["reply"],
@@ -93,6 +109,16 @@ async def chat(req: ChatRequest):
                 "reply_token_usage": reply_tokens,
                 "grand_total": grand_total,
             })
+            try:
+                memory_service.update_after_turn(
+                    user_id=req.userId,
+                    session_id=req.sessionId,
+                    question=req.message,
+                    reply=reply_result["reply"],
+                    sql_generated=sql_result["sql"],
+                )
+            except Exception as mem_err:
+                yield sse_event("status", {"step": 4, "text": f"Memory update warning: {mem_err}"})
 
         except Exception as e:
             yield sse_event("error", {"error": str(e)})
@@ -104,7 +130,7 @@ async def chat(req: ChatRequest):
         # Save sau khi stream xong
         if chat_data:
             try:
-                save_chat(req.sessionId, req.message, chat_data)
+                save_chat(req.sessionId, req.message, chat_data, user_id=req.userId)
                 print(f"[save_chat OK] session={req.sessionId[:8]}... q={req.message[:30]}")
             except Exception as e:
                 import traceback
@@ -114,6 +140,43 @@ async def chat(req: ChatRequest):
             print(f"[save_chat SKIP] No chat_data for: {req.message[:30]}")
 
     return StreamingResponse(response_with_save(), media_type="text/event-stream")
+
+
+def _guard_admin(x_admin_token: str | None):
+    if not ADMIN_TOKEN:
+        raise HTTPException(status_code=500, detail="MEMORY_ADMIN_TOKEN is not configured")
+    if x_admin_token != ADMIN_TOKEN:
+        raise HTTPException(status_code=401, detail="Invalid admin token")
+
+
+@app.get("/memory/admin/overview")
+def memory_admin_overview(userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
+    _guard_admin(x_admin_token)
+    return memory_service.admin_overview(user_id=userId)
+
+
+@app.post("/memory/admin/search")
+def memory_admin_search(req: MemorySearchRequest, x_admin_token: str | None = Header(default=None)):
+    _guard_admin(x_admin_token)
+    return memory_service.admin_search(user_id=req.userId, query=req.query, top_k=req.topK)
+
+
+@app.delete("/memory/admin/items/{memory_id}")
+def memory_admin_delete(memory_id: int, userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
+    _guard_admin(x_admin_token)
+    return memory_service.admin_delete_item(user_id=userId, memory_id=memory_id)
+
+
+@app.post("/memory/admin/reset")
+def memory_admin_reset(userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
+    _guard_admin(x_admin_token)
+    return memory_service.admin_reset(user_id=userId)
+
+
+@app.post("/memory/admin/rebuild")
+def memory_admin_rebuild(userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
+    _guard_admin(x_admin_token)
+    return memory_service.admin_rebuild(user_id=userId)
 
 
 if __name__ == "__main__":

@@ -14,11 +14,41 @@ export interface TokenUsage {
 }
 
 // 1.2. Chart config từ AI
+// Base chart types — LLM chọn base type + options để tạo vô hạn biến thể
+export type ChartType = 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'composed' | 'radar' | 'radial_bar' | 'treemap' | 'funnel' | 'waterfall';
+
+// Options linh hoạt — LLM tự do kết hợp để tạo bất kỳ biến thể nào từ recharts
+export interface ChartOptions {
+    // Layout
+    layout?: 'horizontal' | 'vertical';     // vertical = horizontal bar
+    stacked?: boolean;                        // stacked bar/area
+    stackOffset?: 'none' | 'expand';          // expand = normalized 100%
+    // Axes
+    dualAxis?: boolean;                       // 2 trục Y cho 2 scale khác nhau
+    // Interaction
+    brush?: boolean;                          // thanh kéo zoom cho time series
+    // Pie/Donut
+    innerRadius?: number | string;            // >0 = donut, "40%" = donut
+    startAngle?: number;                      // half pie: 180
+    endAngle?: number;                        // half pie: 0
+    // Scatter/Bubble
+    zField?: string;                          // bubble size field
+    // Styling
+    gradient?: boolean;                       // area gradient fill
+    dashed?: boolean;                         // dashed line
+    showDots?: boolean;                       // show/hide dots on line
+    barRadius?: number;                       // bo tròn góc bar
+    // Colors
+    negativeColor?: string;                   // màu cho giá trị âm (waterfall, pos/neg bar)
+    positiveColor?: string;                   // màu cho giá trị dương
+}
+
 export interface ChartConfig {
-    type: 'bar' | 'line' | 'pie' | 'area' | 'stacked_bar' | 'horizontal_bar' | 'donut' | 'scatter' | 'radar' | 'treemap' | 'funnel' | 'composed';
+    type: ChartType;
     xKey: string;
     yKeys: string[];
     yKey?: string;
+    options?: ChartOptions;
 }
 
 // 1.3. Building blocks — LLM tổ hợp các mảnh ghép này
@@ -27,6 +57,7 @@ export interface StatCardItem {
     value: string;
     subtitle?: string;
     color?: string;
+    trend?: 'up' | 'down' | 'neutral';
 }
 
 export interface DetailCardItem {
@@ -41,12 +72,43 @@ export interface StatCardsBlock {
     items: StatCardItem[];
 }
 
+export interface SeriesConfig {
+    key: string;
+    renderAs: 'bar' | 'line' | 'area';
+    yAxisId?: 'left' | 'right';
+}
+
+export interface ReferenceLineConfig {
+    value: number;
+    label?: string;
+    color?: string;
+}
+
+// Config cho data transform layer — AI chỉ định cách xử lý data trước khi vẽ chart
+export interface ChartBlockConfig {
+    x_field: string;
+    y_fields: string[];
+    group_by?: string;
+    aggregate?: 'sum' | 'avg' | 'count';
+    sort_by?: string;
+    sort_order?: 'asc' | 'desc';
+    limit?: number;
+    color_field?: string;
+}
+
 export interface ChartBlock {
     type: 'chart';
-    chartType: ChartConfig['type'];
+    chartType: ChartType;
     xKey: string;
     yKeys: string[];
     yKey?: string;
+    title?: string;
+    purpose?: string;
+    size?: 'full' | 'half';
+    options?: ChartOptions;
+    series?: SeriesConfig[];
+    referenceLine?: ReferenceLineConfig;
+    config?: ChartBlockConfig;
 }
 
 export interface DetailCardsBlock {
@@ -60,7 +122,24 @@ export interface HeadingBlock {
     level?: 'h2' | 'h3';
 }
 
-export type Block = StatCardsBlock | ChartBlock | DetailCardsBlock | HeadingBlock;
+// Table block — AI tạo bảng phân tích với tiêu đề, columns tự chọn, highlight rules
+export interface TableColumn {
+    key: string;          // tên cột trong data
+    label?: string;       // tên hiển thị (nếu khác key)
+    format?: 'number' | 'currency' | 'percent' | 'text';
+    highlight?: 'positive_negative';  // tô màu xanh/đỏ theo giá trị +/-
+}
+
+export interface AnalysisTableBlock {
+    type: 'table';
+    title: string;
+    columns: TableColumn[];
+    sortBy?: string;
+    sortOrder?: 'asc' | 'desc';
+    limit?: number;
+}
+
+export type Block = StatCardsBlock | ChartBlock | DetailCardsBlock | HeadingBlock | AnalysisTableBlock;
 
 // 1.4. Kiểu dữ liệu cho tin nhắn Chat.
 export interface Message {
@@ -121,5 +200,5 @@ export const UI_STRINGS = {
 export const LAYOUT = {
     SIDEBAR_COLLAPSED_WIDTH: 52,
     SIDEBAR_EXPANDED_WIDTH: 260,
-    CONTENT_MAX_WIDTH: '48rem',
+    CONTENT_MAX_WIDTH: '64rem',
 };

@@ -111,8 +111,10 @@ export default function ChatPage() {
                     if (line.startsWith('event: ')) {
                         currentEvent = line.slice(7);
                     } else if (line.startsWith('data: ') && currentEvent) {
-                        const payload = JSON.parse(line.slice(6));
-                        updateMessage(aiMsgId, currentEvent, payload);
+                        try {
+                            const payload = JSON.parse(line.slice(6));
+                            updateMessage(aiMsgId, currentEvent, payload);
+                        } catch { /* skip malformed JSON from chunked SSE */ }
                         currentEvent = '';
                     }
                 }
@@ -149,7 +151,7 @@ export default function ChatPage() {
               <>
                 {/* 3a. Danh sách tin nhắn (cuộn được) */}
                 <div className="flex-1 overflow-y-auto">
-                  <div className="max-w-[48rem] mx-auto w-full space-y-6 py-6 px-6">
+                  <div className="max-w-[64rem] mx-auto w-full space-y-6 py-6 px-6">
                     {messages.map((msg) => (
                       <MessageBubble key={msg.id} message={msg} />
                     ))}

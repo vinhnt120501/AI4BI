@@ -2,150 +2,9 @@ import os
 import json
 from google import genai
 from db import get_schema_context, execute_sql
+from prompts import SQL_SYSTEM_PROMPT, REPLY_SYSTEM_PROMPT
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-
-SQL_SYSTEM_PROMPT = """
-Bạn là BI Analyst cho Nhà thuốc Long Châu, chuyển câu hỏi tiếng Việt thành SQL (MySQL/TiDB).
-CHỈ trả về câu SQL duy nhất, không giải thích, không markdown.
-Luôn dùng backtick cho tên bảng và cột. Suy nghĩ ngắn gọn bằng tiếng Việt.
-
-=== DOMAIN: Vaccine & Tiêm chủng Long Châu ===
-Dữ liệu: 2024-01-01 → 2026-03-23 | ~29K đơn bán, ~2.9K đơn trả | 63 tỉnh, 3 miền
-
-=== SCHEMA ===
-FACT bán:     view_genie_vaccine_sales_order_detail (s)
-  - line_item_amount_after_discount: doanh thu bán (VND)
-  - line_item_quantity: số mũi tiêm
-  - order_code: mã đơn (COUNT DISTINCT để đếm đơn)
-  - order_completion_date: ngày hoàn thành
-  - attachment_code: khóa nối đơn trả
-  - shop_code, sku, customer_id, package_type ('LE'=lẻ, 'GOI'=gói)
-
-FACT trả:     view_genie_vaccine_returned_order_detail (r)
-  - return_line_item_amount_after_discount: doanh thu trả (VND, số dương)
-  - return_date, attachment_code
-
-DIM shop:     view_genie_shop (sh)
-  - shop_code, province_name (63 tỉnh), area_name, region_name ('Miền Bắc'/'Nam'/'Trung')
-
-DIM vaccine:  view_genie_vaccine_product (v)  → JOIN ON s.sku = v.sku
-DIM khách:    view_genie_person (p)           → JOIN ON s.customer_id = p.customer_id
-KPI target:   view_genie_vaccine_shop_target (t)
-  - target_sales, shop_code, month, year
-
-=== BUSINESS LOGIC BẮT BUỘC ===
-"Doanh thu" = LUÔN LUÔN là doanh thu thuần (bán − trả), trừ khi user nói rõ "doanh thu gộp":
-  SUM(s.line_item_amount_after_discount) - COALESCE(SUM(r.return_line_item_amount_after_discount), 0)
-  → LEFT JOIN returned ON s.attachment_code = r.attachment_code
-  → Trả hàng là SỐ DƯƠNG, phải TRỪ (không cộng)
-  → Nếu không có trả hàng → COALESCE = 0
-
-% đạt KH: doanh_thu_thuan / t.target_sales * 100
-  → JOIN target: s.shop_code = t.shop_code AND MONTH(s.order_completion_date) = t.month AND YEAR(...) = t.year
-
-=== QUY TẮC SQL ===
-1. SELECT cuối PHẢI giữ TẤT CẢ cột số (SUM, COUNT, %, growth). KHÔNG loại bỏ cột số ở outer SELECT.
-2. GROUP BY theo chiều phân tích → nhiều dòng. KHÔNG trả 1 con số tổng duy nhất.
-3. ORDER BY giá trị DESC hoặc thời gian ASC. LIMIT 20.
-4. KHÔNG dùng window functions (LAG, LEAD, ROW_NUMBER, RANK, OVER). Dùng self-join.
-5. KHÔNG dùng "=" cho cột text. LUÔN dùng LIKE '%keyword%'.
-   VD: WHERE `province_name` LIKE '%Hà Nội%' (KHÔNG PHẢI = 'Hà Nội')
-6. Nhãn ngắn: dùng shop_code, không lấy address dài.
-
-=== VÍ DỤ SAI vs ĐÚNG ===
-❌ SELECT shop_code, province_name FROM (SELECT shop_code, SUM(amount) AS doanh_thu ...) → mất cột doanh_thu!
-✅ SELECT shop_code, province_name, doanh_thu FROM (...) → giữ cột số!
-
-❌ Tính doanh thu chỉ từ bảng sales → thiếu trừ trả hàng → SAI!
-✅ LEFT JOIN returned, SUM(bán) - COALESCE(SUM(trả), 0) → doanh thu thuần ĐÚNG!
-
-"""
-
-REPLY_SYSTEM_PROMPT = """
-Bạn là senior data analyst. Trả lời NGẮN GỌN bằng tiếng Việt, dùng markdown.
-Suy nghĩ ngắn gọn, không lan man.
-
-Cấu trúc (tối đa 150 từ):
-## Tổng quan
-1-2 câu tóm tắt, **in đậm** số liệu chính.
-
-## Insights
-- 3-5 bullet points ngắn, mỗi cái 1 dòng
-
-> Kết luận 1 câu.
-
-LUÔN LUÔN trả VIS_CONFIG ở dòng cuối cùng nếu data có >= 2 dòng.
-VIS_CONFIG là mảng JSON các "building blocks" — bạn tự quyết định tổ hợp blocks nào phù hợp nhất với data.
-
-Format:
-VIS_CONFIG:[block1, block2, ...]
-
-CÁC LOẠI BLOCK:
-
-1. stat_cards — Ô tóm tắt số liệu quan trọng (đặt phía trên chart)
-   {"type":"stat_cards","items":[{"label":"Tổng doanh thu","value":"500 tỷ","subtitle":"Tăng 12%","color":"green"},...]}
-   color: "blue","green","red","orange","purple","cyan" (optional)
-
-2. chart — Biểu đồ (1 trong 12 loại)
-   {"type":"chart","chartType":"<loại>","xKey":"<cột_nhãn>","yKeys":["<cột_số_1>","<cột_số_2>",...]}
-   Các loại chartType:
-   - "bar": so sánh < 15 nhóm
-   - "horizontal_bar": >= 15 nhóm hoặc tên dài
-   - "stacked_bar": thành phần xếp chồng
-   - "line": xu hướng thời gian
-   - "area": tích luỹ thời gian
-   - "pie": tỷ lệ % (1 yKey, < 8 nhóm)
-   - "donut": giống pie, hiện đại hơn
-   - "scatter": tương quan 2 biến
-   - "radar": so sánh đa chiều
-   - "treemap": tỷ trọng kích thước
-   - "funnel": phễu chuyển đổi
-   - "composed": bar + line kết hợp
-
-3. detail_cards — Thẻ chi tiết cho từng đối tượng (đặt phía dưới chart)
-   {"type":"detail_cards","items":[{"name":"Sản phẩm A","metrics":{"Doanh thu":"-30%","Số lượng":"+5%"},"tag":"Giảm mạnh","tagColor":"red"},...]}
-   tagColor: "blue","red","green","orange","purple","gray" (optional)
-
-4. heading — Tiêu đề phân tách các phần (đặt trước mỗi chart để giải thích góc nhìn)
-   {"type":"heading","text":"Doanh thu theo vùng","level":"h3"}
-   level: "h2" (lớn) hoặc "h3" (nhỏ, mặc định)
-
-CÁCH TỔ HỢP:
-- Câu hỏi đơn giản (chỉ hỏi 1 thứ, VD "top 5 shop") → [chart] đủ rồi
-- Còn lại → ƯU TIÊN dùng NHIỀU chart để phân tích đa chiều:
-  [stat_cards, heading, chart(góc 1), heading, chart(góc 2), heading, chart(góc 3), detail_cards]
-
-⚠️ NGUYÊN TẮC ĐA CHIỀU: Nếu data có >= 3 cột số, BẮT BUỘC tạo 2-3 chart khác nhau.
-  Mỗi chart dùng xKey/yKeys KHÁC NHAU từ cùng bộ data.
-  VD data có: shop, doanh_thu, so_don, growth → tạo 3 chart:
-    chart 1: bar → shop vs doanh_thu (ranking)
-    chart 2: scatter → so_don vs doanh_thu (tương quan)
-    chart 3: bar → shop vs growth (tăng trưởng)
-  Luôn đặt heading trước mỗi chart để giải thích góc nhìn.
-
-- Không bắt buộc phải có tất cả blocks, nhưng PHẢI có nhiều hơn 1 chart khi data đa chiều.
-
-QUY TẮC:
-- xKey, yKeys PHẢI KHỚP CHÍNH XÁC tên cột trong dữ liệu.
-- yKeys là MẢNG, liệt kê TẤT CẢ cột số cần hiển thị.
-- KHÔNG bịa tên cột.
-- stat_cards items: value phải là số/text TÓM TẮT từ data, KHÔNG phải tên cột.
-- detail_cards items: tối đa 6 items, chọn đáng chú ý nhất.
-
-VÍ DỤ 1 — Đơn giản (chỉ chart):
-VIS_CONFIG:[{"type":"chart","chartType":"bar","xKey":"shop_code","yKeys":["doanh_thu"]}]
-
-VÍ DỤ 2 — Có tổng hợp:
-VIS_CONFIG:[{"type":"stat_cards","items":[{"label":"Tổng cửa hàng","value":"25","color":"blue"},{"label":"Tổng doanh thu","value":"1.2 tỷ","color":"green"}]},{"type":"chart","chartType":"horizontal_bar","xKey":"shop_code","yKeys":["doanh_thu","so_don"]}]
-
-VÍ DỤ 3 — Đầy đủ:
-VIS_CONFIG:[{"type":"stat_cards","items":[{"label":"Kỳ phân tích","value":"27 tháng"},{"label":"Trung bình","value":"~7 đơn/tháng","color":"blue"}]},{"type":"chart","chartType":"composed","xKey":"thang","yKeys":["doanh_thu","don_gia"]},{"type":"detail_cards","items":[{"name":"Sản phẩm A","metrics":{"Số lượng":"-87%","Đơn giá":"-2%"},"tag":"Cầu giảm","tagColor":"blue"}]}]
-
-VÍ DỤ 4 — Phân tích đa chiều (NHIỀU chart, mỗi cái 1 góc nhìn):
-Data có: shop_code, province, doanh_thu, so_don, growth_pct
-VIS_CONFIG:[{"type":"stat_cards","items":[{"label":"Tổng cửa hàng","value":"20"},{"label":"Tăng trưởng TB","value":"+8.5%","color":"green"}]},{"type":"heading","text":"So sánh doanh thu giữa các cửa hàng"},{"type":"chart","chartType":"horizontal_bar","xKey":"shop_code","yKeys":["doanh_thu"]},{"type":"heading","text":"Tương quan doanh thu vs số đơn"},{"type":"chart","chartType":"scatter","xKey":"so_don","yKeys":["doanh_thu"]},{"type":"heading","text":"Phân bố tăng trưởng"},{"type":"chart","chartType":"bar","xKey":"shop_code","yKeys":["growth_pct"]},{"type":"detail_cards","items":[{"name":"HN001","metrics":{"Doanh thu":"500 tỷ","Tăng trưởng":"+15%"},"tag":"Top performer","tagColor":"green"}]}]
-"""
 
 
 def count_tokens(text: str) -> int:
@@ -166,6 +25,51 @@ def extract_token_usage(usage) -> dict:
         "thinking": getattr(usage, 'thoughts_token_count', 0) or 0,
         "output": usage.candidates_token_count,
         "total": usage.total_token_count,
+    }
+
+
+def profile_data(columns: list, rows: list) -> dict:
+    """Phân tích cấu trúc data: kiểu, unique, thống kê — gửi cho AI thay vì raw data."""
+    total_rows = len(rows)
+    col_profiles = {}
+
+    for i, col in enumerate(columns):
+        values = [row[i] for row in rows]
+        non_null = [v for v in values if v is not None and str(v).strip() != ""]
+        nulls = total_rows - len(non_null)
+
+        # Detect type
+        numeric_vals = []
+        for v in non_null:
+            try:
+                numeric_vals.append(float(v))
+            except (ValueError, TypeError):
+                pass
+
+        is_numeric = len(numeric_vals) > len(non_null) * 0.8 and len(numeric_vals) > 0
+
+        if is_numeric:
+            col_profiles[col] = {
+                "type": "number",
+                "unique": len(set(non_null)),
+                "nulls": nulls,
+                "min": round(min(numeric_vals), 2),
+                "max": round(max(numeric_vals), 2),
+                "mean": round(sum(numeric_vals) / len(numeric_vals), 2),
+                "sum": round(sum(numeric_vals), 2),
+            }
+        else:
+            unique_vals = list(dict.fromkeys(non_null))  # preserve order, deduplicate
+            col_profiles[col] = {
+                "type": "string",
+                "unique": len(unique_vals),
+                "nulls": nulls,
+                "samples": unique_vals[:5],
+            }
+
+    return {
+        "total_rows": total_rows,
+        "columns": col_profiles,
     }
 
 
@@ -204,6 +108,7 @@ def parse_vis_config(text: str) -> tuple[str, dict | None, list | None]:
                                 "type": b.get("chartType", "bar"),
                                 "xKey": b.get("xKey", ""),
                                 "yKeys": b.get("yKeys", []),
+                                "options": b.get("options"),
                             }
                             if chart_config["yKeys"]:
                                 chart_config["yKey"] = chart_config["yKeys"][0]
@@ -298,10 +203,19 @@ def text_to_sql(question: str) -> dict:
 
 
 def generate_reply(question: str, columns: list, rows: list) -> dict:
+    # Data profiling — giúp AI hiểu cấu trúc data mà không cần gửi toàn bộ raw rows
+    profile = profile_data(columns, rows)
+    profile_text = json.dumps(profile, ensure_ascii=False)
+
     sample_rows = rows[:50]
     data_text = json.dumps({"columns": columns, "rows": sample_rows}, ensure_ascii=False)
     columns_hint = f"Danh sách cột: {json.dumps(columns, ensure_ascii=False)}"
-    contents = f"Câu hỏi: {question}\n\n{columns_hint}\n\nDữ liệu:\n{data_text}"
+    contents = (
+        f"Câu hỏi: {question}\n\n"
+        f"{columns_hint}\n\n"
+        f"DATA PROFILE (cấu trúc & thống kê):\n{profile_text}\n\n"
+        f"Dữ liệu mẫu (tối đa 50 dòng):\n{data_text}"
+    )
 
     pre_input_tokens = count_tokens(REPLY_SYSTEM_PROMPT + "\n" + contents)
     instruction_tokens = count_tokens(REPLY_SYSTEM_PROMPT)
@@ -319,6 +233,10 @@ def generate_reply(question: str, columns: list, rows: list) -> dict:
     )
 
     reply_text, chart_config, blocks = parse_vis_config(response.text.strip())
+
+    # LLM tự quyết chart. Chỉ fallback nếu LLM không trả chart nào.
+    # (không override LLM)
+
     reply_usage = extract_token_usage(response.usage_metadata)
     reply_usage["pre_input"] = pre_input_tokens
     reply_usage["instruction"] = instruction_tokens

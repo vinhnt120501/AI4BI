@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Message } from '@/types/types';
+import { Message, ChartBlock } from '@/types/types';
 import StreamingText from './shared/StreamingText';
-import ChartRenderer from './ChartRenderer';
+import DynamicChart from './DynamicChart';
 import BlockRenderer from './blocks/BlockRenderer';
 import UserBubble from './sections/UserBubble';
 import ThinkingSection from './sections/ThinkingSection';
@@ -19,7 +19,7 @@ interface MessageBubbleProps {
 /**
  * Auto-detect chart config khi AI không trả chart_config nhưng data có cột số
  */
-function detectChartConfig(columns: string[], rows: string[][]) {
+function detectChartConfig(columns: string[], rows: string[][]): ChartBlock | null {
   if (rows.length < 2) return null;
   let xKey = '';
   const yKeys: string[] = [];
@@ -32,8 +32,9 @@ function detectChartConfig(columns: string[], rows: string[][]) {
     }
   }
   if (!xKey || yKeys.length === 0) return null;
-  const type = rows.length >= 15 ? 'horizontal_bar' as const : 'bar' as const;
-  return { type, xKey, yKeys };
+  const chartType = 'bar' as const;
+  const options = rows.length >= 15 ? { layout: 'vertical' as const } : undefined;
+  return { type: 'chart', chartType, xKey, yKeys, options, title: 'Auto-detected chart' };
 }
 
 export default function MessageBubble({ message }: MessageBubbleProps) {
@@ -43,8 +44,14 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
 
   const { content, sql, thinking, tokenUsage, replyTokenUsage, columns, rows, chartConfig, blocks } = message;
 
-  const effectiveChart = chartConfig || (columns && rows ? detectChartConfig(columns, rows) : null);
   const hasBlocks = blocks && blocks.length > 0;
+
+  // Fallback: nếu không có blocks, tạo ChartBlock từ chartConfig hoặc auto-detect
+  const fallbackBlock: ChartBlock | null = !hasBlocks
+    ? (chartConfig
+      ? { type: 'chart', chartType: chartConfig.type, xKey: chartConfig.xKey, yKeys: chartConfig.yKeys, yKey: chartConfig.yKey, options: chartConfig.options }
+      : (columns && rows ? detectChartConfig(columns, rows) : null))
+    : null;
 
   return (
     <div className="space-y-3">
@@ -53,12 +60,14 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
       {columns && <TableSection columns={columns} rows={rows || []} />}
       <TokenSection tokenUsage={tokenUsage} replyTokenUsage={replyTokenUsage} />
 
-      {/* Building blocks (ưu tiên) hoặc fallback về chart đơn */}
+      {/* Dashboard blocks (ưu tiên) hoặc fallback chart đơn */}
       {hasBlocks && columns && rows ? (
         <BlockRenderer blocks={blocks} columns={columns} rows={rows} />
       ) : (
-        effectiveChart && columns && rows && rows.length > 1 && (
-          <ChartRenderer columns={columns} rows={rows} config={effectiveChart} />
+        fallbackBlock && columns && rows && rows.length > 1 && (
+          <div className="border border-slate-200 rounded-xl p-4 bg-white">
+            <DynamicChart block={fallbackBlock} columns={columns} rows={rows} />
+          </div>
         )
       )}
 

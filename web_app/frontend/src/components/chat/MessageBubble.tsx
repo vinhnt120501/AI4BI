@@ -11,6 +11,7 @@ import SqlSection from './sections/SqlSection';
 import TableSection from './sections/TableSection';
 import TokenSection from './sections/TokenSection';
 import ActionButtons from './sections/ActionButtons';
+import LlmPayloadSection from './sections/LlmPayloadSection';
 
 interface MessageBubbleProps {
   message: Message;
@@ -41,7 +42,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
     return <UserBubble content={message.content} />;
   }
 
-  const { content, sql, thinking, tokenUsage, replyTokenUsage, columns, rows, chartConfig, blocks } = message;
+  const { content, sql, thinking, tokenUsage, replyTokenUsage, columns, rows, chartConfig, blocks, llmDebugPayloads } = message;
 
   const effectiveChart = chartConfig || (columns && rows ? detectChartConfig(columns, rows) : null);
   const hasBlocks = blocks && blocks.length > 0;
@@ -50,6 +51,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
     <div className="space-y-3">
       {thinking && <ThinkingSection thinking={thinking} tokens={tokenUsage?.thinking} />}
       {sql && <SqlSection sql={sql} />}
+      {llmDebugPayloads && llmDebugPayloads.length > 0 && <LlmPayloadSection payloads={llmDebugPayloads} />}
       {columns && <TableSection columns={columns} rows={rows || []} />}
       <TokenSection tokenUsage={tokenUsage} replyTokenUsage={replyTokenUsage} />
 

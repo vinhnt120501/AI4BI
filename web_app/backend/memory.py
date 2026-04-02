@@ -53,6 +53,10 @@ class MemoryService:
         self.persist_dir = os.getenv("MEMORY_PERSIST_DIR", str(Path(__file__).parent / ".memory"))
         self.short_token_limit = int(os.getenv("MEMORY_SHORT_TOKEN_LIMIT", "1800"))
         self.long_top_k = int(os.getenv("MEMORY_LONG_TOP_K", "5"))
+        self.sql_fact_top_k = int(os.getenv("MEMORY_SQL_FACT_TOP_K", "3"))
+        self.sql_vector_top_k = int(os.getenv("MEMORY_SQL_VECTOR_TOP_K", "2"))
+        self.short_max_turns = int(os.getenv("MEMORY_SHORT_MAX_TURNS", "3"))
+        self.short_summary_chars = int(os.getenv("MEMORY_SHORT_SUMMARY_CHARS", "220"))
         self.summary_every_n = int(os.getenv("MEMORY_SUMMARY_EVERY_N_TURNS", "8"))
         self.embedding_model = os.getenv("OPENROUTER_EMBEDDING_MODEL", "openai/text-embedding-3-small")
         if "/" in self.embedding_model:
@@ -74,6 +78,11 @@ class MemoryService:
             ),
         )
         self._init_vector_store()
+        self._chart_pattern = re.compile(
+            r"\b(chart|charttype|bar|line|pie|donut|scatter|radar|treemap|funnel|composed|"
+            r"visual|visualization|plot|graph|biểu đồ)\b",
+            re.IGNORECASE,
+        )
 
     def _init_vector_store(self):
         self.vector_index = None
@@ -97,7 +106,7 @@ class MemoryService:
         return max(1, len(text) // 4)
 
     def build_memory_context(self, user_id: str, session_id: str, query: str) -> MemoryContext:
-        short = self._build_short_term_context(user_id, session_id)
+        short = self._build_short_term_context(user_id, session_id, max_turns=self.short_max_turns)
         facts = self._build_fact_block(user_id, top_k=self.long_top_k)
         vector = self._build_vector_block(user_id, query, top_k=self.long_top_k)
         return MemoryContext(
@@ -107,14 +116,29 @@ class MemoryService:
             vector_block=vector,
         )
 
-    def _build_short_term_context(self, user_id: str, session_id: str) -> str:
-        rows = get_chat_history(session_id=session_id, limit=20, user_id=user_id)
+    def build_stage_memory_context(self, user_id: str, session_id: str, query: str, stage: str) -> MemoryContext:
+        stage = (stage or "reply").lower()
+        if stage == "sql":
+            # SQL step: compact context only, avoid flooding prompt with long transcript.
+            return MemoryContext(
+                short_term=self._build_short_term_summary(user_id, session_id, max_turns=2),
+                static_block=self.static_block,
+                fact_block=self._build_fact_block(user_id, top_k=self.sql_fact_top_k),
+                vector_block=self._build_vector_block(user_id, query, top_k=self.sql_vector_top_k),
+            )
+        return self.build_memory_context(user_id=user_id, session_id=session_id, query=query)
+
+    def _build_short_term_context(self, user_id: str, session_id: str, max_turns: int | None = None) -> str:
+        limit = max_turns if max_turns is not None else 20
+        rows = get_chat_history(session_id=session_id, limit=limit, user_id=user_id)
         rows = list(reversed(rows))
         budget = self.short_token_limit
         chunks = []
         for row in rows:
             q = (row.get("question") or "").strip()
             a = (row.get("reply") or "").strip()
+            if a and len(a) > self.short_summary_chars:
+                a = a[: self.short_summary_chars].rstrip() + "..."
             block = f"User: {q}\nAssistant: {a}".strip()
             cost = self._estimate_tokens(block)
             if cost > budget:
@@ -123,12 +147,36 @@ class MemoryService:
             budget -= cost
         return "\n\n".join(chunks)
 
-    def _build_fact_block(self, user_id: str, top_k: int = 5) -> str:
-        facts = get_memory_facts(user_id=user_id, limit=max(top_k * 2, 8))
-        if not facts:
+    def _build_short_term_summary(self, user_id: str, session_id: str, max_turns: int = 2) -> str:
+        rows = get_chat_history(session_id=session_id, limit=max_turns, user_id=user_id)
+        rows = list(reversed(rows))
+        if not rows:
             return ""
         lines = []
-        for f in facts[:top_k]:
+        for row in rows:
+            q = (row.get("question") or "").strip()
+            a = (row.get("reply") or "").strip()
+            if a and len(a) > 120:
+                a = a[:120].rstrip() + "..."
+            lines.append(f"- Q: {q} | A: {a}")
+        return "\n".join(lines)
+
+    def _build_fact_block(self, user_id: str, top_k: int = 5) -> str:
+        facts = get_memory_facts(user_id=user_id, limit=max(top_k * 4, 16))
+        if not facts:
+            return ""
+        unique = []
+        seen = set()
+        for f in facts:
+            key = (str(f.get("category", "")).strip().lower(), str(f.get("content", "")).strip().lower())
+            if not key[1] or key in seen:
+                continue
+            seen.add(key)
+            unique.append(f)
+            if len(unique) >= top_k:
+                break
+        lines = []
+        for f in unique:
             lines.append(
                 f"- ({f.get('category','fact')}, importance={f.get('importance', 1)}) {f.get('content','')}"
             )
@@ -144,6 +192,7 @@ class MemoryService:
             return ""
 
         lines = []
+        seen_text = set()
         for hit in hits:
             md = getattr(hit.node, "metadata", {}) or {}
             if md.get("user_id") != user_id:
@@ -152,6 +201,10 @@ class MemoryService:
             text = (hit.node.get_content() or "").strip()
             if not text:
                 continue
+            norm = text.lower()
+            if norm in seen_text:
+                continue
+            seen_text.add(norm)
             if score is None:
                 lines.append(f"- {text}")
             else:
@@ -279,11 +332,27 @@ class MemoryService:
             return []
 
     @staticmethod
-    def _dedupe_facts(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _is_chart_related(category: str, content: str) -> bool:
+        category = (category or "").strip().lower()
+        content = (content or "").strip()
+        if "chart" in category or "visual" in category:
+            return True
+        return bool(re.search(
+            r"\b(chart|charttype|bar|line|pie|donut|scatter|radar|treemap|funnel|composed|visual|visualization|plot|graph|biểu đồ)\b",
+            content,
+            flags=re.IGNORECASE,
+        ))
+
+    @classmethod
+    def _dedupe_facts(cls, items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         seen = set()
         out = []
         for it in items:
-            key = (it.get("category", "").strip().lower(), it.get("content", "").strip().lower())
+            category = it.get("category", "").strip()
+            content = it.get("content", "").strip()
+            if cls._is_chart_related(category, content):
+                continue
+            key = (category.lower(), content.lower())
             if not key[1] or key in seen:
                 continue
             seen.add(key)

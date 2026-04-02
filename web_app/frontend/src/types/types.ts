@@ -76,6 +76,16 @@ export interface Message {
     chartConfig?: ChartConfig;
     blocks?: Block[];
     statusText?: string;
+    llmDebugPayloads?: LlmDebugPayload[];
+}
+
+export interface LlmDebugPayload {
+    stage: 'sql' | 'reply' | string;
+    model?: string;
+    systemPrompt?: string;
+    userContent?: string;
+    memoryContext?: string;
+    schemaChars?: number;
 }
 
 // 1.2. Kiểu dữ liệu cho mục menu trong Sidebar.

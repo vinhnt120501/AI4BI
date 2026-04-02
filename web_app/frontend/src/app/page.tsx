@@ -56,6 +56,18 @@ export default function ChatPage() {
                             blocks: payload.blocks as Message['blocks'],
                             replyTokenUsage: payload.reply_token_usage as Message['replyTokenUsage'],
                         };
+                    case 'debug_payload': {
+                        const prevPayloads = m.llmDebugPayloads || [];
+                        const nextPayload = {
+                            stage: (payload.stage as string) || 'unknown',
+                            model: payload.model as string | undefined,
+                            systemPrompt: payload.system_prompt as string | undefined,
+                            userContent: payload.user_content as string | undefined,
+                            memoryContext: payload.memory_context as string | undefined,
+                            schemaChars: payload.schema_chars as number | undefined,
+                        };
+                        return { ...m, llmDebugPayloads: [...prevPayloads, nextPayload] };
+                    }
                     case 'error':
                         return { ...m, content: `Lỗi: ${payload.error}` };
                     default:

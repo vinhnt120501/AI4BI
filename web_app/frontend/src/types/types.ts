@@ -77,6 +77,7 @@ export interface Message {
     blocks?: Block[];
     statusText?: string;
     llmDebugPayloads?: LlmDebugPayload[];
+    followUpSuggestions?: string[];
 }
 
 export interface LlmDebugPayload {

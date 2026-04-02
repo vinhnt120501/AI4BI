@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from openai import OpenAI
 from db import get_schema_context, execute_sql
 
@@ -161,6 +162,16 @@ Data có: shop_code, province, doanh_thu, so_don, growth_pct
 VIS_CONFIG:[{"type":"stat_cards","items":[{"label":"Tổng cửa hàng","value":"20"},{"label":"Tăng trưởng TB","value":"+8.5%","color":"green"}]},{"type":"heading","text":"So sánh doanh thu giữa các cửa hàng"},{"type":"chart","chartType":"horizontal_bar","xKey":"shop_code","yKeys":["doanh_thu"]},{"type":"heading","text":"Tương quan doanh thu vs số đơn"},{"type":"chart","chartType":"scatter","xKey":"so_don","yKeys":["doanh_thu"]},{"type":"heading","text":"Phân bố tăng trưởng"},{"type":"chart","chartType":"bar","xKey":"shop_code","yKeys":["growth_pct"]},{"type":"detail_cards","items":[{"name":"HN001","metrics":{"Doanh thu":"500 tỷ","Tăng trưởng":"+15%"},"tag":"Top performer","tagColor":"green"}]}]
 """
 
+FOLLOWUP_SYSTEM_PROMPT = """
+Bạn là BI assistant. Hãy gợi ý câu hỏi follow-up tiếp theo cho user.
+Yêu cầu:
+- Trả về DUY NHẤT JSON array các chuỗi câu hỏi, không markdown.
+- Ngôn ngữ: tiếng Việt, ngắn gọn, tự nhiên.
+- Bám theo ngữ cảnh câu hỏi hiện tại + context trả lời + memory.
+- Không lặp lại câu hỏi user vừa hỏi.
+- Chỉ gợi ý câu hỏi có thể trả lời từ dữ liệu BI hiện có.
+"""
+
 
 def count_tokens(text: str) -> int:
     # 9router/OpenAI-compatible endpoint does not guarantee a token-count API.
@@ -277,6 +288,43 @@ def parse_vis_config(text: str) -> tuple[str, dict | None, list | None]:
     return "\n".join(clean_lines).strip(), chart_config, blocks
 
 
+def _clean_text(text: str) -> str:
+    return re.sub(r"\s+", " ", (text or "").strip()).lower()
+
+
+def _parse_json_array(text: str) -> list[str]:
+    raw = (text or "").strip()
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+    match = re.search(r"\[[\s\S]*\]", raw)
+    candidate = match.group(0) if match else raw
+    try:
+        parsed = json.loads(candidate)
+    except Exception:
+        return []
+    if not isinstance(parsed, list):
+        return []
+    return [item.strip() for item in parsed if isinstance(item, str) and item.strip()]
+
+
+def _normalize_followups(items: list[str], current_question: str, max_count: int) -> list[str]:
+    current_norm = _clean_text(current_question)
+    seen = set()
+    out = []
+    for item in items:
+        text = item.strip().strip("-").strip()
+        if not text:
+            continue
+        key = _clean_text(text)
+        if not key or key == current_norm or key in seen:
+            continue
+        seen.add(key)
+        out.append(text)
+        if len(out) >= max_count:
+            break
+    return out
+
+
 def build_sql_system_prompt(memory_context: str = "") -> tuple[str, str]:
     schema = get_schema_context()
     if memory_context:
@@ -372,3 +420,39 @@ def generate_reply(question: str, columns: list, rows: list, memory_context: str
         "blocks": blocks,
         "reply_token_usage": reply_usage,
     }
+
+
+def generate_followup_questions(
+    question: str,
+    reply: str,
+    columns: list,
+    rows: list,
+    memory_context: str = "",
+) -> list[str]:
+    enabled = os.getenv("FOLLOWUP_ENABLED", "true").lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        return []
+
+    max_count = int(os.getenv("FOLLOWUP_COUNT", "4"))
+    max_rows = int(os.getenv("FOLLOWUP_MAX_ROWS", "20"))
+    max_text_chars = int(os.getenv("FOLLOWUP_MAX_TEXT_CHARS", "1200"))
+    sample_rows = rows[:max_rows]
+    data_text = json.dumps({"columns": columns, "rows": sample_rows}, ensure_ascii=False)
+    if len(data_text) > max_text_chars:
+        data_text = data_text[:max_text_chars] + "..."
+
+    user_prompt = (
+        f"Memory Context:\n{memory_context}\n\n"
+        f"Câu hỏi user vừa hỏi:\n{question}\n\n"
+        f"Assistant vừa trả lời:\n{reply}\n\n"
+        f"Dữ liệu tổng quan:\n{data_text}\n\n"
+        f"Hãy trả về {max_count} câu hỏi follow-up khác nhau, JSON array."
+    )
+
+    try:
+        response = generate_chat(FOLLOWUP_SYSTEM_PROMPT, user_prompt, temperature=0.2)
+        content = _message_text(response.choices[0].message)
+        parsed = _parse_json_array(content)
+    except Exception:
+        parsed = []
+    return _normalize_followups(parsed, current_question=question, max_count=max_count)

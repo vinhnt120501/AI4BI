@@ -56,6 +56,13 @@ export default function ChatPage() {
                             blocks: payload.blocks as Message['blocks'],
                             replyTokenUsage: payload.reply_token_usage as Message['replyTokenUsage'],
                         };
+                    case 'suggestions':
+                        return {
+                            ...m,
+                            followUpSuggestions: Array.isArray(payload.questions)
+                                ? (payload.questions as string[]).filter((x) => typeof x === 'string' && x.trim() !== '')
+                                : [],
+                        };
                     case 'debug_payload': {
                         const prevPayloads = m.llmDebugPayloads || [];
                         const nextPayload = {
@@ -78,18 +85,18 @@ export default function ChatPage() {
     };
 
     // 4. Xử lý gửi tin nhắn
-    const handleSend = async () => {
-        if (inputValue.trim() === '')
-            return;
+    const handleSend = async (forcedMessage?: string) => {
+        const normalized = (forcedMessage ?? inputValue).trim();
+        if (normalized === '') return;
 
         // 3.1. Tạo tin nhắn user
         const newUserMsg: Message = {
             id: Date.now().toString(),
             role: 'user',
-            content: inputValue,
+            content: normalized,
         };
         setMessages((prev) => [...prev, newUserMsg]);
-        setInputValue('');
+        if (!forcedMessage) setInputValue('');
         setIsTyping(true);
 
         // 3.2. Gọi Backend SSE → stream từng phần
@@ -106,7 +113,7 @@ export default function ChatPage() {
             const res = await fetch(`${API_URL}/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: inputValue, sessionId }),
+                body: JSON.stringify({ message: normalized, sessionId }),
             });
 
             if (!res.ok) {
@@ -152,7 +159,12 @@ export default function ChatPage() {
         }
     };
 
+    const handleSuggestionClick = async (question: string) => {
+        await handleSend(question);
+    };
+
     const hasMessages = messages.length > 0;
+    const lastAssistantId = [...messages].reverse().find((msg) => msg.role === 'assistant')?.id;
 
     // ===== GIAO DIỆN =====
     return (
@@ -173,7 +185,12 @@ export default function ChatPage() {
                 <div className="flex-1 overflow-y-auto">
                   <div className="max-w-[48rem] mx-auto w-full space-y-6 py-6 px-6">
                     {messages.map((msg) => (
-                      <MessageBubble key={msg.id} message={msg} />
+                      <MessageBubble
+                        key={msg.id}
+                        message={msg}
+                        isLatestAssistant={msg.role === 'assistant' && msg.id === lastAssistantId}
+                        onSuggestionClick={handleSuggestionClick}
+                      />
                     ))}
                     {isTyping && (() => {
                       const lastMsg = messages[messages.length - 1];

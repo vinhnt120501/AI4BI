@@ -12,6 +12,7 @@ load_dotenv(Path(__file__).parent / ".env")
 from llm import (
     build_reply_contents,
     build_sql_system_prompt,
+    generate_followup_questions,
     generate_reply,
     text_to_sql,
     REPLY_SYSTEM_PROMPT,
@@ -129,6 +130,14 @@ async def chat(req: ChatRequest):
                 "blocks": reply_result.get("blocks"),
                 "reply_token_usage": reply_result["reply_token_usage"],
             })
+            suggestions = generate_followup_questions(
+                question=req.message,
+                reply=reply_result["reply"],
+                columns=sql_result["columns"],
+                rows=sql_result["rows"],
+                memory_context=reply_memory_context,
+            )
+            yield sse_event("suggestions", {"questions": suggestions})
 
             # Bước 4: Tổng kết token
             sql_tokens = sql_result["token_usage"]

@@ -1,6 +1,7 @@
 import os
 import json
 import re
+import time
 from openai import OpenAI
 from db import get_schema_context, execute_sql
 
@@ -456,3 +457,159 @@ def generate_followup_questions(
     except Exception:
         parsed = []
     return _normalize_followups(parsed, current_question=question, max_count=max_count)
+
+
+def text_to_sql_detailed(question: str, memory_context: str = "") -> dict:
+    timing = {}
+    t_total = time.perf_counter()
+
+    t = time.perf_counter()
+    system_prompt, schema = build_sql_system_prompt(memory_context=memory_context)
+    timing["build_prompt"] = round((time.perf_counter() - t) * 1000, 1)
+
+    pre_input_tokens = count_tokens(system_prompt + "\n" + question)
+
+    t = time.perf_counter()
+    response = generate_chat(system_prompt, question, temperature=0)
+    timing["llm_sql_1"] = round((time.perf_counter() - t) * 1000, 1)
+
+    usage = extract_token_usage(response.usage)
+    usage["pre_input"] = pre_input_tokens
+    usage["schema"] = count_tokens(schema)
+    usage["instruction"] = count_tokens(system_prompt) - usage["schema"]
+    usage["question"] = count_tokens(question)
+
+    sql = clean_sql(_message_text(response.choices[0].message))
+    thinking = extract_thinking(response)
+
+    retry_happened = False
+    try:
+        t = time.perf_counter()
+        db_result = execute_sql(sql)
+        timing["db_exec_1"] = round((time.perf_counter() - t) * 1000, 1)
+    except Exception as e:
+        retry_happened = True
+        error_msg = str(e)
+        t = time.perf_counter()
+        retry_response = generate_chat(
+            system_prompt,
+            f"{question}\n\nSQL trước đó bị lỗi: {error_msg}\nViết lại SQL khác, tránh lỗi này.",
+            temperature=0,
+        )
+        timing["llm_sql_retry"] = round((time.perf_counter() - t) * 1000, 1)
+
+        retry_usage = extract_token_usage(retry_response.usage)
+        usage["input"] += retry_usage["input"]
+        usage["thinking"] += retry_usage["thinking"]
+        usage["output"] += retry_usage["output"]
+        usage["total"] += retry_usage["total"]
+
+        sql = clean_sql(_message_text(retry_response.choices[0].message))
+        thinking += "\n\n[Retry] " + extract_thinking(retry_response)
+
+        t = time.perf_counter()
+        db_result = execute_sql(sql)
+        timing["db_exec_retry"] = round((time.perf_counter() - t) * 1000, 1)
+
+    timing["retry_happened"] = 1.0 if retry_happened else 0.0
+    timing["total"] = round((time.perf_counter() - t_total) * 1000, 1)
+
+    return {
+        "sql": sql,
+        "thinking": thinking,
+        "token_usage": usage,
+        "columns": db_result["columns"],
+        "rows": db_result["rows"],
+        "timing_ms": timing,
+    }
+
+
+def generate_reply_detailed(question: str, columns: list, rows: list, memory_context: str = "") -> dict:
+    timing = {}
+    t_total = time.perf_counter()
+
+    t = time.perf_counter()
+    contents, data_text = build_reply_contents(
+        question=question,
+        columns=columns,
+        rows=rows,
+        memory_context=memory_context,
+    )
+    timing["build_contents"] = round((time.perf_counter() - t) * 1000, 1)
+
+    pre_input_tokens = count_tokens(REPLY_SYSTEM_PROMPT + "\n" + contents)
+    instruction_tokens = count_tokens(REPLY_SYSTEM_PROMPT)
+    data_tokens = count_tokens(data_text)
+    question_tokens = count_tokens(question)
+
+    t = time.perf_counter()
+    response = generate_chat(REPLY_SYSTEM_PROMPT, contents, temperature=0.3)
+    timing["llm_reply"] = round((time.perf_counter() - t) * 1000, 1)
+
+    t = time.perf_counter()
+    reply_text, chart_config, blocks = parse_vis_config(_message_text(response.choices[0].message).strip())
+    timing["parse_reply"] = round((time.perf_counter() - t) * 1000, 1)
+
+    reply_usage = extract_token_usage(response.usage)
+    reply_usage["pre_input"] = pre_input_tokens
+    reply_usage["instruction"] = instruction_tokens
+    reply_usage["data"] = data_tokens
+    reply_usage["question"] = question_tokens
+    timing["total"] = round((time.perf_counter() - t_total) * 1000, 1)
+
+    return {
+        "reply": reply_text,
+        "chart_config": chart_config,
+        "blocks": blocks,
+        "reply_token_usage": reply_usage,
+        "timing_ms": timing,
+    }
+
+
+def generate_followup_questions_detailed(
+    question: str,
+    reply: str,
+    columns: list,
+    rows: list,
+    memory_context: str = "",
+) -> dict:
+    timing = {}
+    t_total = time.perf_counter()
+    enabled = os.getenv("FOLLOWUP_ENABLED", "true").lower() in {"1", "true", "yes", "on"}
+    if not enabled:
+        return {"questions": [], "timing_ms": {"disabled": 1.0, "total": 0.0}}
+
+    t = time.perf_counter()
+    max_count = int(os.getenv("FOLLOWUP_COUNT", "4"))
+    max_rows = int(os.getenv("FOLLOWUP_MAX_ROWS", "20"))
+    max_text_chars = int(os.getenv("FOLLOWUP_MAX_TEXT_CHARS", "1200"))
+    sample_rows = rows[:max_rows]
+    data_text = json.dumps({"columns": columns, "rows": sample_rows}, ensure_ascii=False)
+    if len(data_text) > max_text_chars:
+        data_text = data_text[:max_text_chars] + "..."
+    timing["prepare_input"] = round((time.perf_counter() - t) * 1000, 1)
+
+    user_prompt = (
+        f"Memory Context:\n{memory_context}\n\n"
+        f"Câu hỏi user vừa hỏi:\n{question}\n\n"
+        f"Assistant vừa trả lời:\n{reply}\n\n"
+        f"Dữ liệu tổng quan:\n{data_text}\n\n"
+        f"Hãy trả về {max_count} câu hỏi follow-up khác nhau, JSON array."
+    )
+
+    try:
+        t = time.perf_counter()
+        response = generate_chat(FOLLOWUP_SYSTEM_PROMPT, user_prompt, temperature=0.2)
+        timing["llm_followup"] = round((time.perf_counter() - t) * 1000, 1)
+        content = _message_text(response.choices[0].message)
+        t = time.perf_counter()
+        parsed = _parse_json_array(content)
+        timing["parse_followup"] = round((time.perf_counter() - t) * 1000, 1)
+    except Exception:
+        parsed = []
+
+    t = time.perf_counter()
+    questions = _normalize_followups(parsed, current_question=question, max_count=max_count)
+    timing["normalize_followup"] = round((time.perf_counter() - t) * 1000, 1)
+    timing["total"] = round((time.perf_counter() - t_total) * 1000, 1)
+    return {"questions": questions, "timing_ms": timing}

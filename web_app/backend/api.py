@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from pathlib import Path
 from dotenv import load_dotenv
 from fastapi import FastAPI, Header, HTTPException, Request
@@ -12,12 +13,12 @@ load_dotenv(Path(__file__).parent / ".env")
 from llm import (
     build_reply_contents,
     build_sql_system_prompt,
-    generate_followup_questions,
-    generate_reply,
-    text_to_sql,
+    generate_followup_questions_detailed,
+    generate_reply_detailed,
+    text_to_sql_detailed,
     REPLY_SYSTEM_PROMPT,
 )
-from db import get_all_tables, init_chat_history_table, init_memory_facts_table, save_chat
+from db import ensure_schema_context_file, get_all_tables, init_chat_history_table, init_memory_facts_table, save_chat
 from memory import MemoryService
 
 app = FastAPI()
@@ -25,6 +26,7 @@ app = FastAPI()
 # Tạo bảng chat_history khi khởi động
 init_chat_history_table()
 init_memory_facts_table()
+ensure_schema_context_file(refresh=False)
 memory_service = MemoryService()
 ADMIN_TOKEN = os.getenv("MEMORY_ADMIN_TOKEN", "").strip()
 SHOW_LLM_PAYLOAD = os.getenv("SHOW_LLM_PAYLOAD", "true").lower() in {"1", "true", "yes", "on"}
@@ -62,6 +64,10 @@ def sse_event(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
 
 
+def _ms(start: float) -> float:
+    return round((time.perf_counter() - start) * 1000, 1)
+
+
 @app.post("/chat")
 async def chat(req: ChatRequest):
     """SSE streaming: gửi từng phần khi có kết quả."""
@@ -70,10 +76,14 @@ async def chat(req: ChatRequest):
     chat_data = {}
 
     def stream():
+        request_started = time.perf_counter()
+        timings_ms: dict[str, float] = {}
         try:
+            t = time.perf_counter()
             sql_memory_ctx = memory_service.build_stage_memory_context(req.userId, req.sessionId, req.message, stage="sql")
             sql_memory_context = sql_memory_ctx.render()
             sql_system_prompt, schema = build_sql_system_prompt(memory_context=sql_memory_context)
+            timings_ms["memory_sql"] = _ms(t)
             if SHOW_LLM_PAYLOAD:
                 yield sse_event("debug_payload", {
                     "stage": "sql",
@@ -86,7 +96,9 @@ async def chat(req: ChatRequest):
 
             # Bước 1: Sinh SQL
             yield sse_event("status", {"step": 1, "text": "Đang phân tích câu hỏi và tạo truy vấn SQL..."})
-            sql_result = text_to_sql(req.message, memory_context=sql_memory_context)
+            t = time.perf_counter()
+            sql_result = text_to_sql_detailed(req.message, memory_context=sql_memory_context)
+            timings_ms["sql_stage"] = _ms(t)
             yield sse_event("thinking", {"thinking": sql_result["thinking"]})
             yield sse_event("sql", {
                 "sql": sql_result["sql"],
@@ -102,8 +114,10 @@ async def chat(req: ChatRequest):
 
             # Bước 3: Phân tích + reply + chart
             yield sse_event("status", {"step": 3, "text": "Đang phân tích dữ liệu và vẽ biểu đồ..."})
+            t = time.perf_counter()
             reply_memory_ctx = memory_service.build_stage_memory_context(req.userId, req.sessionId, req.message, stage="reply")
             reply_memory_context = reply_memory_ctx.render()
+            timings_ms["memory_reply"] = _ms(t)
             reply_user_content, _ = build_reply_contents(
                 question=req.message,
                 columns=sql_result["columns"],
@@ -118,25 +132,30 @@ async def chat(req: ChatRequest):
                     "user_content": reply_user_content,
                     "memory_context": reply_memory_context,
                 })
-            reply_result = generate_reply(
+            t = time.perf_counter()
+            reply_result = generate_reply_detailed(
                 req.message,
                 sql_result["columns"],
                 sql_result["rows"],
                 memory_context=reply_memory_context,
             )
+            timings_ms["reply_stage"] = _ms(t)
             yield sse_event("reply", {
                 "reply": reply_result["reply"],
                 "chart_config": reply_result["chart_config"],
                 "blocks": reply_result.get("blocks"),
                 "reply_token_usage": reply_result["reply_token_usage"],
             })
-            suggestions = generate_followup_questions(
+            t = time.perf_counter()
+            followup_result = generate_followup_questions_detailed(
                 question=req.message,
                 reply=reply_result["reply"],
                 columns=sql_result["columns"],
                 rows=sql_result["rows"],
                 memory_context=reply_memory_context,
             )
+            suggestions = followup_result.get("questions", [])
+            timings_ms["followup_stage"] = _ms(t)
             yield sse_event("suggestions", {"questions": suggestions})
 
             # Bước 4: Tổng kết token
@@ -149,6 +168,23 @@ async def chat(req: ChatRequest):
                 "total": sql_tokens["total"] + reply_tokens["total"],
             }
             yield sse_event("done", {"grand_total": grand_total})
+            timings_ms["sql_stage_detail"] = sql_result.get("timing_ms", {})
+            timings_ms["reply_stage_detail"] = reply_result.get("timing_ms", {})
+            timings_ms["followup_stage_detail"] = followup_result.get("timing_ms", {})
+            timings_ms["total"] = _ms(request_started)
+            yield sse_event("timing", {"timings_ms": timings_ms})
+            print(
+                "[chat_timing] "
+                + json.dumps(
+                    {
+                        "session_id": req.sessionId,
+                        "user_id": req.userId,
+                        "message": (req.message or "")[:120],
+                        "timings_ms": timings_ms,
+                    },
+                    ensure_ascii=False,
+                )
+            )
 
             # Lưu data để save sau khi stream xong
             chat_data.update({
@@ -156,6 +192,7 @@ async def chat(req: ChatRequest):
                 "reply": reply_result["reply"],
                 "chart_config": reply_result["chart_config"],
                 "blocks": reply_result.get("blocks"),
+                "timings_ms": timings_ms,
                 "reply_token_usage": reply_tokens,
                 "grand_total": grand_total,
             })
@@ -304,7 +341,7 @@ if __name__ == "__main__":
 
                 print(f"\n{'='*50}")
                 print(f"[Lần 1: Sinh SQL]")
-                print(f"  ĐẦU VÀO: {t['pre_input']:,} tokens")
+                print(f"  ĐẦU VÀO: {t['pre_input']:,} tokens")  
                 print(f"    - Schema     : {t['schema']:,}")
                 print(f"    - Instruction: {t['instruction']:,}")
                 print(f"    - Câu hỏi   : {t['question']:,}")

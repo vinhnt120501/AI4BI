@@ -11,9 +11,13 @@ import SqlSection from './sections/SqlSection';
 import TableSection from './sections/TableSection';
 import TokenSection from './sections/TokenSection';
 import ActionButtons from './sections/ActionButtons';
+import LlmPayloadSection from './sections/LlmPayloadSection';
+import FollowUpSuggestions from './sections/FollowUpSuggestions';
 
 interface MessageBubbleProps {
   message: Message;
+  isLatestAssistant?: boolean;
+  onSuggestionClick?: (question: string) => void;
 }
 
 /**
@@ -37,12 +41,28 @@ function detectChartConfig(columns: string[], rows: string[][]): ChartBlock | nu
   return { type: 'chart', chartType, xKey, yKeys, options, title: 'Auto-detected chart' };
 }
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({
+  message,
+  isLatestAssistant = false,
+  onSuggestionClick,
+}: MessageBubbleProps) {
   if (message.role === 'user') {
     return <UserBubble content={message.content} />;
   }
 
-  const { content, sql, thinking, tokenUsage, replyTokenUsage, columns, rows, chartConfig, blocks } = message;
+  const {
+    content,
+    sql,
+    thinking,
+    tokenUsage,
+    replyTokenUsage,
+    columns,
+    rows,
+    chartConfig,
+    blocks,
+    llmDebugPayloads,
+    followUpSuggestions,
+  } = message;
 
   const hasBlocks = blocks && blocks.length > 0;
 
@@ -57,6 +77,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
     <div className="space-y-3">
       {thinking && <ThinkingSection thinking={thinking} tokens={tokenUsage?.thinking} />}
       {sql && <SqlSection sql={sql} />}
+      {llmDebugPayloads && llmDebugPayloads.length > 0 && <LlmPayloadSection payloads={llmDebugPayloads} />}
       {columns && <TableSection columns={columns} rows={rows || []} />}
       <TokenSection tokenUsage={tokenUsage} replyTokenUsage={replyTokenUsage} />
 
@@ -75,6 +96,9 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
         <div className="text-[15px] leading-relaxed text-slate-800 bg-slate-50 rounded-xl px-5 py-4">
           <StreamingText text={content} speed={12} />
         </div>
+      )}
+      {isLatestAssistant && followUpSuggestions && followUpSuggestions.length > 0 && onSuggestionClick && (
+        <FollowUpSuggestions suggestions={followUpSuggestions} onSelect={onSuggestionClick} />
       )}
 
       <ActionButtons />

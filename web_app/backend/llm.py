@@ -4,6 +4,7 @@ import re
 import time
 from openai import OpenAI
 from db import get_schema_context, execute_sql
+from prompts import SQL_SYSTEM_PROMPT as SQL_SYSTEM_PROMPT_VINH, REPLY_SYSTEM_PROMPT as REPLY_SYSTEM_PROMPT_VINH
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY") or "local-9router-key"
 OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "http://localhost:20128/v1")
@@ -174,6 +175,11 @@ Yêu cầu:
 """
 
 
+# Override prompt theo branch vinhnt_ver_2 (chart contract mới).
+SQL_SYSTEM_PROMPT = SQL_SYSTEM_PROMPT_VINH
+REPLY_SYSTEM_PROMPT = REPLY_SYSTEM_PROMPT_VINH
+
+
 def count_tokens(text: str) -> int:
     # 9router/OpenAI-compatible endpoint does not guarantee a token-count API.
     # Keep a stable approximation for existing telemetry fields.
@@ -254,6 +260,7 @@ def parse_vis_config(text: str) -> tuple[str, dict | None, list | None]:
                                 "type": b.get("chartType", "bar"),
                                 "xKey": b.get("xKey", ""),
                                 "yKeys": b.get("yKeys", []),
+                                "options": b.get("options"),
                             }
                             if chart_config["yKeys"]:
                                 chart_config["yKey"] = chart_config["yKeys"][0]

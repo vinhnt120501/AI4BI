@@ -141,6 +141,15 @@ export interface AnalysisTableBlock {
 
 export type Block = StatCardsBlock | ChartBlock | DetailCardsBlock | HeadingBlock | AnalysisTableBlock;
 
+export interface LlmDebugPayload {
+    stage: 'sql' | 'reply' | string;
+    model?: string;
+    systemPrompt?: string;
+    userContent?: string;
+    memoryContext?: string;
+    schemaChars?: number;
+}
+
 // 1.4. Kiểu dữ liệu cho tin nhắn Chat.
 export interface Message {
     id: string;
@@ -155,6 +164,8 @@ export interface Message {
     chartConfig?: ChartConfig;
     blocks?: Block[];
     statusText?: string;
+    llmDebugPayloads?: LlmDebugPayload[];
+    followUpSuggestions?: string[];
 }
 
 // 1.2. Kiểu dữ liệu cho mục menu trong Sidebar.

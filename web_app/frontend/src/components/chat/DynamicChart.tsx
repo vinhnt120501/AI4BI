@@ -114,8 +114,22 @@ interface DynamicChartProps {
 
 // ─── Main Component ───
 export default function DynamicChart({ block, columns, rows }: DynamicChartProps) {
-  const { chartType, xKey, options, series, referenceLine, config: transformConfig } = block;
-  const opts = options || {};
+  const { xKey, options, series, referenceLine, config: transformConfig } = block;
+
+  // Backward-compat: map legacy chart types from old prompt/backend to new dynamic types.
+  const rawChartType = String((block as unknown as { chartType?: string }).chartType || 'bar');
+  let chartType = rawChartType as ChartBlock['chartType'];
+  const opts = { ...(options || {}) };
+  if (rawChartType === 'horizontal_bar') {
+    chartType = 'bar';
+    if (!opts.layout) opts.layout = 'vertical';
+  } else if (rawChartType === 'stacked_bar') {
+    chartType = 'bar';
+    opts.stacked = true;
+  } else if (rawChartType === 'donut') {
+    chartType = 'pie';
+    if (!opts.innerRadius) opts.innerRadius = '55%';
+  }
 
   // Build & transform data
   let chartData = buildChartData(columns, rows);
@@ -151,7 +165,9 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
   };
   const gridProps = { strokeDasharray: '3 3' as const, stroke: '#e2e8f0', opacity: 0.7 };
   const hasDualAxis = opts.dualAxis && yKeys.length > 1;
-  const showBrush = opts.brush ?? chartData.length > 12;
+  // Default interactive brush on for small/medium series too (>=2 points),
+  // users can still override by passing options.brush = false.
+  const showBrush = opts.brush ?? chartData.length >= 2;
   const isStacked = opts.stacked;
   const isPercent = opts.stackOffset === 'expand';
   const isVertical = opts.layout === 'vertical';

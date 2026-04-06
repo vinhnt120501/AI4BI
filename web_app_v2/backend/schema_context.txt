@@ -1,0 +1,86 @@
+TABLE: `chat_history`
+- `id` | type=int | Mô tả: dữ liệu của cột `id`.
+- `user_id` | type=varchar | Mô tả: dữ liệu của cột `user_id`.
+- `session_id` | type=varchar | Mô tả: dữ liệu của cột `session_id`.
+- `created_at` | type=datetime | Mô tả: dữ liệu của cột `created_at`.
+- `question` | type=text | Mô tả: dữ liệu của cột `question`.
+- `sql_generated` | type=text | Mô tả: dữ liệu của cột `sql_generated`.
+- `thinking` | type=text | Mô tả: dữ liệu của cột `thinking`.
+- `reply` | type=text | Mô tả: dữ liệu của cột `reply`.
+- `columns_data` | type=json | Mô tả: dữ liệu của cột `columns_data`.
+- `rows_data` | type=json | Mô tả: dữ liệu của cột `rows_data`.
+- `chart_config` | type=json | Mô tả: dữ liệu của cột `chart_config`.
+- `token_sql_input` | type=int | Mô tả: dữ liệu của cột `token_sql_input`.
+- `token_sql_thinking` | type=int | Mô tả: dữ liệu của cột `token_sql_thinking`.
+- `token_sql_output` | type=int | Mô tả: dữ liệu của cột `token_sql_output`.
+- `token_sql_total` | type=int | Mô tả: dữ liệu của cột `token_sql_total`.
+- `token_reply_input` | type=int | Mô tả: dữ liệu của cột `token_reply_input`.
+- `token_reply_thinking` | type=int | Mô tả: dữ liệu của cột `token_reply_thinking`.
+- `token_reply_output` | type=int | Mô tả: dữ liệu của cột `token_reply_output`.
+- `token_reply_total` | type=int | Mô tả: dữ liệu của cột `token_reply_total`.
+- `token_grand_total` | type=int | Mô tả: dữ liệu của cột `token_grand_total`.
+
+TABLE: `memory_facts`
+- `id` | type=int | Mô tả: dữ liệu của cột `id`.
+- `user_id` | type=varchar | Mô tả: dữ liệu của cột `user_id`.
+- `session_id` | type=varchar | Mô tả: dữ liệu của cột `session_id`.
+- `category` | type=varchar | Mô tả: dữ liệu của cột `category`.
+- `content` | type=text | Mô tả: dữ liệu của cột `content`.
+- `importance` | type=tinyint | Mô tả: dữ liệu của cột `importance`.
+- `source_type` | type=varchar | Mô tả: dữ liệu của cột `source_type`.
+- `created_at` | type=datetime | Mô tả: dữ liệu của cột `created_at`.
+
+TABLE: `sample_central_rabie`
+- `month` | type=varchar | Mô tả: dữ liệu của cột `month`.
+- `province_name` | type=varchar | Mô tả: dữ liệu của cột `province_name`.
+- `unique_vaccinated_customers` | type=varchar | Mô tả: dữ liệu của cột `unique_vaccinated_customers`.
+
+TABLE: `view_genie_person`
+- `lcv_id` | type=varchar | Mã định danh người thụ hưởng (bắt đầu bằng LCV)
+- `customer_id` | type=varchar | Mã định danh người mua đơn hàng (24 ký tự alphanumeric)
+- `name` | type=varchar | Họ và tên đầy đủ (tiếng Việt, duy nhất)
+- `date_of_birth` | type=date | Ngày sinh (YYYY-MM-DD)
+- `gender` | type=tinyint | 0=Nam, 1=Nữ, 2=Khác
+- `note` | type=text | Ghi chú bổ sung (thường null)
+
+TABLE: `view_genie_shop`
+- `shop_code` | type=varchar | Mã cửa hàng duy nhất (5 chữ số)
+- `province_name` | type=varchar | Tên tỉnh/thành phố (63 tỉnh thành VN)
+- `district_name` | type=varchar | Tên quận/huyện
+- `ward_name` | type=varchar | Tên phường/xã
+- `address` | type=varchar | Địa chỉ đầy đủ
+- `area_name` | type=varchar | Vùng kinh tế (7 vùng)
+- `region_name` | type=varchar | Miền địa lý: Miền Bắc | Miền Trung | Miền Nam
+
+TABLE: `view_genie_vaccine_product`
+- `sku` | type=varchar | Mã SKU sản phẩm duy nhất
+- `disease_group_name` | type=varchar | Nhóm bệnh (null với combo/dịch vụ/test)
+- `product_name` | type=varchar | Tên đầy đủ sản phẩm vaccine
+
+TABLE: `view_genie_vaccine_returned_order_detail`
+- `attachment_code` | type=varchar | FK liên kết về đơn hàng gốc
+- `customer_id` | type=varchar | Mã người mua (bắt buộc)
+- `lcv_id` | type=varchar | Mã người thụ hưởng (có thể null ~1%)
+- `sku` | type=varchar | Mã sản phẩm vaccine
+- `package_type` | type=varchar | Loại mua: LE | GOI
+- `return_line_item_amount_after_discount` | type=bigint | Giá trị hoàn trả sau chiết khấu (VND)
+- `return_date` | type=date | Ngày trả hàng
+
+TABLE: `view_genie_vaccine_sales_order_detail`
+- `attachment_code` | type=varchar | Mã duy nhất của line item (PK)
+- `customer_id` | type=varchar | Mã người mua
+- `lcv_id` | type=varchar | Mã người thụ hưởng mũi tiêm
+- `shop_code` | type=varchar | Mã cửa hàng
+- `order_code` | type=varchar | Mã đơn hàng (23 chữ số, 1 order có thể nhiều line item)
+- `sku` | type=varchar | Mã sản phẩm vaccine
+- `package_type` | type=varchar | Loại mua: LE (lẻ) | GOI (gói, +5%)
+- `line_item_amount_after_discount` | type=bigint | Doanh thu line item sau chiết khấu (VND)
+- `line_item_quantity` | type=tinyint | Số lượng mũi tiêm (1-3)
+- `order_completion_date` | type=date | Ngày hoàn thành đơn hàng
+- `order_creation_date` | type=date | Ngày tạo đơn hàng
+
+TABLE: `view_genie_vaccine_shop_target`
+- `shop_code` | type=varchar | Mã cửa hàng
+- `month` | type=tinyint | Tháng (1-12)
+- `year` | type=smallint | Năm (2024-2025)
+- `target_sales` | type=bigint | Doanh thu mục tiêu (VND)

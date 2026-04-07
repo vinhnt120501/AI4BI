@@ -55,14 +55,22 @@ class MemoryService:
         self.short_max_turns = int(os.getenv("MEMORY_SHORT_MAX_TURNS", "3"))
         self.short_summary_chars = int(os.getenv("MEMORY_SHORT_SUMMARY_CHARS", "220"))
         self.summary_every_n = int(os.getenv("MEMORY_SUMMARY_EVERY_N_TURNS", "8"))
-        self.embedding_model = os.getenv("OPENROUTER_EMBEDDING_MODEL", "text-embedding-3-small")
-        self.chat_model = os.getenv("OPENROUTER_MODEL", "cx/gpt-5-codex-mini")
-        self.openrouter_base = os.getenv("OPENROUTER_BASE_URL", "http://localhost:20128/v1")
-        self.openrouter_key = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY") or "local-9router-key"
-        self.extra_headers = {
-            "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "http://localhost:3000"),
-            "X-Title": os.getenv("OPENROUTER_APP_NAME", "AI4BI"),
-        }
+        self.embedding_model = os.getenv("EMBEDDING_MODEL") or os.getenv("OPENROUTER_EMBEDDING_MODEL", "text-embedding-3-small")
+        self.chat_model = os.getenv("LLM_MODEL") or os.getenv("OPENROUTER_MODEL", "cx/gpt-5-codex-mini")
+        self.openrouter_base = os.getenv("LLM_BASE_URL") or os.getenv("OPENROUTER_BASE_URL", "http://localhost:20128/v1")
+        self.openrouter_key = (
+            os.getenv("LLM_API_KEY")
+            or os.getenv("OPENROUTER_API_KEY")
+            or os.getenv("OPENAI_API_KEY")
+            or "local-9router-key"
+        )
+        self.extra_headers = {}
+        site_url = os.getenv("OPENROUTER_SITE_URL")
+        app_name = os.getenv("OPENROUTER_APP_NAME")
+        if site_url:
+            self.extra_headers["HTTP-Referer"] = site_url
+        if app_name:
+            self.extra_headers["X-Title"] = app_name
         self.client = OpenAI(api_key=self.openrouter_key, base_url=self.openrouter_base)
         self.static_block = os.getenv("MEMORY_STATIC_BLOCK", MEMORY_STATIC_BLOCK_DEFAULT)
         self._chart_pattern = re.compile(

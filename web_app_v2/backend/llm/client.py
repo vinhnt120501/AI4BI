@@ -1,9 +1,18 @@
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from openai import OpenAI
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENAI_API_KEY") or "local-9router-key"
-OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "http://localhost:20128/v1")
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "cx/gpt-5-codex-mini")
+load_dotenv(Path(__file__).parent.parent / ".env", override=True)
+
+OPENROUTER_API_KEY = (
+    os.getenv("LLM_API_KEY")
+    or os.getenv("OPENROUTER_API_KEY")
+    or os.getenv("OPENAI_API_KEY")
+    or "local-9router-key"
+)
+OPENROUTER_BASE_URL = os.getenv("LLM_BASE_URL") or os.getenv("OPENROUTER_BASE_URL", "http://localhost:20128/v1")
+OPENROUTER_MODEL = os.getenv("LLM_MODEL") or os.getenv("OPENROUTER_MODEL", "cx/gpt-5-codex-mini")
 if OPENROUTER_MODEL.startswith("openai/cx/"):
     OPENROUTER_MODEL = OPENROUTER_MODEL.replace("openai/", "", 1)
 
@@ -15,10 +24,13 @@ client = OpenAI(
     base_url=OPENROUTER_BASE_URL,
 )
 
-EXTRA_HEADERS = {
-    "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "http://localhost:3000"),
-    "X-Title": os.getenv("OPENROUTER_APP_NAME", "AI4BI"),
-}
+EXTRA_HEADERS = {}
+site_url = os.getenv("OPENROUTER_SITE_URL")
+app_name = os.getenv("OPENROUTER_APP_NAME")
+if site_url:
+    EXTRA_HEADERS["HTTP-Referer"] = site_url
+if app_name:
+    EXTRA_HEADERS["X-Title"] = app_name
 
 
 def count_tokens(text: str) -> int:

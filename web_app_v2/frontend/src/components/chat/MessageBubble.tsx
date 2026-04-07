@@ -11,6 +11,7 @@ import UserBubble from './sections/UserBubble';
 import SqlSection from './sections/SqlSection';
 import TableSection from './sections/TableSection';
 import TokenSection from './sections/TokenSection';
+import TimingSection from './sections/TimingSection';
 import ActionButtons from './sections/ActionButtons';
 import LlmPayloadSection from './sections/LlmPayloadSection';
 import FollowUpSuggestions from './sections/FollowUpSuggestions';
@@ -56,7 +57,6 @@ export default function MessageBubble({
   const {
     content,
     sql,
-    thinking,
     tokenUsage,
     replyTokenUsage,
     columns,
@@ -67,7 +67,8 @@ export default function MessageBubble({
     followUpSuggestions,
     statusText,
     currentStep,
-    isDone
+    isDone,
+    timings,
   } = message;
 
   const hasBlocks = blocks && blocks.length > 0;
@@ -95,6 +96,7 @@ export default function MessageBubble({
       {columns && <TableSection columns={columns} rows={rows || []} />}
       {llmDebugPayloads && llmDebugPayloads.length > 0 && <LlmPayloadSection payloads={llmDebugPayloads} />}
       <TokenSection tokenUsage={tokenUsage} replyTokenUsage={replyTokenUsage} />
+      <TimingSection timings={timings} />
 
       {/* Dashboard blocks (ưu tiên) hoặc fallback chart đơn */}
       {hasBlocks && columns && rows ? (

@@ -166,8 +166,8 @@ async def process_chat(message: str, session_id: str, user_id: str,
                 for k, v in sql_sub.items():
                     timings_ms[f"sql__{k}"] = v
 
-            yield sse_event("done", {"grand_total": grand_total})
             yield sse_event("timing", {"timings_ms": timings_ms})
+            yield sse_event("done", {"grand_total": grand_total})
 
             chat_data.update({
                 **sql_result,

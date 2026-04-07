@@ -95,7 +95,7 @@ def text_to_sql(question: str, memory_context: str = "", custom_instruction: str
     except Exception as e:
         retry_response = generate_chat(
             system_prompt,
-            f"{question}\n\nSQL trước đó bị lỗi: {e}\nViết lại SQL khác, tránh lỗi này.",
+            f"{question}\n\nSQL trước đó:\n{sql}\n\nLỗi: {e}\nViết lại SQL khác, tránh lỗi này.",
             temperature=0,
         )
         retry_usage = extract_token_usage(retry_response.usage)
@@ -152,7 +152,7 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
             t = time.perf_counter()
             retry_response = generate_chat(
                 system_prompt,
-                f"{question}\n\nSQL trước đó bị lỗi: {e}\nViết lại SQL khác, tránh lỗi này.",
+                f"{question}\n\nSQL trước đó:\n{sql}\n\nLỗi: {e}\nViết lại SQL khác, tránh lỗi này.",
                 temperature=0,
             )
             timing[f"llm_sql_retry_{retry_count}"] = round((time.perf_counter() - t) * 1000, 1)

@@ -31,53 +31,53 @@ TABLE: `memory_facts`
 - `created_at` | type=datetime | Mô tả: dữ liệu của cột `created_at`.
 
 TABLE: `sample_central_rabie`
-- `month` | type=varchar | Mô tả: dữ liệu của cột `month`.
-- `province_name` | type=varchar | Mô tả: dữ liệu của cột `province_name`.
-- `unique_vaccinated_customers` | type=varchar | Mô tả: dữ liệu của cột `unique_vaccinated_customers`.
+- `month` | type=varchar | Định dạng: 'YYYY-MM' (vd: '2024-01', '2024-12')
+- `province_name` | type=varchar | Tên tỉnh/thành phố miền Trung (vd: 'Đà Nẵng', 'Huế', 'Quảng Nam')
+- `unique_vaccinated_customers` | type=varchar | Số khách tiêm duy nhất trong tháng (lưu dạng text)
 
 TABLE: `view_genie_person`
-- `lcv_id` | type=varchar | Mã định danh người thụ hưởng (bắt đầu bằng LCV)
+- `lcv_id` | type=varchar | Mã định danh người thụ hưởng (bắt đầu bằng 'LCV', vd: 'LCV000123456')
 - `customer_id` | type=varchar | Mã định danh người mua đơn hàng (24 ký tự alphanumeric)
 - `name` | type=varchar | Họ và tên đầy đủ (tiếng Việt, duy nhất)
-- `date_of_birth` | type=date | Ngày sinh (YYYY-MM-DD)
-- `gender` | type=tinyint | 0=Nam, 1=Nữ, 2=Khác
+- `date_of_birth` | type=date | Ngày sinh (YYYY-MM-DD) — dùng TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) để tính tuổi
+- `gender` | type=tinyint | Giá trị: 0=Nam, 1=Nữ, 2=Khác — dùng = để filter, không dùng LIKE
 - `note` | type=text | Ghi chú bổ sung (thường null)
 
 TABLE: `view_genie_shop`
-- `shop_code` | type=varchar | Mã cửa hàng duy nhất (5 chữ số)
-- `province_name` | type=varchar | Tên tỉnh/thành phố (63 tỉnh thành VN)
-- `district_name` | type=varchar | Tên quận/huyện
+- `shop_code` | type=varchar | Mã cửa hàng duy nhất (5 chữ số, vd: '10001', '20045') — dùng = không dùng LIKE
+- `province_name` | type=varchar | Tên tỉnh/thành phố (63 tỉnh thành VN, vd: 'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng') — dùng LIKE cho tìm kiếm
+- `district_name` | type=varchar | Tên quận/huyện (vd: 'Quận 1', 'Hoàn Kiếm')
 - `ward_name` | type=varchar | Tên phường/xã
 - `address` | type=varchar | Địa chỉ đầy đủ
-- `area_name` | type=varchar | Vùng kinh tế (7 vùng)
-- `region_name` | type=varchar | Miền địa lý: Miền Bắc | Miền Trung | Miền Nam
+- `area_name` | type=varchar | Vùng kinh tế (vd: 'Đồng bằng sông Hồng', 'Đông Nam Bộ', 'Tây Nguyên')
+- `region_name` | type=varchar | Miền địa lý — chính xác 3 giá trị: 'Miền Bắc', 'Miền Trung', 'Miền Nam' — dùng = không LIKE
 
 TABLE: `view_genie_vaccine_product`
-- `sku` | type=varchar | Mã SKU sản phẩm duy nhất
-- `disease_group_name` | type=varchar | Nhóm bệnh (null với combo/dịch vụ/test)
-- `product_name` | type=varchar | Tên đầy đủ sản phẩm vaccine
+- `sku` | type=varchar | Mã SKU sản phẩm duy nhất (vd: 'VAC001', 'COMBO_DTP') — dùng = không LIKE
+- `disease_group_name` | type=varchar | Nhóm bệnh (vd: 'Cúm', 'Viêm gan B', 'Dại', 'HPV') — null với combo/dịch vụ/test — dùng LIKE khi tìm theo tên bệnh
+- `product_name` | type=varchar | Tên đầy đủ sản phẩm vaccine (vd: 'Vắc xin Cúm Vaxigrip Tetra 0.5ml') — dùng LIKE khi tìm theo tên
 
 TABLE: `view_genie_vaccine_returned_order_detail`
-- `attachment_code` | type=varchar | FK liên kết về đơn hàng gốc
-- `customer_id` | type=varchar | Mã người mua (bắt buộc)
-- `lcv_id` | type=varchar | Mã người thụ hưởng (có thể null ~1%)
-- `sku` | type=varchar | Mã sản phẩm vaccine
-- `package_type` | type=varchar | Loại mua: LE | GOI
-- `return_line_item_amount_after_discount` | type=bigint | Giá trị hoàn trả sau chiết khấu (VND)
-- `return_date` | type=date | Ngày trả hàng
+- `attachment_code` | type=varchar | FK liên kết về đơn hàng gốc — dùng = không LIKE
+- `customer_id` | type=varchar | Mã người mua (bắt buộc) — dùng = không LIKE
+- `lcv_id` | type=varchar | Mã người thụ hưởng (có thể null ~1%) — dùng = không LIKE
+- `sku` | type=varchar | Mã sản phẩm vaccine — dùng = không LIKE
+- `package_type` | type=varchar | Chính xác 2 giá trị: 'LE' (lẻ) hoặc 'GOI' (gói) — dùng = không LIKE
+- `return_line_item_amount_after_discount` | type=bigint | Giá trị hoàn trả sau chiết khấu (VND, số dương)
+- `return_date` | type=date | Ngày trả hàng (YYYY-MM-DD) — dùng cho filter hoan tra
 
 TABLE: `view_genie_vaccine_sales_order_detail`
-- `attachment_code` | type=varchar | Mã duy nhất của line item (PK)
-- `customer_id` | type=varchar | Mã người mua
-- `lcv_id` | type=varchar | Mã người thụ hưởng mũi tiêm
-- `shop_code` | type=varchar | Mã cửa hàng
-- `order_code` | type=varchar | Mã đơn hàng (23 chữ số, 1 order có thể nhiều line item)
-- `sku` | type=varchar | Mã sản phẩm vaccine
-- `package_type` | type=varchar | Loại mua: LE (lẻ) | GOI (gói, +5%)
-- `line_item_amount_after_discount` | type=bigint | Doanh thu line item sau chiết khấu (VND)
-- `line_item_quantity` | type=tinyint | Số lượng mũi tiêm (1-3)
-- `order_completion_date` | type=date | Ngày hoàn thành đơn hàng
-- `order_creation_date` | type=date | Ngày tạo đơn hàng
+- `attachment_code` | type=varchar | Mã duy nhất của line item (PK) — dùng = không LIKE
+- `customer_id` | type=varchar | Mã người mua — dùng = không LIKE
+- `lcv_id` | type=varchar | Mã người thụ hưởng mũi tiêm — dùng = không LIKE
+- `shop_code` | type=varchar | Mã cửa hàng — dùng = không LIKE
+- `order_code` | type=varchar | Mã đơn hàng (1 order có thể nhiều line item) — dùng COUNT(DISTINCT `order_code`) để đếm đơn
+- `sku` | type=varchar | Mã sản phẩm vaccine — dùng = không LIKE
+- `package_type` | type=varchar | Chính xác 2 giá trị: 'LE' (lẻ) hoặc 'GOI' (gói, phụ phí +5%) — dùng = không LIKE
+- `line_item_amount_after_discount` | type=bigint | Doanh thu line item sau chiết khấu (VND) — đây là metric doanh thu chính
+- `line_item_quantity` | type=tinyint | Số lượng mũi tiêm trong line item (thường 1-3)
+- `order_completion_date` | type=date | Ngày hoàn thành đơn hàng (YYYY-MM-DD) — dùng mặc định cho filter doanh thu theo thời gian
+- `order_creation_date` | type=date | Ngày tạo đơn hàng (YYYY-MM-DD) — chỉ dùng khi user hỏi ngày tạo đơn
 
 TABLE: `view_genie_vaccine_shop_target`
 - `shop_code` | type=varchar | Mã cửa hàng

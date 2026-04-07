@@ -69,7 +69,28 @@ def stream_reply(question: str, columns: list, rows: list, memory_context: str =
     vis_config_started = False
 
     for chunk in response:
-        delta = chunk.choices[0].delta.content if chunk.choices[0].delta.content else ""
+        choices = getattr(chunk, "choices", None) or []
+        if not choices:
+            continue
+
+        delta_obj = getattr(choices[0], "delta", None)
+        if delta_obj is None:
+            continue
+
+        delta = getattr(delta_obj, "content", None)
+        if isinstance(delta, list):
+            parts = []
+            for item in delta:
+                if isinstance(item, dict):
+                    if item.get("type") == "text":
+                        parts.append(item.get("text", ""))
+                else:
+                    if getattr(item, "type", None) == "text":
+                        parts.append(getattr(item, "text", ""))
+            delta = "".join(parts)
+        elif delta is None:
+            delta = ""
+
         if not delta:
             continue
         full_text += delta

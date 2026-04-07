@@ -20,12 +20,14 @@ def execute_sql(sql: str) -> dict:
     validate_sql(sql)
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute(sql)
-    cols = [desc[0] for desc in cursor.description]
-    rows = cursor.fetchall()
-    cursor.close()
-    conn.close()
-    return {"columns": cols, "rows": [[str(v) for v in row] for row in rows]}
+    try:
+        cursor.execute(sql)
+        cols = [desc[0] for desc in cursor.description]
+        rows = cursor.fetchall()
+        return {"columns": cols, "rows": [[str(v) for v in row] for row in rows]}
+    finally:
+        cursor.close()
+        conn.close()
 
 
 def compute_data_summary(columns: list[str], rows: list[list[str]]) -> dict:

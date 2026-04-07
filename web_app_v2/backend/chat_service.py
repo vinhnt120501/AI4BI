@@ -129,28 +129,6 @@ async def process_chat(message: str, session_id: str, user_id: str,
                     })
             timings_ms["llm_reply"] = _ms(t)
 
-            # Follow-up questions
-            t = time.perf_counter()
-            followup_result = await asyncio.to_thread(
-                generate_followup_questions_detailed,
-                message, reply_result["reply"],
-                sql_result["columns"], sql_result["rows"], reply_memory_context,
-            )
-            timings_ms["llm_followup"] = _ms(t)
-            yield sse_event("suggestions", {"questions": followup_result.get("questions", [])})
-
-            # Memory update
-            t = time.perf_counter()
-            try:
-                await asyncio.to_thread(
-                    memory_service.update_after_turn,
-                    user_id, session_id, message,
-                    reply_result["reply"], sql_result["sql"],
-                )
-            except Exception as mem_err:
-                yield sse_event("status", {"step": 4, "text": f"Memory update warning: {mem_err}"})
-            timings_ms["memory_update"] = _ms(t)
-
             # Token summary
             sql_tokens = sql_result.get("token_usage", {})
             reply_tokens = reply_result.get("usage", {})
@@ -158,7 +136,6 @@ async def process_chat(message: str, session_id: str, user_id: str,
                 k: sql_tokens.get(k, 0) + reply_tokens.get(k, 0)
                 for k in ("input", "thinking", "output", "total")
             }
-            timings_ms["total"] = _ms(request_started)
 
             # Merge sub-timings from sql_generator
             sql_sub = sql_result.get("timing_ms", {})
@@ -166,8 +143,43 @@ async def process_chat(message: str, session_id: str, user_id: str,
                 for k, v in sql_sub.items():
                     timings_ms[f"sql__{k}"] = v
 
+            # Send done immediately — user sees complete response
+            timings_ms["total"] = _ms(request_started)
             yield sse_event("timing", {"timings_ms": timings_ms})
             yield sse_event("done", {"grand_total": grand_total})
+
+            # Follow-up + memory update in parallel after done (non-blocking for user)
+            async def run_followup():
+                t = time.perf_counter()
+                result = await asyncio.to_thread(
+                    generate_followup_questions_detailed,
+                    message, reply_result["reply"],
+                    sql_result["columns"], sql_result["rows"], reply_memory_context,
+                )
+                timings_ms["llm_followup"] = _ms(t)
+                return result
+
+            async def run_memory_update():
+                t = time.perf_counter()
+                await asyncio.to_thread(
+                    memory_service.update_after_turn,
+                    user_id, session_id, message,
+                    reply_result["reply"], sql_result["sql"],
+                )
+                timings_ms["memory_update"] = _ms(t)
+
+            followup_result, _ = await asyncio.gather(
+                run_followup(),
+                run_memory_update(),
+                return_exceptions=True,
+            )
+
+            if isinstance(followup_result, BaseException):
+                followup_result = {}
+            yield sse_event("suggestions", {"questions": followup_result.get("questions", [])})
+
+            # Update timing with follow-up and memory durations
+            yield sse_event("timing", {"timings_ms": timings_ms})
 
             chat_data.update({
                 **sql_result,
@@ -187,9 +199,9 @@ async def process_chat(message: str, session_id: str, user_id: str,
         async for chunk in stream():
             yield chunk
         if chat_data:
-            try:
-                await asyncio.to_thread(save_chat, session_id, message, chat_data, user_id)
-            except Exception as e:
-                print(f"[save_chat ERROR] {e}")
+            await asyncio.gather(
+                asyncio.to_thread(save_chat, session_id, message, chat_data, user_id),
+                return_exceptions=True,
+            )
 
     return stream_and_save()

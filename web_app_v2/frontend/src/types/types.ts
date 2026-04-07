@@ -185,6 +185,7 @@ export interface Message {
     isDone?: boolean;
     llmDebugPayloads?: LlmDebugPayload[];
     followUpSuggestions?: string[];
+    timings?: Record<string, number>;
 }
 
 // 2. Khai báo các thông tin hiển thị ở giao diện (front-end)

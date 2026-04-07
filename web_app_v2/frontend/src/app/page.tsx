@@ -129,6 +129,9 @@ export default function ChatPage() {
                         };
                     case 'suggestions':
                         return { ...m, followUpSuggestions: payload.questions as string[] };
+                    case 'timing':
+                        console.log('[timing]', payload.timings_ms);
+                        return { ...m, timings: payload.timings_ms as Record<string, number> };
                     case 'done':
                         return { ...m, isDone: true };
                     case 'error':

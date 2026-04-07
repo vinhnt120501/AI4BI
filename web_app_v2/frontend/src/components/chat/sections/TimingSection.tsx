@@ -13,8 +13,9 @@ const LABELS: Record<string, string> = {
   sql_stage: 'SQL generation',
   memory_reply: 'Memory (reply)',
   llm_reply: 'LLM reply',
-  llm_followup: 'Follow-up',
-  memory_update: 'Memory update',
+  llm_followup: 'Follow-up (background)',
+  memory_update: 'Memory update (background)',
+  background_total: 'Background total',
 };
 
 export default function TimingSection({ timings }: { timings?: Record<string, number> }) {
@@ -22,8 +23,11 @@ export default function TimingSection({ timings }: { timings?: Record<string, nu
   if (!timings) return null;
 
   const total = timings.total;
-  const keyOrder = ['sql_stage', 'llm_reply', 'memory_sql', 'memory_reply', 'llm_followup', 'memory_update'];
+  const keyOrder = ['sql_stage', 'llm_reply', 'memory_sql', 'memory_reply'];
   const mainKeys = keyOrder.filter((k) => timings[k] !== undefined);
+  const backgroundKeys = ['llm_followup', 'memory_update', 'background_total'].filter(
+    (k) => timings[k] !== undefined
+  );
   const subKeys = Object.keys(timings).filter(
     (k) => k.startsWith('sql__') || k.startsWith('agentic_')
   );
@@ -45,8 +49,6 @@ export default function TimingSection({ timings }: { timings?: Record<string, nu
                 llm_reply: 'bg-violet-400',
                 memory_sql: 'bg-amber-300',
                 memory_reply: 'bg-amber-300',
-                llm_followup: 'bg-emerald-400',
-                memory_update: 'bg-slate-300',
               };
               return (
                 <div
@@ -69,6 +71,17 @@ export default function TimingSection({ timings }: { timings?: Record<string, nu
             </React.Fragment>
           ))}
         </div>
+
+        {backgroundKeys.length > 0 && (
+          <div className="grid grid-cols-[160px_1fr] gap-x-2 pt-2 border-t border-slate-100 mt-2">
+            {backgroundKeys.map((k) => (
+              <React.Fragment key={k}>
+                <span className="text-slate-400">{LABELS[k] || k}:</span>
+                <span className="text-slate-600">{fmt(timings[k])}</span>
+              </React.Fragment>
+            ))}
+          </div>
+        )}
 
         {/* Sub-timings (agentic / sql internals) */}
         {subKeys.length > 0 && (

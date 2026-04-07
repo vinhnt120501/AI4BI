@@ -143,7 +143,7 @@ async def process_chat(message: str, session_id: str, user_id: str,
                 for k, v in sql_sub.items():
                     timings_ms[f"sql__{k}"] = v
 
-            # Send done immediately — user sees complete response
+            # User-visible latency: stop the clock when the final answer is ready.
             timings_ms["total"] = _ms(request_started)
             yield sse_event("timing", {"timings_ms": timings_ms})
             yield sse_event("done", {"grand_total": grand_total})
@@ -168,17 +168,19 @@ async def process_chat(message: str, session_id: str, user_id: str,
                 )
                 timings_ms["memory_update"] = _ms(t)
 
+            background_started = time.perf_counter()
             followup_result, _ = await asyncio.gather(
                 run_followup(),
                 run_memory_update(),
                 return_exceptions=True,
             )
+            timings_ms["background_total"] = _ms(background_started)
 
             if isinstance(followup_result, BaseException):
                 followup_result = {}
             yield sse_event("suggestions", {"questions": followup_result.get("questions", [])})
 
-            # Update timing with follow-up and memory durations
+            # Background-only timings: these happen after the user-visible response is done.
             yield sse_event("timing", {"timings_ms": timings_ms})
 
             chat_data.update({

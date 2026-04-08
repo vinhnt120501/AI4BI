@@ -2,7 +2,7 @@ import os
 import re
 import time
 from db import get_schema_context, execute_sql
-from prompts import ANALYTICS_SQL_GUIDE, SQL_ROBOT_RULES
+from prompts import SQL_ROBOT_RULES
 from .client import count_tokens, extract_thinking, extract_token_usage, generate_chat, message_text
 from .parser import clean_sql
 
@@ -61,7 +61,6 @@ def build_sql_system_prompt(custom_instruction: str = "", memory_context: str = 
     if instruction:
         system_prompt += f"{instruction}\n\n"
     system_prompt += rules
-    system_prompt += f"\n\n{ANALYTICS_SQL_GUIDE}"
     if memory:
         system_prompt += f"\n\nMemory Context:\n{memory}"
     system_prompt += f"\n\nAnalytics Schema:\n{schema}"

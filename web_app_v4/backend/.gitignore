@@ -1,0 +1,22 @@
+# Python runtime
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local secrets / runtime data
+.env
+.env.*
+!.env.example
+.memory/
+
+# Logs
+*.log
+
+# Test output
+test_result.json

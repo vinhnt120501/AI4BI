@@ -2,7 +2,7 @@ import os
 import re
 import time
 from db import get_schema_context, execute_sql
-from sql_prompt_rules import ANALYTICS_SQL_GUIDE, SQL_ROBOT_RULES
+from prompts import ANALYTICS_SQL_GUIDE, SQL_ROBOT_RULES
 from .client import count_tokens, extract_thinking, extract_token_usage, generate_chat, message_text
 from .parser import clean_sql
 

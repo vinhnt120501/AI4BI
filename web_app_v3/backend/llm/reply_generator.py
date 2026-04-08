@@ -8,6 +8,125 @@ from .client import (
 from .parser import parse_vis_config
 
 
+def _try_parse_float(x: str) -> float | None:
+    if x is None:
+        return None
+    s = str(x).strip()
+    if not s:
+        return None
+
+    # Handle common display formats coming back from SQL-as-strings.
+    s = s.replace(",", "")
+    if s.endswith("%"):
+        s = s[:-1].strip()
+    try:
+        return float(s)
+    except Exception:
+        return None
+
+
+def _infer_numeric_columns(columns: list[str], rows: list[list[str]], sample_n: int = 60) -> list[str]:
+    if not columns or not rows:
+        return []
+
+    sample = rows[:sample_n]
+    numeric_cols: list[str] = []
+    for col_i, col_name in enumerate(columns):
+        non_empty = 0
+        ok = 0
+        for r in sample:
+            if col_i >= len(r):
+                continue
+            raw = r[col_i]
+            v = (raw or "").strip() if isinstance(raw, str) else str(raw or "").strip()
+            if not v or v.lower() in {"null", "none", "nan"}:
+                continue
+            non_empty += 1
+            if _try_parse_float(v) is not None:
+                ok += 1
+        if non_empty >= 3 and ok / max(1, non_empty) >= 0.7:
+            numeric_cols.append(col_name)
+    return numeric_cols
+
+
+def _first_chart_config(blocks: list[dict] | None) -> dict | None:
+    if not blocks:
+        return None
+    for b in blocks:
+        if isinstance(b, dict) and b.get("type") == "chart":
+            cfg = {
+                "type": b.get("chartType", "bar"),
+                "xKey": b.get("xKey", ""),
+                "yKeys": b.get("yKeys", []) or [],
+                "options": b.get("options"),
+            }
+            if cfg["yKeys"]:
+                cfg["yKey"] = cfg["yKeys"][0]
+            return cfg
+    return None
+
+
+def _normalize_scatter_blocks(blocks: list[dict] | None, columns: list[str], rows: list[list[str]]) -> bool:
+    """
+    LLMs sometimes output scatter charts with yKeys == xKey, which is almost always useless.
+    Fix it deterministically using the observed dataset.
+    """
+    if not blocks or not columns:
+        return False
+
+    numeric = _infer_numeric_columns(columns, rows)
+    changed = False
+
+    for b in blocks:
+        if not isinstance(b, dict) or b.get("type") != "chart":
+            continue
+        chart_type = str(b.get("chartType") or "").lower().strip()
+        if "scatter" not in chart_type:
+            continue
+
+        x_key = str(b.get("xKey") or "").strip()
+        y_keys = b.get("yKeys") or []
+        if isinstance(y_keys, str):
+            y_keys = [y_keys]
+        if not isinstance(y_keys, list):
+            y_keys = []
+        y_keys = [str(y).strip() for y in y_keys if str(y).strip()]
+
+        if not x_key and numeric:
+            x_key = numeric[0]
+            b["xKey"] = x_key
+            changed = True
+
+        if x_key:
+            new_y = [y for y in y_keys if y != x_key]
+            if new_y != y_keys:
+                y_keys = new_y
+                changed = True
+
+        if not y_keys:
+            candidate = None
+            for col in numeric:
+                if col and col != x_key:
+                    candidate = col
+                    break
+            if candidate is None:
+                for col in columns:
+                    if col and col != x_key:
+                        candidate = col
+                        break
+            if candidate is not None:
+                y_keys = [candidate]
+                changed = True
+
+        if len(y_keys) > 1:
+            y_keys = [y_keys[0]]
+            changed = True
+
+        b["yKeys"] = y_keys
+
+    return changed
+
+
 def build_reply_contents(question: str, columns: list, rows: list,
                          memory_context: str = "", additional_data: list[dict] | None = None) -> dict:
     """Truyền thẳng toàn bộ kết quả SQL cho LLM. SQL đã tính toán hết."""
@@ -93,6 +212,8 @@ def stream_reply(question: str, columns: list, rows: list, memory_context: str =
             yield {"type": "text", "content": delta}
 
     clean_text, chart_config, blocks = parse_vis_config(full_text)
+    if _normalize_scatter_blocks(blocks, columns, rows):
+        chart_config = _first_chart_config(blocks)
     usage = {
         "input": reply_data["counts"]["question"] + reply_data["counts"]["data"] + reply_data["counts"]["memory"],
         "thinking": 0,
@@ -116,6 +237,8 @@ def generate_reply(question: str, columns: list, rows: list,
     final_system_prompt = (custom_instruction or "") + "\n\n" + VISUALIZATION_PROMPT_RULES
     response = generate_chat(final_system_prompt, reply_data["contents"], temperature=0)
     reply_text, chart_config, blocks = parse_vis_config(message_text(response.choices[0].message).strip())
+    if _normalize_scatter_blocks(blocks, columns, rows):
+        chart_config = _first_chart_config(blocks)
     reply_usage = extract_token_usage(response.usage)
     reply_usage.update(reply_data["counts"])
     reply_usage["rules"] = count_tokens(VISUALIZATION_PROMPT_RULES)
@@ -146,6 +269,8 @@ def generate_reply_detailed(question: str, columns: list, rows: list,
 
     t = time.perf_counter()
     reply_text, chart_config, blocks = parse_vis_config(message_text(response.choices[0].message).strip())
+    if _normalize_scatter_blocks(blocks, columns, rows):
+        chart_config = _first_chart_config(blocks)
     timing["parse_reply"] = round((time.perf_counter() - t) * 1000, 1)
 
     reply_usage = extract_token_usage(response.usage)

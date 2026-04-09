@@ -69,7 +69,8 @@ export default function MessageBubble({
     : content;
 
   // Fallback: nếu không có blocks, tạo ChartBlock từ chartConfig hoặc auto-detect
-  const fallbackBlock: ChartBlock | null = !hasBlocks
+  // Chỉ render fallback sau khi pipeline hoàn tất (tránh hiển thị chart "tạm" sơ sài khi mới có data).
+  const fallbackBlock: ChartBlock | null = !hasBlocks && Boolean(isDone)
     ? (chartConfig
       ? { type: 'chart', chartType: chartConfig.type, xKey: chartConfig.xKey, yKeys: chartConfig.yKeys, yKey: chartConfig.yKey, options: chartConfig.options }
       : (columns && rows ? detectChartConfig(columns, rows) : null))
@@ -95,6 +96,11 @@ export default function MessageBubble({
           eventTimeline={eventTimeline}
           isDone={isDone}
           startedAt={message.startedAt}
+          sql={message.sql}
+          columns={message.columns}
+          rows={message.rows}
+          tokenUsage={message.tokenUsage}
+          replyTokenUsage={message.replyTokenUsage}
         />
       ) : !isDone ? (
         <div className="flex items-center gap-2.5 py-2">

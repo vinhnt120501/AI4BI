@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, ChevronDown, Circle, Loader2 } from 'lucide-react';
-import { MessageEvent } from '@/types/types';
+import { MessageEvent, TokenUsage } from '@/types/types';
 
 interface ProgressTimelineProps {
   currentStep: number;
@@ -11,6 +11,11 @@ interface ProgressTimelineProps {
   eventTimeline?: MessageEvent[];
   isDone?: boolean;
   startedAt?: number;
+  sql?: string;
+  columns?: string[];
+  rows?: string[][];
+  tokenUsage?: TokenUsage;
+  replyTokenUsage?: TokenUsage;
 }
 
 function formatElapsed(atMs?: number) {
@@ -82,8 +87,182 @@ function buildSummaryText(item?: MessageEvent) {
   }
 }
 
-export default function ProgressTimeline({ currentStep, statusText, statusHistory, eventTimeline, isDone, startedAt }: ProgressTimelineProps) {
+function stripTrailingDots(text: string) {
+  return text.replace(/\s*(\.\.\.|…)\s*$/, '');
+}
+
+function normalizeIdentifier(text: string) {
+  return text.replace(/^[`"'[]+/, '').replace(/[`"'\]]+$/, '').replace(/[;,]$/, '').trim();
+}
+
+function stripSqlComments(sql: string) {
+  // Remove line comments and block comments to avoid false positives in WITH parsing.
+  return sql
+    .replace(/--.*$/gm, ' ')
+    .replace(/\/\*[\s\S]*?\*\//g, ' ');
+}
+
+function extractCteNames(sql?: string) {
+  if (typeof sql !== 'string' || !sql.trim()) return [];
+
+  const source = stripSqlComments(sql);
+  const withMatch = /\bwith\b/i.exec(source);
+  if (!withMatch) return [];
+
+  const startIndex = withMatch.index + withMatch[0].length;
+  const afterWith = source.slice(startIndex);
+
+  // Keep only top-level tokens (depth 0) between WITH ... SELECT.
+  let depth = 0;
+  let topLevel = '';
+  for (let i = 0; i < afterWith.length; i++) {
+    const ch = afterWith[i];
+    if (ch === '(') {
+      depth += 1;
+      topLevel += ch;
+      continue;
+    }
+    if (ch === ')') {
+      depth = Math.max(0, depth - 1);
+      topLevel += ch;
+      continue;
+    }
+    if (depth === 0) {
+      topLevel += ch;
+      // Detect the main SELECT at depth 0 to stop scanning early.
+      if (/\bselect\b/i.test(topLevel.slice(-12))) {
+        // Keep enough context for regex to still match the last `... AS (`
+        // but we don't need anything after the main SELECT.
+        break;
+      }
+    } else {
+      topLevel += ' ';
+    }
+  }
+
+  const results: string[] = [];
+  const re = /\b([`"[\]\w.]+)\s*(?:\([^)]*\))?\s+as\s*\(/gi;
+  let match: RegExpExecArray | null = null;
+  while ((match = re.exec(topLevel))) {
+    const name = normalizeIdentifier(match[1] || '');
+    if (name && !results.includes(name)) results.push(name);
+  }
+  return results;
+}
+
+function extractTableNames(sql?: string) {
+  if (typeof sql !== 'string' || !sql.trim()) return [];
+
+  const normalized = stripSqlComments(sql).replace(/\s+/g, ' ').trim();
+  const cteNames = new Set(extractCteNames(normalized).map((name) => name.toLowerCase()));
+  const results: string[] = [];
+  const re = /\b(from|join)\s+([`"[\]\w.]+|\([^)]+?\))/gi;
+
+  let match: RegExpExecArray | null = null;
+  while ((match = re.exec(normalized))) {
+    const raw = match[2] || '';
+    if (!raw || raw.startsWith('(')) continue;
+    const name = normalizeIdentifier(raw);
+    if (!name) continue;
+    if (cteNames.has(name.toLowerCase())) continue;
+    if (!results.includes(name)) results.push(name);
+  }
+
+  return results;
+}
+
+function computeStageIndex(items: MessageEvent[], lastIndex: number) {
+  const TOTAL_STAGES = 11;
+  const last = items[lastIndex];
+  if (!last) return { stageIndex: undefined as number | undefined, totalStages: TOTAL_STAGES };
+
+  let statusOrdinal = 0;
+  for (let i = 0; i <= lastIndex; i++) {
+    if (items[i]?.event === 'status') statusOrdinal += 1;
+  }
+
+  const stageIndex = (() => {
+    switch (last.event) {
+      case 'debug_payload':
+        return 1;
+      case 'status':
+        return statusOrdinal === 1 ? 2 : statusOrdinal === 2 ? 5 : 7;
+      case 'thinking':
+        return 3;
+      case 'sql':
+        return 4;
+      case 'data':
+        return 6;
+      case 'additional_data':
+        return 6;
+      case 'reply':
+        return 8;
+      case 'done':
+        return 9;
+      case 'suggestions':
+        return 10;
+      case 'final':
+        return 11;
+      case 'error':
+        return 11;
+      default:
+        return undefined;
+    }
+  })();
+
+  return { stageIndex, totalStages: TOTAL_STAGES };
+}
+
+function formatToken(value?: number) {
+  if (typeof value !== 'number') return '—';
+  return value.toLocaleString();
+}
+
+function TokenRow({ label, value, indent = false }: { label: string; value?: number; indent?: boolean }) {
+  if (value === undefined) return null;
+  return (
+    <>
+      <div className={`${indent ? 'pl-4 text-[11px] text-slate-500' : 'text-[11px] text-slate-600'} whitespace-nowrap`}>{label}</div>
+      <div className={`${indent ? 'text-[11px] text-slate-500' : 'text-[11px] text-slate-700'} text-right`}>{formatToken(value)}</div>
+    </>
+  );
+}
+
+function TokenBreakdown({ title, usage }: { title: string; usage: TokenUsage }) {
+  return (
+    <div className="rounded-xl bg-slate-50 px-3 py-2">
+      <div className="text-[11px] font-semibold text-slate-700">{title}</div>
+      <div className="mt-2 grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 font-mono">
+        <TokenRow label="Input" value={usage.input} />
+        <TokenRow label="- Schema" value={usage.schema} indent />
+        <TokenRow label="- Rules" value={usage.rules} indent />
+        <TokenRow label="- Instruction" value={usage.instruction} indent />
+        <TokenRow label="- Memory" value={usage.memory} indent />
+        <TokenRow label="- Question" value={usage.question} indent />
+        <TokenRow label="- Data" value={usage.data} indent />
+        {usage.thinking > 0 ? <TokenRow label="Thinking" value={usage.thinking} /> : null}
+        <TokenRow label="Output" value={usage.output} />
+        <TokenRow label="Subtotal" value={usage.total} />
+      </div>
+    </div>
+  );
+}
+
+export default function ProgressTimeline({
+  currentStep,
+  statusText,
+  statusHistory,
+  eventTimeline,
+  isDone,
+  startedAt,
+  sql,
+  columns,
+  rows,
+  tokenUsage,
+  replyTokenUsage,
+}: ProgressTimelineProps) {
   const [nowMs, setNowMs] = useState(() => Date.now());
+  const [openPanels, setOpenPanels] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (isDone) return;
@@ -93,7 +272,7 @@ export default function ProgressTimeline({ currentStep, statusText, statusHistor
   }, [isDone, startedAt]);
 
   const baseItems: MessageEvent[] = eventTimeline && eventTimeline.length > 0
-    ? eventTimeline
+    ? eventTimeline.filter((item) => item.event !== 'timing')
     : (statusHistory || []).map((text) => ({ event: 'status', detail: text, atMs: undefined }));
 
   const items: MessageEvent[] = useMemo(() => {
@@ -109,7 +288,7 @@ export default function ProgressTimeline({ currentStep, statusText, statusHistor
   if (items.length === 0 && !statusText && currentStep <= 0) return null;
 
   const lastItem = items[items.length - 1];
-  const displayStepCount = items.filter((item) => item.event !== 'final').length;
+  const { stageIndex, totalStages } = computeStageIndex(items, items.length - 1);
   const maxElapsed = items.reduce<number | undefined>((latest, item) => {
     if (typeof item.atMs !== 'number') return latest;
     return typeof latest === 'number' ? Math.max(latest, item.atMs) : item.atMs;
@@ -118,23 +297,45 @@ export default function ProgressTimeline({ currentStep, statusText, statusHistor
   const totalElapsed = !isDone && typeof liveElapsed === 'number'
     ? (typeof maxElapsed === 'number' ? Math.max(maxElapsed, liveElapsed) : liveElapsed)
     : maxElapsed;
-  const summaryText = buildSummaryText(lastItem);
+  const isSummaryActive = Boolean(!isDone && lastItem && lastItem.event !== 'final' && lastItem.event !== 'done' && lastItem.event !== 'reply' && lastItem.event !== 'suggestions' && lastItem.event !== 'error');
+  const dots = isSummaryActive ? '.'.repeat(((Math.floor(nowMs / 450)) % 3) + 1) : '';
+  const summaryText = isSummaryActive ? stripTrailingDots(buildSummaryText(lastItem)) : buildSummaryText(lastItem);
+  const sqlText = typeof sql === 'string' ? sql.trim() : '';
+  const colNames = Array.isArray(columns) ? columns.filter(Boolean) : [];
+  const rowValues = Array.isArray(rows) ? rows : [];
+  const tableNames = useMemo(() => extractTableNames(sqlText), [sqlText]);
+  const grandTotalTokens = (tokenUsage?.total || 0) + (replyTokenUsage?.total || 0);
+  const inputTotalTokens = (tokenUsage?.input || 0) + (replyTokenUsage?.input || 0);
+  const outputTotalTokens = (tokenUsage?.output || 0) + (replyTokenUsage?.output || 0);
+  const thinkingTotalTokens = (tokenUsage?.thinking || 0) + (replyTokenUsage?.thinking || 0);
 
   return (
-    <details className="rounded-2xl bg-white">
+    <details className="group rounded-2xl bg-white">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-1 py-2 text-slate-700 marker:content-none">
         <div className="min-w-0">
           <div className="text-[13px] font-medium text-slate-700">Quá trình xử lý</div>
-          <div className="mt-0.5 truncate text-[12px] text-slate-500">{summaryText}</div>
+          <div className="mt-0.5 truncate text-[12px] text-slate-500">
+            <span
+              key={summaryText}
+              className={`inline-block animate-in fade-in slide-in-from-bottom-1 duration-300 ${isSummaryActive ? 'text-slate-600' : ''}`}
+            >
+              {summaryText}
+            </span>
+            {dots ? (
+              <span className="inline-block w-4 font-mono text-slate-400 animate-in fade-in duration-200">
+                {dots}
+              </span>
+            ) : null}
+          </div>
         </div>
         <div className="flex items-center gap-3 text-[12px] text-slate-400">
-          <span>{displayStepCount} bước</span>
+          {typeof stageIndex === 'number' ? <span>Bước {stageIndex}/{totalStages}</span> : null}
           {typeof totalElapsed === 'number' ? <span>{formatElapsed(totalElapsed)}</span> : null}
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="h-4 w-4 transition-transform duration-200 group-open:rotate-180" />
         </div>
       </summary>
 
-      <div className="mt-2 flex flex-col gap-3 rounded-2xl bg-white px-4 py-4">
+      <div className="mt-2 flex flex-col gap-3 rounded-2xl bg-white px-4 py-4 group-open:animate-in group-open:fade-in group-open:slide-in-from-top-1 group-open:duration-300">
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           const isError = item.event === 'error';
@@ -146,6 +347,22 @@ export default function ProgressTimeline({ currentStep, statusText, statusHistor
             return item.atMs;
           })();
 
+          const isSqlStep = item.event === 'sql';
+          const isDataStep = item.event === 'data';
+          const sqlTablesColsKey = isSqlStep ? 'sql_tables_cols' : '';
+          const sqlQueryKey = isSqlStep ? 'sql_query' : '';
+          const dataTablesColsKey = isDataStep ? 'data_tables_cols' : '';
+
+          const canShowSqlTablesCols = isSqlStep && (tableNames.length > 0 || colNames.length > 0);
+          const canShowSqlQuery = isSqlStep && Boolean(sqlText);
+          const canShowDataTablesCols = isDataStep && (colNames.length > 0 || rowValues.length > 0);
+
+          const sqlTablesColsOpen = sqlTablesColsKey ? Boolean(openPanels[sqlTablesColsKey]) : false;
+          const sqlQueryOpen = sqlQueryKey ? Boolean(openPanels[sqlQueryKey]) : false;
+          const dataTablesColsOpen = dataTablesColsKey ? Boolean(openPanels[dataTablesColsKey]) : false;
+          const canShowTokens = item.event === 'final' && Boolean(tokenUsage || replyTokenUsage);
+          const tokensOpen = Boolean(openPanels.tokens);
+
           let icon: React.ReactNode = <Circle className="mt-0.5 h-4 w-4 flex-shrink-0 text-slate-300" />;
           if (isError) {
             icon = <Circle className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-500 fill-rose-500/10" />;
@@ -156,7 +373,7 @@ export default function ProgressTimeline({ currentStep, statusText, statusHistor
           }
 
           return (
-            <div key={`${item.event}-${index}`} className="flex items-start gap-2.5">
+            <div key={`${item.event}-${index}`} className="flex items-start gap-2.5 animate-in fade-in slide-in-from-bottom-1 duration-300">
               {icon}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
@@ -168,6 +385,209 @@ export default function ProgressTimeline({ currentStep, statusText, statusHistor
                 {item.detail ? (
                   <div className="mt-0.5 whitespace-pre-wrap break-words text-[12px] leading-relaxed text-slate-500">
                     {item.detail}
+                  </div>
+                ) : null}
+
+                {canShowSqlTablesCols || canShowSqlQuery || canShowDataTablesCols ? (
+                  <div className="mt-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {canShowSqlTablesCols ? (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100"
+                          aria-expanded={sqlTablesColsOpen}
+                          onClick={() => {
+                            if (!sqlTablesColsKey) return;
+                            setOpenPanels((prev) => ({ ...prev, [sqlTablesColsKey]: !prev[sqlTablesColsKey] }));
+                          }}
+                        >
+                          <span>{sqlTablesColsOpen ? 'Ẩn bảng/cột' : 'Xem bảng/cột'}</span>
+                          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${sqlTablesColsOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                      ) : null}
+
+                      {canShowSqlQuery ? (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100"
+                          aria-expanded={sqlQueryOpen}
+                          onClick={() => {
+                            if (!sqlQueryKey) return;
+                            setOpenPanels((prev) => ({ ...prev, [sqlQueryKey]: !prev[sqlQueryKey] }));
+                          }}
+                        >
+                          <span>{sqlQueryOpen ? 'Ẩn câu SQL' : 'Xem câu SQL'}</span>
+                          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${sqlQueryOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                      ) : null}
+
+                      {canShowDataTablesCols ? (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100"
+                          aria-expanded={dataTablesColsOpen}
+                          onClick={() => {
+                            if (!dataTablesColsKey) return;
+                            setOpenPanels((prev) => ({ ...prev, [dataTablesColsKey]: !prev[dataTablesColsKey] }));
+                          }}
+                        >
+                          <span>{dataTablesColsOpen ? 'Ẩn bảng/cột' : 'Xem bảng/cột'}</span>
+                          <ChevronDown className={`h-3.5 w-3.5 transition-transform ${dataTablesColsOpen ? 'rotate-180' : ''}`} />
+                        </button>
+                      ) : null}
+                    </div>
+
+                    {sqlTablesColsOpen && canShowSqlTablesCols ? (
+                      <div className="mt-2 rounded-xl bg-slate-50 px-3 py-2">
+                        <div className="space-y-3">
+                          <div>
+                            <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Tên bảng</div>
+                            {tableNames.length > 0 ? (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {tableNames.map((name) => (
+                                  <span key={name} className="rounded-full bg-white px-3 py-1 text-[11px] text-slate-700 shadow-sm">
+                                    {name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="mt-1 text-[12px] text-slate-500">N/A</div>
+                            )}
+                          </div>
+
+                          <div>
+                            <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Tên cột</div>
+                            {colNames.length > 0 ? (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {colNames.map((name) => (
+                                  <span key={name} className="rounded-full bg-white px-3 py-1 text-[11px] text-slate-700 shadow-sm">
+                                    {name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="mt-1 text-[12px] text-slate-500">
+                                Chưa có (sẽ xuất hiện sau bước Nhận dữ liệu).
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {sqlQueryOpen && canShowSqlQuery ? (
+                      <div className="mt-2 rounded-xl bg-slate-50 px-3 py-2">
+                        <div>
+                          <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Câu SQL</div>
+                          <div className="mt-2 whitespace-pre-wrap break-words rounded-lg bg-white px-3 py-2 font-mono text-[11px] leading-relaxed text-slate-700 shadow-sm">
+                            {sqlText}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {dataTablesColsOpen && canShowDataTablesCols ? (
+                      <div className="mt-2 rounded-xl bg-slate-50 px-3 py-2">
+                        <div className="space-y-3">
+                          <div>
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Tên cột</div>
+                              <div className="text-[11px] text-slate-400">
+                                {rowValues.length > 0 ? `${rowValues.length} dòng` : null}
+                              </div>
+                            </div>
+                            {colNames.length > 0 ? (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {colNames.map((name) => (
+                                  <span key={name} className="rounded-full bg-white px-3 py-1 text-[11px] text-slate-700 shadow-sm">
+                                    {name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="mt-1 text-[12px] text-slate-500">N/A</div>
+                            )}
+                          </div>
+
+                          {colNames.length > 0 && rowValues.length > 0 ? (
+                            <div>
+                              <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Bảng dữ liệu</div>
+                              <div className="mt-2 max-h-[420px] overflow-auto rounded-lg bg-white shadow-sm">
+                                <table className="min-w-[600px] w-full border-collapse text-[11px]">
+                                  <thead className="bg-slate-50 sticky top-0 z-10">
+                                    <tr>
+                                      {colNames.map((name) => (
+                                        <th key={name} className="whitespace-nowrap border-b border-slate-200 px-3 py-2 text-left font-semibold text-slate-600">
+                                          {name}
+                                        </th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {rowValues.map((row, rowIndex) => (
+                                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}>
+                                        {colNames.map((_, colIndex) => (
+                                          <td key={colIndex} className="whitespace-nowrap border-b border-slate-100 px-3 py-2 text-slate-700">
+                                            {row?.[colIndex] ?? ''}
+                                          </td>
+                                        ))}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {canShowTokens ? (
+                  <div className="mt-2">
+                    <div className="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 px-3 py-2">
+                      <span className="text-[11px] font-semibold text-slate-700">Token</span>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-mono text-slate-700 shadow-sm">
+                        Total: {grandTotalTokens.toLocaleString()}
+                      </span>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-mono text-slate-600 shadow-sm">
+                        In: {inputTotalTokens.toLocaleString()}
+                      </span>
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-mono text-slate-600 shadow-sm">
+                        Out: {outputTotalTokens.toLocaleString()}
+                      </span>
+                      {thinkingTotalTokens > 0 ? (
+                        <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-mono text-slate-600 shadow-sm">
+                          Thinking: {thinkingTotalTokens.toLocaleString()}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 rounded-lg bg-slate-50 px-2.5 py-1 text-[11px] font-medium text-slate-600 hover:bg-slate-100"
+                      aria-expanded={tokensOpen}
+                      onClick={() => {
+                        setOpenPanels((prev) => ({ ...prev, tokens: !prev.tokens }));
+                      }}
+                    >
+                      <span>{tokensOpen ? 'Ẩn chi tiết token' : 'Xem chi tiết token'}</span>
+                      <ChevronDown className={`h-3.5 w-3.5 transition-transform ${tokensOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {tokensOpen ? (
+                      <div className="mt-2 space-y-2">
+                        {tokenUsage ? <TokenBreakdown title="SQL generation" usage={tokenUsage} /> : null}
+                        {replyTokenUsage ? <TokenBreakdown title="Analysis & reply" usage={replyTokenUsage} /> : null}
+                        <div className="rounded-xl bg-slate-50 px-3 py-2 font-mono text-[11px] text-slate-700">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold">Grand total</span>
+                            <span className="font-semibold">{grandTotalTokens.toLocaleString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

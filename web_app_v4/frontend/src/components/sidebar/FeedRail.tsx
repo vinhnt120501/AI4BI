@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { buildApiUrl, DEFAULT_USER_ID } from '@/lib/api';
 
 const C = {
   brand: '#19226D',
@@ -24,87 +25,54 @@ export interface FeedItem {
   title: string;
   desc: string;
   time: string;
+  createdAt?: string;
 }
 
-const FEED: FeedItem[] = [
-  {
-    id: 1,
-    type: 'critical',
-    dot: C.red,
-    tag: 'Nghiêm trọng',
-    tagBg: C.redBg,
-    title: 'Doanh thu miền Nam -18% WoW',
-    desc: '3 tài khoản lớn trì hoãn gia hạn. Phá vỡ xu hướng tăng 6 tháng.',
-    time: '12 phút trước',
-  },
-  {
-    id: 2,
-    type: 'watch',
-    dot: C.amber,
-    tag: 'Theo dõi',
-    tagBg: C.amberBg,
-    title: 'CAC đạt 3.2tr, vượt 12%',
-    desc: 'CPC quảng cáo tìm kiếm tăng mạnh. Kênh organic vẫn hiệu quả.',
-    time: '1 giờ trước',
-  },
-  {
-    id: 3,
-    type: 'positive',
-    dot: C.pos,
-    tag: 'Tích cực',
-    tagBg: C.posLight,
-    title: 'Pipeline DN +34% MoM',
-    desc: 'Cao nhất từ trước đến nay. Tương quan với chương trình đối tác.',
-    time: '2 giờ trước',
-  },
-  {
-    id: 4,
-    type: 'insight',
-    dot: C.brand,
-    tag: 'Insight',
-    tagBg: C.brandLight,
-    title: 'Vì sao deal doanh nghiệp tăng tốc',
-    desc: 'Phân tích tự động: chương trình đối tác mới tạo hiệu ứng multiplier trên pipeline. Kèm dự báo Q2.',
-    time: '2 giờ trước',
-  },
-  {
-    id: 5,
-    type: 'watch',
-    dot: C.amber,
-    tag: 'Theo dõi',
-    tagBg: C.amberBg,
-    title: 'Churn risk: 12 tài khoản mid-market',
-    desc: 'Mô hình dự đoán phát hiện giảm tương tác 30 ngày qua.',
-    time: '3 giờ trước',
-  },
-  {
-    id: 6,
-    type: 'insight',
-    dot: C.brand,
-    tag: 'Insight',
-    tagBg: C.brandLight,
-    title: 'Hiệu quả marketing Q1',
-    desc: 'Chi phí vs. kết quả tất cả kênh. Organic vượt trội paid gấp 3 lần.',
-    time: 'Hôm qua',
-  },
-  {
-    id: 7,
-    type: 'insight',
-    dot: C.brand,
-    tag: 'Insight',
-    tagBg: C.brandLight,
-    title: 'Phân bổ doanh thu theo sản phẩm',
-    desc: 'Sản phẩm A chiếm 62% MRR nhưng tăng trưởng chậm. Sản phẩm B tăng 40% MoM.',
-    time: 'Hôm qua',
-  },
+type HeartbeatTrend = 'up' | 'down' | 'neutral';
+type HeartbeatItem = { id: number; label: string; value: string; delta?: string; trend: HeartbeatTrend };
+
+const DEFAULT_HEARTBEAT: HeartbeatItem[] = [
+  { id: 1, label: 'Doanh thu 7 ngày', value: '—', delta: '—', trend: 'neutral' },
+  { id: 2, label: 'WoW doanh thu', value: '—', delta: '—', trend: 'neutral' },
+  { id: 3, label: 'Tỷ lệ hoàn trả', value: '—', delta: '—', trend: 'neutral' },
+  { id: 4, label: 'Tiến độ target MTD', value: '—', delta: '—', trend: 'neutral' },
+  { id: 5, label: 'Top khu vực', value: '—', delta: '—', trend: 'neutral' },
+  { id: 6, label: 'Top shop', value: '—', delta: '—', trend: 'neutral' },
+  { id: 7, label: 'Rủi ro', value: '—', delta: '—', trend: 'neutral' },
+  { id: 8, label: 'Cơ hội', value: '—', delta: '—', trend: 'neutral' },
 ];
 
-const KPIS = [
-  { l: 'MRR', v: '56 tỷ', c: '+8.2%', cc: C.pos },
-  { l: 'Người dùng', v: '12.8K', c: '+3.1%', cc: C.pos },
-  { l: 'NPS', v: '72', c: 'ổn định', cc: 'var(--color-text-secondary)' },
-  { l: 'Chi phí VH', v: '8.8 tỷ', c: '+5%', cc: C.red },
-];
+async function fetchJsonWithTimeout(url: string, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) throw new Error(`fetch failed: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      throw new Error('Request timeout');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchWithRetry(url: string, timeoutMs = 8000, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fetchJsonWithTimeout(url, timeoutMs);
+    } catch (error) {
+      const isLast = attempt === maxRetries - 1;
+      if (isLast) throw error;
+      const msg = error instanceof Error ? error.message : '';
+      const isConnectionError = msg.includes('Failed to fetch') || msg.includes('timeout');
+      if (!isConnectionError) throw error;
+      await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+    }
+  }
+}
 
 function Dot({ color, size = 9 }: { color: string; size?: number }) {
   return (
@@ -123,13 +91,58 @@ function Dot({ color, size = 9 }: { color: string; size?: number }) {
 
 interface FeedRailProps {
   activeId?: number | null;
+  activeHistorySessionId?: string | null;
   onSelect: (item: FeedItem) => void;
+  onSelectHistory?: (sessionId: string) => void;
+  onSelectKpi?: (kpiLabel: string) => void;
+  userId?: string;
 }
 
-type FeedFilterId = 'all' | 'alert' | 'insight';
+type FeedFilterId = 'alert' | 'insight';
 
-export default function FeedRail({ activeId, onSelect }: FeedRailProps) {
-  const [filter, setFilter] = useState<FeedFilterId>('all');
+type HistoryItem = {
+  id: number;
+  sessionId: string;
+  createdAt?: string | null;
+  question: string;
+  replyPreview?: string;
+};
+
+type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
+
+function formatCount(n: number) {
+  if (!Number.isFinite(n)) return '';
+  if (n > 99) return '99+';
+  return String(n);
+}
+
+function formatRelativeTime(iso?: string | null) {
+  if (!iso) return '';
+  const createdAt = new Date(iso).getTime();
+  if (Number.isNaN(createdAt)) return '';
+  const diffMs = Date.now() - createdAt;
+  const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+  if (diffSec < 10) return 'Vừa xong';
+  if (diffSec < 60) return `${diffSec}s trước`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `${diffMin} phút trước`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr} giờ trước`;
+  if (diffHr < 48) return 'Hôm qua';
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay} ngày trước`;
+}
+
+export default function FeedRail({ activeId, activeHistorySessionId, onSelect, onSelectHistory, onSelectKpi, userId }: FeedRailProps) {
+  const [filter, setFilter] = useState<FeedFilterId>('alert');
+  const resolvedUserId = userId || DEFAULT_USER_ID;
+
+  const [signalItems, setSignalItems] = useState<FeedItem[]>([]);
+  const [signalsOffset, setSignalsOffset] = useState(0);
+  const [signalsHasMore, setSignalsHasMore] = useState(false);
+  const [signalsLoadingMore, setSignalsLoadingMore] = useState(false);
+  const [signalsStatus, setSignalsStatus] = useState<LoadStatus>('idle');
+  const [signalsError, setSignalsError] = useState<string>('');
 
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [historyOffset, setHistoryOffset] = useState(0);
@@ -305,19 +318,53 @@ export default function FeedRail({ activeId, onSelect }: FeedRailProps) {
   }, [heartbeatStatus, loadHeartbeat]);
 
   const counts = useMemo(() => {
-    const alert = FEED.filter((item) => item.type !== 'insight').length;
-    const insight = FEED.filter((item) => item.type === 'insight').length;
-    return { alert, insight };
-  }, []);
+    return {
+      alert: signalsStatus === 'ready' ? signalItems.length : undefined,
+      insight: historyStatus === 'ready' ? historyItems.length : undefined,
+    };
+  }, [historyItems.length, historyStatus, signalItems.length, signalsStatus]);
 
   const filters: Array<{ id: FeedFilterId; label: string; count?: number }> = [
-    { id: 'all', label: 'Tất cả' },
-    { id: 'alert', label: 'Cảnh báo', count: counts.alert },
+    { id: 'alert', label: 'Tín hiệu', count: counts.alert },
     { id: 'insight', label: 'Insight', count: counts.insight },
   ];
 
+  const handleScroll = useCallback(() => {
+    const el = historyScrollRef.current;
+    if (!el) return;
+    const remaining = el.scrollHeight - el.scrollTop - el.clientHeight;
+
+    if (filter === 'insight') {
+      if (historyStatus !== 'ready') return;
+      if (!historyHasMore || historyLoading) return;
+      if (remaining < 240) {
+        void loadHistory();
+      }
+      return;
+    }
+
+    if (filter === 'alert') {
+      if (signalsStatus !== 'ready') return;
+      if (!signalsHasMore || signalsLoadingMore) return;
+      if (remaining < 240) void loadSignals();
+      return;
+    }
+  }, [filter, historyHasMore, historyLoading, historyStatus, loadHistory, loadSignals, signalsHasMore, signalsLoadingMore, signalsStatus]);
+
+  // Auto-load more signals if content doesn't fill scroll container
+  useEffect(() => {
+    if (filter !== 'alert') return;
+    if (signalsStatus !== 'ready') return;
+    if (!signalsHasMore || signalsLoadingMore) return;
+    const el = historyScrollRef.current;
+    if (!el) return;
+    if (el.scrollHeight <= el.clientHeight) {
+      void loadSignals();
+    }
+  }, [filter, signalsStatus, signalsHasMore, signalsLoadingMore, signalItems.length, loadSignals]);
+
   return (
-    <aside className="w-[300px] shrink-0 border-r border-[color:var(--color-border-tertiary)] bg-[var(--color-background-primary)]">
+    <aside className="w-[320px] md:w-[360px] shrink-0 border-r border-[color:var(--color-border-tertiary)] bg-[var(--color-background-primary)]">
       <div className="flex h-full flex-col">
         <div className="px-4 pb-3 pt-4">
           <p className="mb-3 text-[14px] font-semibold text-[color:var(--color-text-primary)]">Hôm nay</p>
@@ -329,15 +376,15 @@ export default function FeedRail({ activeId, onSelect }: FeedRailProps) {
                   key={item.id}
                   onClick={() => setFilter(item.id)}
                   className={[
-                    'inline-flex items-center gap-1 rounded-full px-3 py-1 text-[12px] font-medium transition-colors',
+                    'inline-flex cursor-pointer items-center gap-1 rounded-full px-3 py-1 text-[12px] font-medium transition-colors',
                     isActive
                       ? 'bg-[#19226D] text-white'
-                      : 'border border-[color:var(--color-border-tertiary)] bg-[var(--color-background-secondary)] text-[color:var(--color-text-secondary)] hover:bg-[var(--color-background-tertiary)]',
+                      : 'border border-[color:var(--color-border-tertiary)] bg-[var(--color-background-secondary)] text-[color:var(--color-text-secondary)] hover:bg-slate-50',
                   ].join(' ')}
                 >
                   <span>{item.label}</span>
                   {typeof item.count === 'number' ? (
-                    <span className="text-[10px] opacity-80">{item.count}</span>
+                    <span className="text-[10px] opacity-80">{formatCount(item.count)}</span>
                   ) : null}
                 </button>
               );
@@ -345,64 +392,175 @@ export default function FeedRail({ activeId, onSelect }: FeedRailProps) {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-2 pb-4">
-          {filtered.map((item) => {
-            const isActive = activeId === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onSelect(item)}
-                className={[
-                  'mb-1 w-full rounded-xl px-3 py-3 text-left transition-colors',
-                  isActive ? 'bg-[#E8EAF5]' : 'hover:bg-[var(--color-background-secondary)]',
-                ].join(' ')}
-                style={{
-                  borderLeft: isActive ? `3px solid ${C.brand}` : '3px solid transparent',
-                }}
-              >
-                <div className="flex items-start gap-2.5">
-                  <Dot color={item.dot} />
-                  <div className="min-w-0 flex-1">
-                    <p className="mb-1 line-clamp-2 text-[13px] font-semibold text-[color:var(--color-text-primary)]">
-                      {item.title}
-                    </p>
-                    <p className="line-clamp-2 text-[12px] leading-relaxed text-[color:var(--color-text-secondary)]">
-                      {item.desc}
-                    </p>
-                    <div className="mt-2 flex items-center justify-between gap-2">
-                      <span
-                        className="rounded-lg px-2 py-0.5 text-[10px] font-semibold"
-                        style={{ color: item.dot, background: item.tagBg }}
-                      >
-                        {item.tag}
-                      </span>
-                      <span className="text-[11px] text-[color:var(--color-text-secondary)]">{item.time}</span>
+        <div
+          ref={historyScrollRef}
+          onScroll={handleScroll}
+          className="flex-1 overflow-y-auto px-2 pb-4"
+        >
+          {filter === 'insight' ? (
+            <>
+              {historyError ? (
+                <div className="px-3 py-2 text-[12px] text-rose-600">
+                  <div>{historyError}</div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHistoryStatus('idle');
+                    }}
+                    className="mt-2 inline-flex cursor-pointer rounded-lg bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
+                  >
+                    Thử lại
+                  </button>
+                </div>
+              ) : null}
+              {historyItems.map((row) => {
+                const isActive = Boolean(activeHistorySessionId && activeHistorySessionId === row.sessionId);
+                return (
+                  <button
+                    key={`${row.sessionId}-${row.id}`}
+                    onClick={() => onSelectHistory?.(row.sessionId)}
+                    className={[
+                      'mb-1 w-full cursor-pointer rounded-xl px-3 py-3 text-left transition-colors',
+                      isActive ? 'bg-[#E8EAF5]' : 'hover:bg-slate-50',
+                    ].join(' ')}
+                    style={{
+                      borderLeft: isActive ? `3px solid ${C.brand}` : '3px solid transparent',
+                    }}
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <Dot color={C.brand} />
+                      <div className="min-w-0 flex-1">
+                        <p className="mb-1 line-clamp-2 text-[13px] font-semibold text-[color:var(--color-text-primary)]">
+                          {row.question}
+                        </p>
+                        {row.replyPreview ? (
+                          <p className="line-clamp-2 text-[12px] leading-relaxed text-[color:var(--color-text-secondary)]">
+                            {row.replyPreview}
+                          </p>
+                        ) : null}
+                        <div className="mt-2 flex items-center justify-between gap-2">
+                          <span
+                            className="rounded-lg px-2 py-0.5 text-[10px] font-semibold"
+                            style={{ color: C.brand, background: C.brandLight }}
+                          >
+                            Insight
+                          </span>
+                        <span className="text-[11px] text-[color:var(--color-text-secondary)]">
+                          {formatRelativeTime(row.createdAt)}
+                        </span>
+                      </div>
+                    </div>
+                    </div>
+                  </button>
+                );
+              })}
+              {historyStatus === 'loading' ? (
+                <div className="px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)]">Đang tải…</div>
+              ) : null}
+              {historyStatus === 'ready' && !historyLoading && historyItems.length === 0 ? (
+                <div className="px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)]">Chưa có lịch sử.</div>
+              ) : null}
+              {!historyLoading && historyItems.length > 0 && !historyHasMore ? (
+                <div className="px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)]">Hết dữ liệu.</div>
+              ) : null}
+            </>
+          ) : (
+            <>
+              {signalsError ? (
+                <div className="px-3 py-2 text-[12px] text-rose-600">
+                  <div>{signalsError}</div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSignalsStatus('idle');
+                    }}
+                    className="mt-2 inline-flex cursor-pointer rounded-lg bg-rose-50 px-2.5 py-1 text-[11px] font-semibold text-rose-700 hover:bg-rose-100"
+                  >
+                    Thử lại
+                  </button>
+                </div>
+              ) : null}
+              {signalsStatus === 'loading' && signalItems.length === 0 ? (
+                <div className="px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)]">Đang tải…</div>
+              ) : null}
+              {signalsStatus === 'ready' && signalItems.length === 0 && !signalsError ? (
+                <div className="px-3 py-2 text-[12px] text-[color:var(--color-text-secondary)]">Chưa có tín hiệu.</div>
+              ) : null}
+              {[...signalItems].sort((a, b) => b.id - a.id).map((item) => {
+              const isActive = activeId === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onSelect(item)}
+                  className={[
+                    'mb-1 w-full rounded-xl px-3 py-3 text-left transition-colors',
+                    'cursor-pointer',
+                    isActive ? 'bg-[#E8EAF5]' : 'hover:bg-slate-50',
+                  ].join(' ')}
+                  style={{
+                    borderLeft: isActive ? `3px solid ${C.brand}` : '3px solid transparent',
+                  }}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <Dot color={item.dot} />
+                    <div className="min-w-0 flex-1">
+                      <p className="mb-1 line-clamp-2 text-[13px] font-semibold text-[color:var(--color-text-primary)]">
+                        {item.title}
+                      </p>
+                      <p className="line-clamp-2 text-[12px] leading-relaxed text-[color:var(--color-text-secondary)]">
+                        {item.desc}
+                      </p>
+                      <div className="mt-2 flex items-center gap-2">
+                        <span
+                          className="rounded-lg px-2 py-0.5 text-[10px] font-semibold"
+                          style={{ color: item.dot, background: item.tagBg }}
+                        >
+                          {item.tag}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+            </>
+          )}
         </div>
 
-        <div className="border-t border-[color:var(--color-border-tertiary)] px-4 py-3">
+        <div className="shrink-0 border-t border-[color:var(--color-border-tertiary)] px-4 pt-5 pb-[calc(16px+env(safe-area-inset-bottom))]">
           <p
-            className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-secondary)]"
+            className="mb-4 text-[10px] font-semibold uppercase tracking-[0.1em] text-[color:var(--color-text-secondary)]"
           >
             Nhịp đập
           </p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            {KPIS.map((kpi) => (
-              <div key={kpi.l} className="py-1">
-                <p className="mb-0.5 text-[10px] text-[color:var(--color-text-secondary)]">{kpi.l}</p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-[18px] font-semibold text-[color:var(--color-text-primary)]">{kpi.v}</span>
-                  <span className="text-[11px] font-semibold" style={{ color: kpi.cc }}>
-                    {kpi.c}
-                  </span>
-                </div>
-              </div>
-            ))}
+          <div className="max-h-[240px] overflow-y-auto">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-6">
+            {heartbeatItems.map((kpi) => {
+              const color = kpi.trend === 'up' ? C.pos : kpi.trend === 'down' ? C.red : 'var(--color-text-secondary)';
+              return (
+                <button
+                  key={`${kpi.id}-${kpi.label}`}
+                  type="button"
+                  onClick={() => onSelectKpi?.(kpi.label)}
+                  className={[
+                    'rounded-xl px-2 py-2 text-left transition-colors',
+                    'cursor-pointer hover:bg-slate-50',
+                  ].join(' ')}
+                  aria-label={`Phân tích KPI ${kpi.label}`}
+                >
+                  <p className="mb-1 text-[11px] text-[color:var(--color-text-secondary)]">{kpi.label}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-[26px] font-semibold leading-none text-[color:var(--color-text-primary)]">{kpi.value}</span>
+                    {kpi.delta ? (
+                      <span className="text-[12px] font-semibold" style={{ color }}>
+                        {kpi.delta}
+                      </span>
+                    ) : null}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
           </div>
         </div>
 

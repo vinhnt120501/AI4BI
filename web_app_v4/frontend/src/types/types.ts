@@ -15,15 +15,36 @@ export interface TokenUsage {
 }
 
 // 1.2. Chart config từ AI
-// Base chart types — LLM chọn base type + options để tạo vô hạn biến thể
-export type ChartType = 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'composed' | 'radar' | 'radial_bar' | 'treemap' | 'funnel' | 'waterfall';
+// 45 chart types — 12 Recharts containers + 33 biến thể render riêng biệt
+// LLM có thể gửi bất kỳ string nào, frontend normalizeChartType() sẽ map về type phù hợp
+export type KnownChartType =
+  // ─── 12 Recharts base containers ───
+  | 'bar' | 'line' | 'area' | 'pie' | 'scatter' | 'composed'
+  | 'radar' | 'radial_bar' | 'treemap' | 'funnel' | 'sankey' | 'sunburst'
+  // ─── Bar variants ───
+  | 'horizontal_bar' | 'stacked_bar' | 'grouped_bar' | 'normalized_bar'
+  | 'positive_negative_bar' | 'stacked_by_sign' | 'population_pyramid'
+  | 'ranged_bar' | 'timeline_bar' | 'tiny_bar' | 'multi_x_axis'
+  // ─── Pie variants ───
+  | 'donut' | 'half_pie' | 'two_level_pie' | 'needle_gauge' | 'gradient_pie'
+  // ─── Scatter variants ───
+  | 'bubble' | 'joint_line_scatter' | 'multi_scatter'
+  // ─── Area variants ───
+  | 'stacked_area' | 'normalized_area' | 'fill_by_value_area'
+  // ─── Line variants ───
+  | 'step_line' | 'sparkline' | 'vertical_line'
+  // ─── Composed variants ───
+  | 'vertical_composed' | 'banded_chart' | 'target_chart' | 'scatter_line'
+  // ─── Other ───
+  | 'waterfall' | 'gauge' | 'nested_treemap' | 'candlestick' | 'box_plot';
+export type ChartType = KnownChartType | (string & {});
 
 // Options linh hoạt — LLM tự do kết hợp để tạo bất kỳ biến thể nào từ recharts
 export interface ChartOptions {
     // Layout
     layout?: 'horizontal' | 'vertical';     // vertical = horizontal bar
     stacked?: boolean;                        // stacked bar/area
-    stackOffset?: 'none' | 'expand';          // expand = normalized 100%
+    stackOffset?: 'none' | 'expand' | 'sign'; // expand = 100%, sign = stacked by sign
     // Axes
     dualAxis?: boolean;                       // 2 trục Y cho 2 scale khác nhau
     // Interaction
@@ -39,12 +60,27 @@ export interface ChartOptions {
     dashed?: boolean;                         // dashed line
     showDots?: boolean;                       // show/hide dots on line
     barRadius?: number;                       // bo tròn góc bar
+    showLegend?: boolean;                     // show/hide legend
+    showGrid?: boolean;                       // show/hide cartesian grid
+    connectNulls?: boolean;                   // connect null points (line/area)
+    xAxisAngle?: number;                      // rotate X tick angle (deg)
+    valueLabels?: boolean;                    // show value labels on bars/lines/scatter
+    background?: boolean;                     // show background in bar chart
+    curveType?: 'monotone' | 'step' | 'stepBefore' | 'stepAfter' | 'linear' | 'natural' | 'basis' | 'basisClosed' | 'basisOpen' | 'monotoneX' | 'monotoneY'; // line/area interpolation
+    fillByValue?: boolean;                    // area fill color by positive/negative
+    jointLine?: boolean;                      // connect scatter points with line
+    barCategoryGap?: number | string;         // gap between bar categories
+    nestedInteractive?: boolean;              // nested treemap interactive drilling
     // Series control
     maxSeries?: number;                       // tối đa số dòng/trục vẽ để tránh quá tải UI
     // Colors
     colors?: string[];                        // custom color palette for chart
     negativeColor?: string;                   // màu cho giá trị âm (waterfall, pos/neg bar)
     positiveColor?: string;                   // màu cho giá trị dương
+    // Reference overlays
+    referenceLines?: ReferenceLineConfig[];
+    referenceAreas?: ReferenceAreaConfig[];
+    referenceDots?: ReferenceDotConfig[];
 }
 
 export interface ChartConfig {
@@ -80,6 +116,25 @@ export interface ReferenceLineConfig {
     value: number;
     label?: string;
     color?: string;
+    axis?: 'x' | 'y';
+}
+
+export interface ReferenceAreaConfig {
+    x1?: string | number;
+    x2?: string | number;
+    y1?: number;
+    y2?: number;
+    label?: string;
+    color?: string;
+    opacity?: number;
+}
+
+export interface ReferenceDotConfig {
+    x: string | number;
+    y: number;
+    label?: string;
+    color?: string;
+    radius?: number;
 }
 
 // Config cho data transform layer — AI chỉ định cách xử lý data trước khi vẽ chart
@@ -109,6 +164,7 @@ export interface ChartBlock {
     config?: ChartBlockConfig;
     columns?: string[]; // optional, from VIS_CONFIG block
     rows?: Array<Array<string | number>>; // optional rows for block-level data
+    data?: unknown; // optional specialized data (e.g. Sankey/Sunburst)
 }
 
 export interface AnalysisTableBlock {

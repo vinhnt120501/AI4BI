@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MessageBubble from '@/components/chat/MessageBubble';
 import FollowUpSuggestions from '@/components/chat/sections/FollowUpSuggestions';
-import ReferenceDataDisclosure from '@/components/chat/sections/ReferenceDataDisclosure';
 import { Message } from '@/types/types';
+import { buildApiUrl, DEFAULT_USER_ID } from '@/lib/api';
 
 interface AnalysisPageProps {
   busy: boolean;
@@ -22,25 +21,33 @@ const C = {
   blueBg: '#E6F1FB',
 };
 
-const BD = '1px solid rgba(148, 163, 184, 0.16)';
-const SHL = '0 1px 2px rgba(0,0,0,0.04)';
-
-const LANDING_SUGGESTIONS = [
-  'Tại sao miền Nam giảm?',
-  'So sánh khu vực Q1',
-  'Mô phỏng cắt budget marketing',
-  'Dự báo MRR Q2',
-];
-
 export default function AnalysisPage({ busy, messages, query, onSend, instructionPanelOpen = true }: AnalysisPageProps) {
   const [input, setInput] = useState('');
   const [inputError, setInputError] = useState('');
   const [landingInput, setLandingInput] = useState('');
   const [landingError, setLandingError] = useState('');
+  const [landingSuggestions, setLandingSuggestions] = useState<string[]>([]);
   const endRef = useRef<HTMLDivElement | null>(null);
   const inputErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const landingErrorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const contentMaxWidth = instructionPanelOpen ? 1080 : 1320;
+
+  const loadLandingSuggestions = useCallback(async () => {
+    try {
+      const url = buildApiUrl(`/landing-suggestions?userId=${encodeURIComponent(DEFAULT_USER_ID)}`);
+      const res = await fetch(url);
+      if (!res.ok) return;
+      const data = await res.json();
+      const items = Array.isArray(data?.items) ? data.items.filter((s: unknown) => typeof s === 'string' && s) : [];
+      if (items.length > 0) setLandingSuggestions(items);
+    } catch {
+      // keep fallback
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadLandingSuggestions();
+  }, [loadLandingSuggestions]);
 
   const baseQuery = useMemo(() => {
     const latestUser = [...messages].reverse().find((message) => message.role === 'user' && message.content.trim());
@@ -119,7 +126,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, instructio
               <div className="w-full max-w-[1200px]">
                 <div className="mb-6">
                   <div className="mx-auto w-full max-w-[760px]">
-                    <FollowUpSuggestions suggestions={LANDING_SUGGESTIONS} onSelect={onSend} variant="landing" />
+                    <FollowUpSuggestions suggestions={landingSuggestions} onSelect={onSend} variant="landing" />
                   </div>
                 </div>
 

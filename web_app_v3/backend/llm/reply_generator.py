@@ -3,7 +3,7 @@ import time
 from prompts import VISUALIZATION_PROMPT_RULES
 from .client import (
     OPENROUTER_MODEL, EXTRA_HEADERS, client,
-    count_tokens, extract_token_usage, generate_chat, message_text,
+    count_tokens, extract_token_usage, generate_chat, message_text, log_llm_request_stats,
 )
 from .parser import parse_vis_config
 
@@ -163,16 +163,34 @@ def stream_reply(question: str, columns: list, rows: list, memory_context: str =
     reply_data = build_reply_contents(question, columns, rows, memory_context, additional_data=additional_data)
     system_prompt = (custom_instruction or "") + "\n\n" + VISUALIZATION_PROMPT_RULES
 
-    response = client.chat.completions.create(
-        model=OPENROUTER_MODEL,
-        temperature=0,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": reply_data["contents"]},
-        ],
-        stream=True,
-        extra_headers=EXTRA_HEADERS,
-    )
+    try:
+        response = client.chat.completions.create(
+            model=OPENROUTER_MODEL,
+            temperature=0,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": reply_data["contents"]},
+            ],
+            stream=True,
+            extra_headers=EXTRA_HEADERS,
+        )
+    except Exception as e:
+        # Streaming path bypasses generate_chat(), so log here.
+        log_llm_request_stats(
+            stage="reply_stream_error",
+            system_prompt=system_prompt,
+            user_prompt=reply_data["contents"],
+            extra_counts={
+                "question": reply_data["counts"].get("question", 0),
+                "data": reply_data["counts"].get("data", 0),
+                "memory": reply_data["counts"].get("memory", 0),
+                "rules": count_tokens(VISUALIZATION_PROMPT_RULES),
+                "rows": len(rows or []),
+                "cols": len(columns or []),
+            },
+        )
+        print(f"[LLM_TRACE] error={type(e).__name__}: {e}")
+        raise
 
     full_text = ""
     vis_config_started = False

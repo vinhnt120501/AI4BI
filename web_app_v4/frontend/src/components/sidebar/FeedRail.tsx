@@ -131,11 +131,178 @@ type FeedFilterId = 'all' | 'alert' | 'insight';
 export default function FeedRail({ activeId, onSelect }: FeedRailProps) {
   const [filter, setFilter] = useState<FeedFilterId>('all');
 
-  const filtered = useMemo(() => {
-    if (filter === 'all') return FEED;
-    if (filter === 'alert') return FEED.filter((item) => item.type !== 'insight');
-    return FEED.filter((item) => item.type === 'insight');
-  }, [filter]);
+  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
+  const [historyOffset, setHistoryOffset] = useState(0);
+  const [historyHasMore, setHistoryHasMore] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string>('');
+  const [historyStatus, setHistoryStatus] = useState<LoadStatus>('idle');
+  const historyScrollRef = useRef<HTMLDivElement | null>(null);
+
+  const [heartbeatItems, setHeartbeatItems] = useState<HeartbeatItem[]>(DEFAULT_HEARTBEAT);
+  const [heartbeatStatus, setHeartbeatStatus] = useState<LoadStatus>('idle');
+  const [heartbeatLoadingMore, setHeartbeatLoadingMore] = useState(false);
+
+
+  const loadHistory = useCallback(async (opts?: { reset?: boolean }) => {
+    if (historyLoading) return;
+    const reset = Boolean(opts?.reset);
+    if (reset) {
+      setHistoryStatus('loading');
+      setHistoryOffset(0);
+      setHistoryHasMore(false);
+      setHistoryItems([]);
+    }
+    setHistoryLoading(true);
+    setHistoryError('');
+    try {
+      const offset = reset ? 0 : historyOffset;
+      const limit = reset ? 5 : 10;
+      const url = buildApiUrl(`/chat/history?userId=${encodeURIComponent(resolvedUserId)}&limit=${limit}&offset=${offset}`);
+      const data = await fetchWithRetry(url, 5000);
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const nextOffset = typeof data?.nextOffset === 'number' ? data.nextOffset : offset + items.length;
+      const hasMore = Boolean(data?.hasMore);
+
+      const normalized: HistoryItem[] = items
+        .map((row: any) => ({
+          id: Number(row?.id || 0),
+          sessionId: String(row?.sessionId || ''),
+          createdAt: row?.createdAt ?? null,
+          question: String(row?.question || ''),
+          replyPreview: row?.replyPreview ? String(row.replyPreview) : '',
+        }))
+        .filter((row: HistoryItem) => Boolean(row.sessionId) && Boolean(row.question));
+
+      setHistoryItems((prev) => {
+        const merged = reset ? normalized : [...prev, ...normalized];
+        const seen = new Set<string>();
+        return merged.filter((row) => {
+          const key = `${row.sessionId}::${row.id}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      });
+      setHistoryOffset(nextOffset);
+      setHistoryHasMore(hasMore);
+      if (reset) setHistoryStatus('ready');
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Không thể tải lịch sử.';
+      setHistoryError(msg.includes('Failed to fetch')
+        ? 'Không kết nối được backend. Hãy chạy server backend ở http://localhost:8333.'
+        : msg);
+      if (reset) setHistoryStatus('error');
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [historyLoading, historyOffset, resolvedUserId]);
+
+  useEffect(() => {
+    if (historyStatus !== 'idle') return;
+    void loadHistory({ reset: true });
+  }, [historyStatus, loadHistory]);
+
+  const loadSignals = useCallback(async (opts?: { reset?: boolean }) => {
+    if (signalsLoadingMore) return;
+    const reset = Boolean(opts?.reset);
+    if (reset) {
+      setSignalsStatus('loading');
+      setSignalsOffset(0);
+      setSignalsHasMore(false);
+      setSignalItems([]);
+    }
+    setSignalsLoadingMore(true);
+    setSignalsError('');
+    try {
+      const offset = reset ? 0 : signalsOffset;
+      const limit = 5;
+      const url = buildApiUrl(`/signals?limit=${limit}&offset=${offset}`);
+      const data = await fetchWithRetry(url, 15000);
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const nextOffset = typeof data?.nextOffset === 'number' ? data.nextOffset : offset + items.length;
+      const hasMore = Boolean(data?.hasMore);
+
+      const normalized: FeedItem[] = items
+        .map((row: any, i: number) => {
+          const type: FeedItemType = row?.type === 'critical' || row?.type === 'watch' || row?.type === 'positive'
+            ? row.type
+            : 'watch';
+          const dot = type === 'critical' ? C.red : type === 'positive' ? C.pos : C.amber;
+          const tagBg = type === 'critical' ? C.redBg : type === 'positive' ? C.posLight : C.amberBg;
+          const tag = type === 'critical' ? 'Nghiêm trọng' : type === 'positive' ? 'Tích cực' : 'Theo dõi';
+          return {
+            id: Number(row?.id || i + 1),
+            type,
+            dot,
+            tag,
+            tagBg,
+            title: String(row?.title || ''),
+            desc: String(row?.desc || ''),
+            time: '',
+            createdAt: row?.createdAt ? String(row.createdAt) : undefined,
+          };
+        })
+        .filter((row: FeedItem) => Boolean(row.title));
+
+      setSignalItems((prev) => reset ? normalized : [...prev, ...normalized]);
+      setSignalsOffset(nextOffset);
+      setSignalsHasMore(hasMore);
+      if (reset) setSignalsStatus('ready');
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Không thể tải tín hiệu.';
+      setSignalsError(msg.includes('Failed to fetch')
+        ? 'Không kết nối được backend. Hãy chạy server backend ở http://localhost:8333.'
+        : msg);
+      if (reset) setSignalsStatus('error');
+    } finally {
+      setSignalsLoadingMore(false);
+    }
+  }, [signalsLoadingMore, signalsOffset]);
+
+  useEffect(() => {
+    if (filter !== 'alert') return;
+    if (signalsStatus !== 'idle') return;
+    void loadSignals({ reset: true });
+  }, [filter, loadSignals, signalsStatus]);
+
+  const loadHeartbeat = useCallback(async () => {
+    if (heartbeatLoadingMore) return;
+    setHeartbeatStatus('loading');
+    setHeartbeatLoadingMore(true);
+    try {
+      const url = buildApiUrl(`/heartbeat?limit=20&offset=0`);
+      const data = await fetchWithRetry(url, 15000);
+      const items = Array.isArray(data?.items) ? data.items : [];
+      const normalized: HeartbeatItem[] = items
+        .map((row: any, i: number) => {
+          const trend: HeartbeatTrend = row?.trend === 'up' || row?.trend === 'down' || row?.trend === 'neutral'
+            ? row.trend
+            : 'neutral';
+          return {
+            id: Number(row?.id || i + 1),
+            label: String(row?.label || ''),
+            value: String(row?.value || ''),
+            delta: row?.delta ? String(row.delta) : '',
+            trend,
+          };
+        })
+        .filter((row: HeartbeatItem) => Boolean(row.label) && Boolean(row.value));
+
+      setHeartbeatItems(normalized.length > 0 ? normalized : DEFAULT_HEARTBEAT.slice(0, 4));
+      setHeartbeatStatus('ready');
+    } catch {
+      setHeartbeatItems(DEFAULT_HEARTBEAT.slice(0, 4));
+      setHeartbeatStatus('error');
+    } finally {
+      setHeartbeatLoadingMore(false);
+    }
+  }, [heartbeatLoadingMore]);
+
+  useEffect(() => {
+    if (heartbeatStatus !== 'idle') return;
+    void loadHeartbeat();
+  }, [heartbeatStatus, loadHeartbeat]);
 
   const counts = useMemo(() => {
     const alert = FEED.filter((item) => item.type !== 'insight').length;

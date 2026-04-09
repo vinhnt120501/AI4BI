@@ -3,6 +3,12 @@ from datetime import datetime
 from .connection import get_connection
 
 
+def _json_or_none(value):
+    if not value:
+        return None
+    return json.dumps(value, ensure_ascii=False)
+
+
 def init_chat_history_table():
     conn = get_connection()
     cursor = conn.cursor()
@@ -34,19 +40,6 @@ def init_chat_history_table():
             INDEX idx_created (created_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     """)
-    cursor.execute("""
-        SELECT COUNT(*) FROM information_schema.columns
-        WHERE table_schema = DATABASE() AND table_name = 'chat_history' AND column_name = 'user_id'
-    """)
-    if cursor.fetchone()[0] == 0:
-        cursor.execute("ALTER TABLE `chat_history` ADD COLUMN `user_id` VARCHAR(100) NOT NULL DEFAULT 'default_user' AFTER `id`")
-        cursor.execute("CREATE INDEX idx_user_session ON `chat_history`(`user_id`, `session_id`)")
-    cursor.execute("""
-        SELECT COUNT(*) FROM information_schema.columns
-        WHERE table_schema = DATABASE() AND table_name = 'chat_history' AND column_name = 'blocks'
-    """)
-    if cursor.fetchone()[0] == 0:
-        cursor.execute("ALTER TABLE `chat_history` ADD COLUMN `blocks` JSON AFTER `chart_config`")
     conn.commit()
     cursor.close()
     conn.close()
@@ -59,53 +52,26 @@ def save_chat(session_id: str, question: str, result: dict, user_id: str = "defa
     reply_tokens = result.get("reply_token_usage", {})
     grand = result.get("grand_total", {})
 
-    cursor.execute("""
-        SELECT COUNT(*) FROM information_schema.columns
-        WHERE table_schema = DATABASE() AND table_name = 'chat_history' AND column_name = 'blocks'
-    """)
-    has_blocks = cursor.fetchone()[0] > 0
-
-    if has_blocks:
-        insert_sql = """INSERT INTO `chat_history`
-        (user_id, session_id, created_at, question, sql_generated, thinking, reply,
-         columns_data, rows_data, chart_config, blocks,
-         token_sql_input, token_sql_thinking, token_sql_output, token_sql_total,
-         token_reply_input, token_reply_thinking, token_reply_output, token_reply_total,
-         token_grand_total)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-        params = (
-            user_id, session_id, datetime.now(), question,
-            result.get("sql"), result.get("thinking"), result.get("reply"),
-            json.dumps(result.get("columns"), ensure_ascii=False) if result.get("columns") else None,
-            json.dumps(result.get("rows"), ensure_ascii=False) if result.get("rows") else None,
-            json.dumps(result.get("chart_config"), ensure_ascii=False) if result.get("chart_config") else None,
-            json.dumps(result.get("blocks"), ensure_ascii=False) if result.get("blocks") else None,
-            sql_tokens.get("input", 0), sql_tokens.get("thinking", 0),
-            sql_tokens.get("output", 0), sql_tokens.get("total", 0),
-            reply_tokens.get("input", 0), reply_tokens.get("thinking", 0),
-            reply_tokens.get("output", 0), reply_tokens.get("total", 0),
-            grand.get("total", 0),
-        )
-    else:
-        insert_sql = """INSERT INTO `chat_history`
-        (user_id, session_id, created_at, question, sql_generated, thinking, reply,
-         columns_data, rows_data, chart_config,
-         token_sql_input, token_sql_thinking, token_sql_output, token_sql_total,
-         token_reply_input, token_reply_thinking, token_reply_output, token_reply_total,
-         token_grand_total)
-        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
-        params = (
-            user_id, session_id, datetime.now(), question,
-            result.get("sql"), result.get("thinking"), result.get("reply"),
-            json.dumps(result.get("columns"), ensure_ascii=False) if result.get("columns") else None,
-            json.dumps(result.get("rows"), ensure_ascii=False) if result.get("rows") else None,
-            json.dumps(result.get("chart_config"), ensure_ascii=False) if result.get("chart_config") else None,
-            sql_tokens.get("input", 0), sql_tokens.get("thinking", 0),
-            sql_tokens.get("output", 0), sql_tokens.get("total", 0),
-            reply_tokens.get("input", 0), reply_tokens.get("thinking", 0),
-            reply_tokens.get("output", 0), reply_tokens.get("total", 0),
-            grand.get("total", 0),
-        )
+    insert_sql = """INSERT INTO `chat_history`
+    (user_id, session_id, created_at, question, sql_generated, thinking, reply,
+     columns_data, rows_data, chart_config, blocks,
+     token_sql_input, token_sql_thinking, token_sql_output, token_sql_total,
+     token_reply_input, token_reply_thinking, token_reply_output, token_reply_total,
+     token_grand_total)
+    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"""
+    params = (
+        user_id, session_id, datetime.now(), question,
+        result.get("sql"), result.get("thinking"), result.get("reply"),
+        _json_or_none(result.get("columns")),
+        _json_or_none(result.get("rows")),
+        _json_or_none(result.get("chart_config")),
+        _json_or_none(result.get("blocks")),
+        sql_tokens.get("input", 0), sql_tokens.get("thinking", 0),
+        sql_tokens.get("output", 0), sql_tokens.get("total", 0),
+        reply_tokens.get("input", 0), reply_tokens.get("thinking", 0),
+        reply_tokens.get("output", 0), reply_tokens.get("total", 0),
+        grand.get("total", 0),
+    )
 
     cursor.execute(insert_sql, params)
     conn.commit()
@@ -126,6 +92,79 @@ def get_chat_history(session_id: str, limit: int = 50, user_id: str = "default_u
             "SELECT * FROM `chat_history` WHERE user_id = %s AND session_id = %s ORDER BY created_at DESC LIMIT %s",
             (user_id, session_id, limit),
         )
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return rows
+
+
+def get_chat_history_page(
+    user_id: str = "default_user",
+    session_id: str = "",
+    limit: int = 10,
+    offset: int = 0,
+    cross_session: bool = True,
+) -> list:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    safe_limit = max(1, min(int(limit or 10), 100))
+    safe_offset = max(0, int(offset or 0))
+
+    if cross_session:
+        cursor.execute(
+            """
+            SELECT id, user_id, session_id, created_at, question, reply
+            FROM `chat_history`
+            WHERE user_id = %s
+            ORDER BY created_at DESC, id DESC
+            LIMIT %s OFFSET %s
+            """,
+            (user_id, safe_limit, safe_offset),
+        )
+    else:
+        cursor.execute(
+            """
+            SELECT id, user_id, session_id, created_at, question, reply
+            FROM `chat_history`
+            WHERE user_id = %s AND session_id = %s
+            ORDER BY created_at DESC, id DESC
+            LIMIT %s OFFSET %s
+            """,
+            (user_id, session_id, safe_limit, safe_offset),
+        )
+
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return rows
+
+
+def count_chat_history(user_id: str = "default_user") -> int:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT COUNT(*) FROM `chat_history` WHERE user_id = %s",
+        (user_id,),
+    )
+    n = cursor.fetchone()[0]
+    cursor.close()
+    conn.close()
+    return int(n or 0)
+
+
+def get_chat_history_session(user_id: str, session_id: str) -> list:
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        """
+        SELECT *
+        FROM `chat_history`
+        WHERE user_id = %s AND session_id = %s
+        ORDER BY created_at ASC, id ASC
+        """,
+        (user_id, session_id),
+    )
     rows = cursor.fetchall()
     cursor.close()
     conn.close()

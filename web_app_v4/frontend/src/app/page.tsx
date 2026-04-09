@@ -7,27 +7,10 @@ import type { AnalysisTarget } from '@/components/workspace/types';
 import { FeedRail } from '@/components/sidebar';
 import TopBar from '@/components/workspace/layout/TopBar';
 import type { Message } from '@/types/types';
-
-const API_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/$/, '');
-const DIRECT_BACKEND_BASE = (process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8333').replace(/\/$/, '');
-const USER_ID = 'default_user';
+import { buildApiUrl, DEFAULT_USER_ID } from '@/lib/api';
 
 function createSessionId() {
   return globalThis.crypto?.randomUUID?.() || `session-${Date.now()}`;
-}
-
-function buildApiUrl(path: string) {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
-
-  if (
-    typeof window !== 'undefined' &&
-    window.location.hostname === 'localhost' &&
-    API_BASE.startsWith('/')
-  ) {
-    return `${DIRECT_BACKEND_BASE}${normalizedPath}`;
-  }
-
-  return `${API_BASE}${normalizedPath}`;
 }
 
 function buildEventDetail(eventType: string, data: any) {
@@ -114,6 +97,7 @@ export default function ChatPage() {
   const [queuedPrompt, setQueuedPrompt] = useState<AnalysisTarget | null>(null);
   const [analysisBusy, setAnalysisBusy] = useState(false);
   const [activeSignalId, setActiveSignalId] = useState<number | null>(null);
+  const [activeHistorySessionId, setActiveHistorySessionId] = useState<string | null>(null);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [instructionText, setInstructionText] = useState('');
@@ -151,7 +135,7 @@ export default function ChatPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: USER_ID,
+          userId: DEFAULT_USER_ID,
           sessionId: analysisSessionId,
           files: filePayload,
         }),
@@ -359,6 +343,8 @@ export default function ChatPage() {
         ...appendEvent(message),
         isDone: true,
       }));
+      // Refresh landing suggestions in background after each chat
+      fetch(buildApiUrl(`/landing-suggestions/refresh?userId=${encodeURIComponent(DEFAULT_USER_ID)}`), { method: 'POST' }).catch(() => {});
       return;
     }
 
@@ -400,6 +386,7 @@ export default function ChatPage() {
     setMessages((current) => [...current, userMessage, assistantMessage]);
     setAnalysisBusy(true);
     setAnalysisQuery(trimmed);
+    setActiveHistorySessionId(null);
 
     try {
       const instruction = typeof window !== 'undefined' ? (localStorage.getItem('ai4bi_instruction') || '') : '';
@@ -416,7 +403,7 @@ export default function ChatPage() {
           body: JSON.stringify({
             message: trimmed,
             sessionId,
-            userId: USER_ID,
+            userId: DEFAULT_USER_ID,
             instruction,
           }),
         });
@@ -475,7 +462,58 @@ export default function ChatPage() {
     setAnalysisQuery(prompt);
     setMessages([]);
     setQueuedPrompt({ prompt, sessionId: nextSessionId });
+    setActiveSignalId(null);
+    setActiveHistorySessionId(null);
   }, []);
+
+  const openHistorySession = useCallback(async (sessionId: string) => {
+    if (!sessionId) return;
+    if (analysisBusy) return;
+    setAnalysisBusy(true);
+    setQueuedPrompt(null);
+
+    try {
+      const url = buildApiUrl(`/chat/history/session?userId=${encodeURIComponent(DEFAULT_USER_ID)}&sessionId=${encodeURIComponent(sessionId)}`);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`history session fetch failed: ${response.status}`);
+      const data = await response.json();
+      const items = Array.isArray(data?.items) ? data.items : [];
+
+      const loaded: Message[] = [];
+      items.forEach((row: any, index: number) => {
+        const id = String(row?.id ?? index);
+        loaded.push({
+          id: `history-user-${sessionId}-${id}`,
+          role: 'user',
+          content: String(row?.question || ''),
+        });
+        loaded.push({
+          id: `history-assistant-${sessionId}-${id}`,
+          role: 'assistant',
+          content: String(row?.reply || ''),
+          sql: String(row?.sql || ''),
+          thinking: String(row?.thinking || ''),
+          columns: Array.isArray(row?.columns) ? row.columns : [],
+          rows: Array.isArray(row?.rows) ? row.rows : [],
+          chartConfig: row?.chartConfig || undefined,
+          blocks: Array.isArray(row?.blocks) ? row.blocks : [],
+          tokenUsage: row?.tokenUsage || undefined,
+          replyTokenUsage: row?.replyTokenUsage || undefined,
+          isDone: true,
+        });
+      });
+
+      setAnalysisSessionId(sessionId);
+      setAnalysisQuery('');
+      setMessages(loaded);
+      setActiveSignalId(null);
+      setActiveHistorySessionId(sessionId);
+    } catch (error) {
+      console.error('[history] open session error:', error);
+    } finally {
+      setAnalysisBusy(false);
+    }
+  }, [analysisBusy]);
 
   const sendInCurrentAnalysis = useCallback((prompt: string) => {
     if (analysisBusy) return;
@@ -533,15 +571,29 @@ export default function ChatPage() {
 
       <FeedRail
         activeId={activeSignalId}
+        activeHistorySessionId={activeHistorySessionId}
         onSelect={(item) => {
           setActiveSignalId(item.id);
+          setActiveHistorySessionId(null);
           openNewAnalysis(item.title);
+        }}
+        onSelectHistory={(sessionId) => {
+          void openHistorySession(sessionId);
+        }}
+        onSelectKpi={(kpiLabel) => {
+          setActiveSignalId(null);
+          setActiveHistorySessionId(null);
+          openNewAnalysis(`Phân tích KPI ${kpiLabel} hôm nay`);
         }}
       />
 
       <div className="flex min-w-0 flex-1 overflow-hidden">
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <TopBar />
+          <TopBar
+            onHome={() => {
+              if (typeof window !== 'undefined') window.location.reload();
+            }}
+          />
           <AnalysisPage
             busy={analysisBusy}
             messages={messages}

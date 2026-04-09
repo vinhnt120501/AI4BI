@@ -43,14 +43,15 @@ function TrendBadge({ trend }: { trend: string }) {
 export default function StatCard({ items }: { items?: StatCardItem[] }) {
   if (!items || items.length === 0) return null;
 
-  // Responsive: 2 cards = 2 cols, 3 = 3 cols, 4 = 4 cols (max 4)
-  const colCount = Math.min(items.length, 4);
+  // Avoid "lonely" last row (e.g. 5 cards -> 4 + 1) by switching to 3 columns when needed.
+  const colCount = (() => {
+    if (items.length <= 4) return items.length;
+    return items.length % 4 === 1 ? 3 : 4;
+  })();
+  const basis = `${100 / colCount}%`;
 
   return (
-    <div
-      className="grid gap-4 w-full"
-      style={{ gridTemplateColumns: `repeat(${colCount}, minmax(0, 1fr))` }}
-    >
+    <div className="flex w-full flex-wrap gap-4">
       {items.map((item, i) => {
         const colorKey = item.color || COLOR_CYCLE[i % COLOR_CYCLE.length];
         const theme = THEMES[colorKey] || THEMES.slate;
@@ -58,7 +59,8 @@ export default function StatCard({ items }: { items?: StatCardItem[] }) {
         return (
           <div
             key={i}
-            className={`relative overflow-hidden border ${theme.border} rounded-2xl px-5 py-5 ${theme.bg} transition-all hover:shadow-lg hover:-translate-y-0.5 duration-300 group`}
+            className={`relative min-w-[240px] flex-1 overflow-hidden border ${theme.border} rounded-2xl px-5 py-5 ${theme.bg} transition-all hover:shadow-lg hover:-translate-y-0.5 duration-300 group`}
+            style={{ flexBasis: `calc(${basis} - 1rem)` }}
           >
             {/* Decorative gradient blob */}
             <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full ${theme.bg} opacity-40 blur-xl group-hover:scale-125 transition-transform duration-700`} />

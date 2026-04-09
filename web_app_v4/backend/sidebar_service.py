@@ -1,128 +1,35 @@
-import os
+from __future__ import annotations
+
 import json
+import os
 import re
-from pathlib import Path
 from datetime import date, datetime, timedelta, timezone
-from dotenv import load_dotenv
-from fastapi import FastAPI, Header, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
+from typing import Any
 
-load_dotenv(Path(__file__).parent / ".env")
-
-from db import (
-    ensure_schema_context_file,
-    init_chat_history_table,
-    init_memory_facts_table,
-    init_memory_vectors_table,
-    init_sidebar_tables,
-    get_connection,
-    get_chat_history_page,
-    get_chat_history_session,
-    count_chat_history,
+from db.connection import get_connection
+from db.sidebar_store import (
+    count_heartbeat,
+    count_signals,
+    count_landing_suggestions,
+    delete_heartbeat,
+    delete_landing_suggestions,
+    delete_signals,
+    get_heartbeat_page,
+    get_landing_suggestions,
+    get_signals_page,
+    insert_heartbeat,
+    insert_landing_suggestions,
+    insert_signals,
 )
-from llm import (
-    build_reply_contents,
-    build_sql_system_prompt,
-    VISUALIZATION_PROMPT_RULES,
-    generate_chat,
-    message_text,
-)
-from memory import MemoryService
-from chat_service import process_chat
-from sidebar_service import get_heartbeat_page_cached, get_signals_page_cached, get_landing_suggestions_cached, refresh_landing_suggestions
-from prompts import DAILY_SIGNALS_PROMPT, DAILY_HEARTBEAT_PROMPT
-
-app = FastAPI()
-
-init_chat_history_table()
-init_memory_facts_table()
-init_memory_vectors_table()
-init_sidebar_tables()
-ensure_schema_context_file(refresh=False)
-memory_service = MemoryService()
-
-ADMIN_TOKEN = os.getenv("MEMORY_ADMIN_TOKEN", "").strip()
-
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "*").split(",")
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[o.strip() for o in CORS_ORIGINS],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-class ChatRequest(BaseModel):
-    message: str
-    sessionId: str = ""
-    userId: str = "default_user"
-    instruction: str = ""
-
-
-class MemorySearchRequest(BaseModel):
-    userId: str = "default_user"
-    query: str
-    topK: int = 10
-
-
-class MemoryContextPreviewRequest(BaseModel):
-    message: str
-    sessionId: str = ""
-    userId: str = "default_user"
-    columns: list[str] = []
-    rows: list[list[str]] = []
-
-class FileIngestItem(BaseModel):
-    name: str
-    content: str
-
-
-class FileIngestRequest(BaseModel):
-    userId: str = "default_user"
-    sessionId: str = ""
-    files: list[FileIngestItem] = []
-
-
-def _guard_admin(x_admin_token: str | None):
-    if not ADMIN_TOKEN:
-        raise HTTPException(status_code=500, detail="MEMORY_ADMIN_TOKEN is not configured")
-    if x_admin_token != ADMIN_TOKEN:
-        raise HTTPException(status_code=401, detail="Invalid admin token")
-
-def _maybe_json(value):
-    if value is None:
-        return None
-    if isinstance(value, (dict, list)):
-        return value
-    if isinstance(value, (bytes, bytearray)):
-        try:
-            value = value.decode("utf-8")
-        except Exception:
-            return None
-    if isinstance(value, str):
-        value = value.strip()
-        if not value:
-            return None
-        try:
-            return json.loads(value)
-        except Exception:
-            return None
-    return None
-
-def _preview_text(text: str, max_len: int = 140) -> str:
-    cleaned = re.sub(r"\s+", " ", (text or "")).strip()
-    if not cleaned:
-        return ""
-    return cleaned if len(cleaned) <= max_len else (cleaned[: max_len - 1] + "…")
+from llm import generate_chat, message_text
+from prompts import DAILY_HEARTBEAT_PROMPT, DAILY_SIGNALS_PROMPT, LANDING_SUGGESTIONS_PROMPT
 
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _safe_float(v) -> float:
+def _safe_float(v: Any) -> float:
     try:
         if v is None:
             return 0.0
@@ -189,7 +96,7 @@ def _get_table_max_dates() -> dict[str, date | None]:
     cursor.close()
     conn.close()
 
-    def _to_date(v) -> date | None:
+    def _to_date(v: Any) -> date | None:
         if isinstance(v, date):
             return v
         try:
@@ -418,7 +325,7 @@ def _fetch_target_mtd_by_shop(as_of: date) -> list[dict]:
     """
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(sql, (end_exclusive, end_exclusive, end_exclusive, end_exclusive))
+    cursor.execute(sql, (as_of, end_exclusive, as_of, as_of))
     rows = cursor.fetchall() or []
     cursor.close()
     conn.close()
@@ -442,7 +349,7 @@ def _fetch_target_mtd_by_shop(as_of: date) -> list[dict]:
     return out
 
 
-def _build_signal_candidates(sales_as_of: date, joint_as_of: date) -> dict:
+def _build_signal_payload(sales_as_of: date, joint_as_of: date) -> dict:
     return {
         "asOfSales": sales_as_of.isoformat(),
         "asOfJoint": joint_as_of.isoformat(),
@@ -477,20 +384,27 @@ def _generate_signals_llm(payload: dict, limit: int) -> list[dict]:
             continue
         title = str(r.get("title") or "").strip()
         desc = str(r.get("desc") or "").strip()
+        fingerprint = str(r.get("fingerprint") or "").strip()
         if not title or not desc:
             continue
-        out.append({"type": t, "title": title, "desc": desc, "createdAt": created_at})
+        out.append(
+            {
+                "type": t,
+                "title": title,
+                "description": desc,
+                "fingerprint": fingerprint,
+                "source": "llm",
+                "created_at": datetime.utcnow(),
+            }
+        )
 
-    out = _dedupe_rows(out, ["title"])
-    for i, r in enumerate(out[:limit]):
-        r["id"] = i + 1
+    out = _dedupe_rows(out, ["fingerprint", "title"])
     return out[:limit]
 
 
 def _generate_signals_fallback(sales_as_of: date, joint_as_of: date, limit: int) -> list[dict]:
-    created_at = _now_iso()
+    created_at = datetime.utcnow()
     out: list[dict] = []
-
     for row in _fetch_revenue_wow_by_region(sales_as_of)[:6]:
         if len(out) >= limit:
             break
@@ -500,7 +414,16 @@ def _generate_signals_fallback(sales_as_of: date, joint_as_of: date, limit: int)
         direction = "tăng" if pct >= 0 else "giảm"
         title = f"Doanh thu {region} {direction} {abs(pct)*100:.0f}% WoW"
         desc = f"Chênh lệch {_format_money_vnd(delta)} so với 7 ngày trước."
-        out.append({"id": len(out) + 1, "type": "watch" if pct < 0 else "positive", "title": title, "desc": desc, "createdAt": created_at})
+        out.append(
+            {
+                "type": "watch" if pct < 0 else "positive",
+                "title": title,
+                "description": desc,
+                "fingerprint": f"rev_region:{region}",
+                "source": "fallback",
+                "created_at": created_at,
+            }
+        )
 
     for row in _fetch_return_rate_wow_by_region(joint_as_of)[:4]:
         if len(out) >= limit:
@@ -510,15 +433,95 @@ def _generate_signals_fallback(sales_as_of: date, joint_as_of: date, limit: int)
         direction = "tăng" if delta_pp >= 0 else "giảm"
         title = f"Tỷ lệ hoàn trả {region} {direction} {abs(delta_pp):.1f} điểm WoW"
         desc = "So sánh tỷ lệ hoàn trả 7 ngày gần nhất vs 7 ngày trước."
-        out.append({"id": len(out) + 1, "type": "watch" if delta_pp > 0 else "positive", "title": title, "desc": desc, "createdAt": created_at})
-
-    out = _dedupe_rows(out, ["title"])
-    for i, r in enumerate(out[:limit]):
-        r["id"] = i + 1
+        out.append(
+            {
+                "type": "watch" if delta_pp > 0 else "positive",
+                "title": title,
+                "description": desc,
+                "fingerprint": f"return_rate:{region}",
+                "source": "fallback",
+                "created_at": created_at,
+            }
+        )
+    out = _dedupe_rows(out, ["fingerprint", "title"])
     return out[:limit]
 
 
-def _build_heartbeat_candidates(sales_as_of: date, joint_as_of: date) -> dict:
+def _ensure_signals(as_of_sales: str, as_of_joint: str) -> None:
+    # Generate once per as-of, store, then serve paginated from DB.
+    if count_signals(as_of_sales, as_of_joint) >= 10:
+        return
+
+    sales_d = date.fromisoformat(as_of_sales)
+    joint_d = date.fromisoformat(as_of_joint)
+    payload = _build_signal_payload(sales_d, joint_d)
+
+    items: list[dict] = []
+    use_llm = os.getenv("SIGNALS_USE_LLM", "true").lower() in {"1", "true", "yes", "on"}
+    if use_llm:
+        try:
+            items = _generate_signals_llm(payload, limit=10)
+        except Exception:
+            items = []
+    if not items:
+        items = _generate_signals_fallback(sales_d, joint_d, limit=10)
+
+    delete_signals(as_of_sales, as_of_joint)
+    rows = []
+    for idx, item in enumerate(items[:10]):
+        rows.append(
+            {
+                "rank": idx + 1,
+                "type": item["type"],
+                "title": item["title"],
+                "description": item["description"],
+                "fingerprint": item.get("fingerprint") or "",
+                "source": item.get("source") or "llm",
+                "created_at": item.get("created_at"),
+            }
+        )
+    insert_signals(as_of_sales, as_of_joint, rows)
+
+
+def get_signals_page_cached(limit: int = 5, offset: int = 0) -> dict[str, Any]:
+    limit = max(1, int(limit or 5))
+    offset = max(0, int(offset or 0))
+
+    dates = _get_table_max_dates()
+    sales_as_of = dates.get("sales") or datetime.now(timezone.utc).date()
+    joint_as_of = min([d for d in [dates.get("sales"), dates.get("returns")] if d] or [sales_as_of])
+    as_of_sales = sales_as_of.isoformat()
+    as_of_joint = joint_as_of.isoformat()
+
+    _ensure_signals(as_of_sales, as_of_joint)
+    total = count_signals(as_of_sales, as_of_joint)
+    rows = get_signals_page(as_of_sales, as_of_joint, limit=limit, offset=offset)
+
+    items: list[dict] = []
+    for r in rows:
+        items.append(
+            {
+                "id": int(r.get("rank") or 0),
+                "type": r.get("type") or "watch",
+                "title": r.get("title") or "",
+                "desc": r.get("description") or "",
+                "createdAt": r.get("created_at").isoformat() if r.get("created_at") else _now_iso(),
+            }
+        )
+
+    next_offset = offset + len(items)
+    has_more = next_offset < total
+    return {
+        "asOfSales": as_of_sales,
+        "asOfJoint": as_of_joint,
+        "items": items,
+        "hasMore": has_more,
+        "nextOffset": next_offset,
+        "total": total,
+    }
+
+
+def _build_heartbeat_payload(sales_as_of: date, joint_as_of: date) -> dict:
     end_sales = _next_day(sales_as_of)
     end_joint = _next_day(joint_as_of)
 
@@ -623,8 +626,8 @@ def _generate_heartbeat_llm(payload: dict) -> list[dict]:
     text = message_text(resp.choices[0].message)
     rows = _parse_llm_json_object_array(text)
     rows = _dedupe_rows(rows, ["label"])
-
     out: list[dict] = []
+    created_at = datetime.utcnow()
     for r in rows:
         if len(out) >= 8:
             break
@@ -636,8 +639,17 @@ def _generate_heartbeat_llm(payload: dict) -> list[dict]:
             trend = "neutral"
         if not label or not value:
             continue
-        out.append({"id": len(out) + 1, "label": label, "value": value, "delta": delta, "trend": trend})
-    return out
+        out.append(
+            {
+                "label": label,
+                "value": value,
+                "delta": delta,
+                "trend": trend,
+                "source": "llm",
+                "created_at": created_at,
+            }
+        )
+    return out[:8]
 
 
 def _generate_heartbeat_fallback(payload: dict) -> list[dict]:
@@ -672,7 +684,6 @@ def _generate_heartbeat_fallback(payload: dict) -> list[dict]:
             "trend": "up" if attainment >= 0.5 else "neutral",
         },
     ]
-
     for r in top_regions[:3]:
         pct = _safe_float(r.get("delta_pct"))
         cards.append(
@@ -693,189 +704,186 @@ def _generate_heartbeat_fallback(payload: dict) -> list[dict]:
                 "trend": "up" if pct > 0 else "down" if pct < 0 else "neutral",
             }
         )
-
-    cards = cards[:8]
     out: list[dict] = []
-    for i, c in enumerate(cards):
-        out.append({"id": i + 1, **c})
+    created_at = datetime.utcnow()
+    for c in cards[:8]:
+        out.append({**c, "source": "fallback", "created_at": created_at})
+    return out[:8]
+
+
+def _ensure_heartbeat(as_of_sales: str, as_of_joint: str) -> None:
+    if count_heartbeat(as_of_sales, as_of_joint) >= 8:
+        return
+
+    sales_d = date.fromisoformat(as_of_sales)
+    joint_d = date.fromisoformat(as_of_joint)
+    payload = _build_heartbeat_payload(sales_d, joint_d)
+
+    items: list[dict] = []
+    use_llm = os.getenv("HEARTBEAT_USE_LLM", "true").lower() in {"1", "true", "yes", "on"}
+    if use_llm:
+        try:
+            items = _generate_heartbeat_llm(payload)
+        except Exception:
+            items = []
+    if not items:
+        items = _generate_heartbeat_fallback(payload)
+
+    delete_heartbeat(as_of_sales, as_of_joint)
+    rows = []
+    for idx, item in enumerate(items[:8]):
+        rows.append(
+            {
+                "rank": idx + 1,
+                "label": item["label"],
+                "value": item["value"],
+                "delta": item.get("delta") or "",
+                "trend": item.get("trend") or "neutral",
+                "source": item.get("source") or "llm",
+                "created_at": item.get("created_at"),
+            }
+        )
+    insert_heartbeat(as_of_sales, as_of_joint, rows)
+
+
+def get_heartbeat_page_cached(limit: int = 4, offset: int = 0) -> dict[str, Any]:
+    limit = max(1, int(limit or 4))
+    offset = max(0, int(offset or 0))
+
+    dates = _get_table_max_dates()
+    sales_as_of = dates.get("sales") or datetime.now(timezone.utc).date()
+    joint_as_of = min([d for d in [dates.get("sales"), dates.get("returns")] if d] or [sales_as_of])
+    as_of_sales = sales_as_of.isoformat()
+    as_of_joint = joint_as_of.isoformat()
+
+    _ensure_heartbeat(as_of_sales, as_of_joint)
+    total = count_heartbeat(as_of_sales, as_of_joint)
+    rows = get_heartbeat_page(as_of_sales, as_of_joint, limit=limit, offset=offset)
+
+    items: list[dict] = []
+    for r in rows:
+        items.append(
+            {
+                "id": int(r.get("rank") or 0),
+                "label": r.get("label") or "",
+                "value": r.get("value") or "",
+                "delta": r.get("delta") or "",
+                "trend": r.get("trend") or "neutral",
+                "createdAt": r.get("created_at").isoformat() if r.get("created_at") else _now_iso(),
+            }
+        )
+
+    next_offset = offset + len(items)
+    has_more = next_offset < total
+    return {
+        "asOfSales": as_of_sales,
+        "asOfJoint": as_of_joint,
+        "items": items,
+        "hasMore": has_more,
+        "nextOffset": next_offset,
+        "total": total,
+    }
+
+
+
+def _build_landing_user_prompt(user_id: str) -> str:
+    from db import get_chat_history, get_schema_context
+    from memory import MemoryService
+
+    memory_svc = MemoryService()
+
+    history_rows = get_chat_history(session_id="", user_id=user_id, limit=10, cross_session=True)
+    history_lines = []
+    for row in reversed(history_rows):
+        q = (row.get("question") or "").strip()
+        if q:
+            history_lines.append(f"- {q}")
+    history_block = "\n".join(history_lines) if history_lines else "(Chưa có lịch sử hội thoại)"
+
+    fact_block = memory_svc._build_fact_block(user_id, top_k=5)
+    if not fact_block:
+        fact_block = "(Chưa có thông tin sở thích)"
+
+    try:
+        schema = get_schema_context()
+        if len(schema) > 2000:
+            schema = schema[:2000] + "\n..."
+    except Exception:
+        schema = "(Không lấy được schema)"
+
+    return (
+        f"[Conversation History]\n{history_block}\n\n"
+        f"[Fact Memory]\n{fact_block}\n\n"
+        f"[Schema Overview]\n{schema}"
+    )
+
+
+def _generate_landing_suggestions_llm(user_id: str) -> list[dict]:
+    user_prompt = _build_landing_user_prompt(user_id)
+    temperature = float(os.getenv("LANDING_LLM_TEMPERATURE", "0.5") or 0.5)
+    resp = generate_chat(
+        system_prompt=LANDING_SUGGESTIONS_PROMPT,
+        user_prompt=user_prompt,
+        temperature=temperature,
+    )
+    text = message_text(resp.choices[0].message)
+    parsed = _parse_llm_json_string_array(text)
+
+    out: list[dict] = []
+    created_at = datetime.utcnow()
+    for idx, item in enumerate(parsed[:4]):
+        t = item.strip()
+        if not t:
+            continue
+        out.append({"rank": idx + 1, "text": t, "source": "llm", "created_at": created_at})
     return out
 
 
-@app.post("/chat")
-async def chat(req: ChatRequest):
-    sse_stream = await process_chat(
-        message=req.message,
-        session_id=req.sessionId,
-        user_id=req.userId,
-        instruction=req.instruction,
-        memory_service=memory_service,
-    )
-    return StreamingResponse(
-        sse_stream,
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-            "Connection": "keep-alive",
-        },
-    )
-
-@app.get("/chat/history")
-def chat_history(userId: str = "default_user", limit: int = 10, offset: int = 0):
-    items = get_chat_history_page(user_id=userId, limit=limit, offset=offset, cross_session=True)
-    total = count_chat_history(user_id=userId)
-    safe_limit = max(1, min(int(limit or 10), 100))
-    safe_offset = max(0, int(offset or 0))
-    next_offset = safe_offset + len(items)
-    has_more = next_offset < total
-
-    return {
-        "items": [
-            {
-                "id": row.get("id"),
-                "sessionId": row.get("session_id") or "",
-                "createdAt": row.get("created_at").isoformat() if row.get("created_at") else None,
-                "question": row.get("question") or "",
-                "replyPreview": _preview_text(row.get("reply") or ""),
-            }
-            for row in items
-        ],
-        "limit": safe_limit,
-        "offset": safe_offset,
-        "nextOffset": next_offset,
-        "total": total,
-        "hasMore": has_more,
-    }
+def _parse_llm_json_string_array(text: str) -> list[str]:
+    raw = (text or "").strip()
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+    match = re.search(r"\[[\s\S]*\]", raw)
+    candidate = match.group(0) if match else raw
+    try:
+        parsed = json.loads(candidate)
+    except Exception:
+        return []
+    if not isinstance(parsed, list):
+        return []
+    return [str(x).strip() for x in parsed if isinstance(x, str) and x.strip()]
 
 
-@app.get("/chat/history/session")
-def chat_history_session(sessionId: str, userId: str = "default_user"):
-    if not sessionId:
-        raise HTTPException(status_code=400, detail="sessionId is required")
+def _ensure_landing_suggestions(user_id: str) -> None:
+    if count_landing_suggestions(user_id) >= 4:
+        return
 
-    rows = get_chat_history_session(user_id=userId, session_id=sessionId)
-    items = []
-    for row in rows:
-        items.append(
-            {
-                "id": row.get("id"),
-                "sessionId": row.get("session_id") or "",
-                "createdAt": row.get("created_at").isoformat() if row.get("created_at") else None,
-                "question": row.get("question") or "",
-                "sql": row.get("sql_generated") or "",
-                "thinking": row.get("thinking") or "",
-                "reply": row.get("reply") or "",
-                "columns": _maybe_json(row.get("columns_data")) or [],
-                "rows": _maybe_json(row.get("rows_data")) or [],
-                "chartConfig": _maybe_json(row.get("chart_config")) or None,
-                "blocks": _maybe_json(row.get("blocks")) or [],
-                "tokenUsage": {
-                    "input": int(row.get("token_sql_input") or 0),
-                    "thinking": int(row.get("token_sql_thinking") or 0),
-                    "output": int(row.get("token_sql_output") or 0),
-                    "total": int(row.get("token_sql_total") or 0),
-                },
-                "replyTokenUsage": {
-                    "input": int(row.get("token_reply_input") or 0),
-                    "thinking": int(row.get("token_reply_thinking") or 0),
-                    "output": int(row.get("token_reply_output") or 0),
-                    "total": int(row.get("token_reply_total") or 0),
-                },
-            }
-        )
+    items: list[dict] = []
+    use_llm = os.getenv("LANDING_USE_LLM", "true").lower() in {"1", "true", "yes", "on"}
+    if use_llm:
+        try:
+            items = _generate_landing_suggestions_llm(user_id)
+        except Exception as e:
+            print(f"[LANDING] LLM generation failed: {e}")
+            items = []
 
-    return {"sessionId": sessionId, "items": items}
+    if not items:
+        return
+
+    delete_landing_suggestions(user_id)
+    insert_landing_suggestions(user_id, items[:4])
 
 
-@app.get("/signals")
-def signals(limit: int = 5, offset: int = 0):
-    return get_signals_page_cached(limit=limit, offset=offset)
+def get_landing_suggestions_cached(user_id: str) -> dict[str, Any]:
+    _ensure_landing_suggestions(user_id)
+    rows = get_landing_suggestions(user_id, limit=4)
+    items = [str(r.get("text") or "") for r in rows if r.get("text")]
+    return {"items": items}
 
 
-@app.get("/heartbeat")
-def heartbeat(limit: int = 4, offset: int = 0):
-    return get_heartbeat_page_cached(limit=limit, offset=offset)
-
-
-@app.get("/landing-suggestions")
-def landing_suggestions(userId: str = "default_user"):
-    return get_landing_suggestions_cached(user_id=userId)
-
-
-@app.post("/landing-suggestions/refresh")
-def landing_suggestions_refresh(userId: str = "default_user"):
-    return refresh_landing_suggestions(user_id=userId)
-
-
-@app.post("/files/ingest")
-def ingest_files(req: FileIngestRequest):
-    if not req.files:
-        return {"status": "ok", "ingested": 0, "results": []}
-    results = []
-    for f in req.files:
-        results.append(
-            memory_service.ingest_reference_file(
-                user_id=req.userId,
-                session_id=req.sessionId,
-                filename=f.name,
-                content=f.content,
-            )
-        )
-    ingested = sum(1 for r in results if r.get("status") == "ok")
-    return {"status": "ok", "ingested": ingested, "results": results}
-
-
-@app.get("/memory/admin/overview")
-def memory_admin_overview(userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
-    _guard_admin(x_admin_token)
-    return memory_service.admin_overview(user_id=userId)
-
-
-@app.post("/memory/admin/search")
-def memory_admin_search(req: MemorySearchRequest, x_admin_token: str | None = Header(default=None)):
-    _guard_admin(x_admin_token)
-    return memory_service.admin_search(user_id=req.userId, query=req.query, top_k=req.topK)
-
-
-@app.delete("/memory/admin/items/{memory_id}")
-def memory_admin_delete(memory_id: int, userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
-    _guard_admin(x_admin_token)
-    return memory_service.admin_delete_item(user_id=userId, memory_id=memory_id)
-
-
-@app.post("/memory/admin/reset")
-def memory_admin_reset(userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
-    _guard_admin(x_admin_token)
-    return memory_service.admin_reset(user_id=userId)
-
-
-@app.post("/memory/admin/rebuild")
-def memory_admin_rebuild(userId: str = "default_user", x_admin_token: str | None = Header(default=None)):
-    _guard_admin(x_admin_token)
-    return memory_service.admin_rebuild(user_id=userId)
-
-
-@app.post("/memory/admin/context-preview")
-def memory_admin_context_preview(req: MemoryContextPreviewRequest, x_admin_token: str | None = Header(default=None)):
-    _guard_admin(x_admin_token)
-    sql_ctx = memory_service.build_stage_memory_context(req.userId, req.sessionId, req.message, stage="sql")
-    reply_ctx = memory_service.build_stage_memory_context(req.userId, req.sessionId, req.message, stage="reply")
-    sql_prompt = build_sql_system_prompt(memory_context=sql_ctx.render())
-    reply_data = build_reply_contents(
-        question=req.message, columns=req.columns or [], rows=req.rows or [],
-        memory_context=reply_ctx.render(),
-    )
-    return {
-        "user_id": req.userId,
-        "session_id": req.sessionId,
-        "message": req.message,
-        "memory_context": {"sql": sql_ctx.render(), "reply": reply_ctx.render()},
-        "stage1_sql_prompt": {"system_prompt": sql_prompt["prompt"], "user_content": req.message},
-        "stage2_reply_prompt": {"system_prompt": VISUALIZATION_PROMPT_RULES, "user_content": reply_data["contents"]},
-    }
-
-
-if __name__ == "__main__":
-    import sys, uvicorn
-    if "--serve" in sys.argv:
-        uvicorn.run(app, host="0.0.0.0", port=8333)
+def refresh_landing_suggestions(user_id: str) -> dict[str, Any]:
+    delete_landing_suggestions(user_id)
+    _ensure_landing_suggestions(user_id)
+    rows = get_landing_suggestions(user_id, limit=4)
+    items = [str(r.get("text") or "") for r in rows if r.get("text")]
+    return {"items": items}

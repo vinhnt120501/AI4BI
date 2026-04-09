@@ -187,7 +187,16 @@ export default function FeedRail({ activeId, activeHistorySessionId, onSelect, o
         }))
         .filter((row: HistoryItem) => Boolean(row.sessionId) && Boolean(row.question));
 
-      setHistoryItems((prev) => reset ? normalized : [...prev, ...normalized]);
+      setHistoryItems((prev) => {
+        const merged = reset ? normalized : [...prev, ...normalized];
+        const seen = new Set<string>();
+        return merged.filter((row) => {
+          const key = `${row.sessionId}::${row.id}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+      });
       setHistoryOffset(nextOffset);
       setHistoryHasMore(hasMore);
       if (reset) setHistoryStatus('ready');

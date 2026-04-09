@@ -50,12 +50,22 @@ def _validate_generated_sql(sql: str):
         )
 
 
+def _truncate_text(text: str, max_chars: int) -> str:
+    value = (text or "").strip()
+    if max_chars <= 0 or len(value) <= max_chars:
+        return value
+    return value[:max_chars].rstrip() + "\n...(truncated)"
+
+
 def build_sql_system_prompt(custom_instruction: str = "", memory_context: str = "") -> dict:
     raw_schema = get_schema_context()
     schema = _curate_schema_context(raw_schema)
+    max_schema_chars = int(os.getenv("SQL_SCHEMA_MAX_CHARS", "5000"))
+    max_memory_chars = int(os.getenv("SQL_MEMORY_MAX_CHARS", "1800"))
+    schema = _truncate_text(schema, max_schema_chars)
     rules = SQL_ROBOT_RULES
     instruction = (custom_instruction or "").strip()
-    memory = (memory_context or "").strip()
+    memory = _truncate_text((memory_context or "").strip(), max_memory_chars)
 
     system_prompt = ""
     if instruction:

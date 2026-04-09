@@ -1,4 +1,5 @@
 import json
+import os
 from db import execute_sql
 from prompts import AGENTIC_PLANNING_PROMPT
 from .client import AGENTIC_ENABLED, generate_chat, message_text
@@ -10,6 +11,10 @@ def agentic_evaluate(question: str, columns: list, rows: list,
         return None
 
     sample = rows[:20]
+    max_schema_chars = int(os.getenv("AGENTIC_SCHEMA_MAX_CHARS", "5000"))
+    max_memory_chars = int(os.getenv("AGENTIC_MEMORY_MAX_CHARS", "1200"))
+    schema_context = (schema_context or "")[:max_schema_chars]
+    memory_context = (memory_context or "")[:max_memory_chars]
     user_prompt = (
         f"Câu hỏi user: {question}\n\n"
         f"Data hiện có ({len(rows)} rows, {len(columns)} cols):\n"

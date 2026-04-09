@@ -1,4 +1,5 @@
 import json
+import os
 import time
 from prompts import VISUALIZATION_PROMPT_RULES
 from .client import (
@@ -127,11 +128,74 @@ def _normalize_scatter_blocks(blocks: list[dict] | None, columns: list[str], row
     return changed
 
 
+def _truncate_text(text: str, max_chars: int) -> str:
+    value = (text or "").strip()
+    if max_chars <= 0 or len(value) <= max_chars:
+        return value
+    return value[:max_chars].rstrip() + "...(truncated)"
+
+
+def _compact_cell(value, max_chars: int):
+    if value is None:
+        return None
+    if isinstance(value, str):
+        text = value.strip()
+        return text[:max_chars].rstrip() + "..." if len(text) > max_chars else text
+    return value
+
+
+def _compact_rows(rows: list, max_rows: int, max_cell_chars: int, tail_rows: int):
+    if not rows:
+        return [], {"sampled": False, "original_rows": 0, "sent_rows": 0}
+
+    total = len(rows)
+    if total <= max_rows:
+        selected = rows
+        sampled = False
+    else:
+        head_rows = max(1, max_rows - max(0, tail_rows))
+        tail_n = min(tail_rows, max(0, total - head_rows))
+        selected = rows[:head_rows] + (rows[-tail_n:] if tail_n > 0 else [])
+        sampled = True
+
+    compacted = []
+    for row in selected:
+        if isinstance(row, list):
+            compacted.append([_compact_cell(cell, max_cell_chars) for cell in row])
+        else:
+            compacted.append(row)
+
+    return compacted, {"sampled": sampled, "original_rows": total, "sent_rows": len(compacted)}
+
+
+def _serialize_result_payload(columns: list, rows: list, *, max_rows: int, max_cell_chars: int, tail_rows: int = 10):
+    compact_rows, meta = _compact_rows(rows or [], max_rows=max_rows, max_cell_chars=max_cell_chars, tail_rows=tail_rows)
+    payload = {"columns": columns, "rows": compact_rows}
+    if meta["sampled"]:
+        payload["note"] = (
+            f"Sampled {meta['sent_rows']} / {meta['original_rows']} rows for prompt efficiency. "
+            "Use visible patterns from the sample."
+        )
+    return json.dumps(payload, ensure_ascii=False), meta
+
+
 def build_reply_contents(question: str, columns: list, rows: list,
                          memory_context: str = "", additional_data: list[dict] | None = None) -> dict:
     """Truyền thẳng toàn bộ kết quả SQL cho LLM. SQL đã tính toán hết."""
-    data_text = json.dumps({"columns": columns, "rows": rows}, ensure_ascii=False)
-    memory = (memory_context or "").strip()
+    max_rows = int(os.getenv("REPLY_MAX_ROWS_TO_LLM", "120"))
+    max_additional_rows = int(os.getenv("REPLY_MAX_ADDITIONAL_ROWS_TO_LLM", "40"))
+    max_additional_queries = int(os.getenv("REPLY_MAX_ADDITIONAL_QUERIES_TO_LLM", "2"))
+    max_cell_chars = int(os.getenv("REPLY_MAX_CELL_CHARS", "120"))
+    max_memory_chars = int(os.getenv("REPLY_MEMORY_MAX_CHARS", "2200"))
+
+    data_text, data_meta = _serialize_result_payload(
+        columns,
+        rows,
+        max_rows=max_rows,
+        max_cell_chars=max_cell_chars,
+        tail_rows=10,
+    )
+    memory = _truncate_text((memory_context or "").strip(), max_memory_chars)
 
     contents = ""
     if memory:
@@ -140,11 +204,24 @@ def build_reply_contents(question: str, columns: list, rows: list,
     contents += f"Kết quả SQL ({len(rows)} rows):\n{data_text}"
 
     if additional_data:
-        for i, extra in enumerate(additional_data, 1):
+        for i, extra in enumerate(additional_data[:max_additional_queries], 1):
+            extra_text, _ = _serialize_result_payload(
+                extra.get("columns", []),
+                extra.get("rows", []),
+                max_rows=max_additional_rows,
+                max_cell_chars=max_cell_chars,
+                tail_rows=5,
+            )
             contents += f"\n\n--- Dữ liệu bổ sung #{i} (Lý do: {extra.get('reason', 'drill-down')}) ---\n"
             contents += f"SQL: {extra.get('sql', '')}\n"
             contents += f"Kết quả ({len(extra['rows'])} rows): "
-            contents += json.dumps({"columns": extra["columns"], "rows": extra["rows"]}, ensure_ascii=False)
+            contents += extra_text
+
+    if additional_data and len(additional_data) > max_additional_queries:
+        contents += (
+            f"\n\n--- Ghi chÃº ---\n"
+            f"Chá»‰ Ä‘Æ°a {max_additional_queries}/{len(additional_data)} truy váº¥n bá»• sung vÃ o prompt Ä‘á»ƒ trÃ¡nh vÆ°á»£t token."
+        )
 
     return {
         "contents": contents,
@@ -154,6 +231,8 @@ def build_reply_contents(question: str, columns: list, rows: list,
             "data": count_tokens(data_text),
             "summary": 0,
             "memory": count_tokens(memory) if memory else 0,
+            "sampled_rows": data_meta.get("sent_rows", len(rows or [])),
+            "original_rows": data_meta.get("original_rows", len(rows or [])),
         }
     }
 

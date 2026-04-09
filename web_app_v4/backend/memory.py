@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any
 
 from openai import OpenAI
+from llm.client import build_chat_messages
 
 from prompts import (
     MEMORY_STATIC_BLOCK_DEFAULT,
@@ -272,10 +273,11 @@ class MemoryService:
             res = self.client.chat.completions.create(
                 model=self.chat_model,
                 temperature=0,
-                messages=[
-                    {"role": "system", "content": MEMORY_FACT_EXTRACTION_SYSTEM},
-                    {"role": "user", "content": user_prompt},
-                ],
+                messages=build_chat_messages(
+                    MEMORY_FACT_EXTRACTION_SYSTEM,
+                    user_prompt,
+                    model_name=self.chat_model,
+                ),
                 extra_headers=self.extra_headers,
             )
             content = res.choices[0].message.content or "[]"
@@ -351,10 +353,11 @@ class MemoryService:
             res = self.client.chat.completions.create(
                 model=self.chat_model,
                 temperature=0.2,
-                messages=[
-                    {"role": "system", "content": MEMORY_SUMMARIZE_PROMPT},
-                    {"role": "user", "content": text},
-                ],
+                messages=build_chat_messages(
+                    MEMORY_SUMMARIZE_PROMPT,
+                    text,
+                    model_name=self.chat_model,
+                ),
                 extra_headers=self.extra_headers,
             )
             return (res.choices[0].message.content or "").strip()

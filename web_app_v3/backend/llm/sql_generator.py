@@ -3,7 +3,7 @@ import re
 import time
 from db import get_schema_context, execute_sql
 from prompts import SQL_ROBOT_RULES
-from .client import count_tokens, extract_thinking, extract_token_usage, generate_chat, message_text
+from .client import count_tokens, extract_thinking, extract_token_usage, generate_chat, message_text, log_llm_request_stats
 from .parser import clean_sql
 
 ALLOWED_ANALYTICS_TABLES = {
@@ -80,6 +80,13 @@ def text_to_sql(question: str, memory_context: str = "", custom_instruction: str
     prompt_data = build_sql_system_prompt(custom_instruction=custom_instruction, memory_context=memory_context)
     system_prompt = prompt_data["prompt"]
 
+    # Helps diagnose context overflow: schema/rules/memory/instruction breakdown.
+    log_llm_request_stats(
+        stage="sql",
+        system_prompt=system_prompt,
+        user_prompt=question,
+        extra_counts={**prompt_data.get("counts", {}), "question": count_tokens(question)},
+    )
     response = generate_chat(system_prompt, question, temperature=0)
     usage = extract_token_usage(response.usage)
     usage.update(prompt_data["counts"])

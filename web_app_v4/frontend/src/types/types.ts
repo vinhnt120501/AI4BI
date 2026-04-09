@@ -173,6 +173,14 @@ export interface MessageEvent {
     atMs?: number;
 }
 
+export interface SqlQueryEntry {
+    sql: string;
+    source: 'primary' | 'agentic';
+    reason?: string;
+    step?: number;
+    attempt?: number;
+}
+
 // 1.4. Kiểu dữ liệu cho tin nhắn Chat.
 export interface Message {
     id: string;
@@ -180,6 +188,7 @@ export interface Message {
     content: string;
     startedAt?: number;
     sql?: string;
+    sqlQueries?: SqlQueryEntry[];
     thinking?: string;
     tokenUsage?: TokenUsage;
     replyTokenUsage?: TokenUsage;

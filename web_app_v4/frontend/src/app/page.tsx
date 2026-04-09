@@ -294,10 +294,41 @@ export default function ChatPage() {
     }
 
     if (eventType === 'sql') {
+      const rawAttempts = Array.isArray(data.sql_attempts) ? data.sql_attempts : [];
+      const sqlQueries = rawAttempts
+        .map((sql: unknown, index: number) => {
+          const text = typeof sql === 'string' ? sql.trim() : '';
+          if (!text) return null;
+          return { sql: text, source: 'primary' as const, attempt: index + 1 };
+        })
+        .filter(Boolean);
+
       updateAssistantMessage(assistantId, (message) => ({
         ...appendEvent(message),
         sql: data.sql || '',
+        sqlQueries: sqlQueries.length > 0
+          ? sqlQueries
+          : (data.sql ? [{ sql: data.sql, source: 'primary' as const, attempt: 1 }] : message.sqlQueries),
         tokenUsage: data.token_usage || message.tokenUsage,
+      }));
+      return;
+    }
+
+    if (eventType === 'additional_data') {
+      const sqlText = typeof data.sql === 'string' ? data.sql.trim() : '';
+      updateAssistantMessage(assistantId, (message) => ({
+        ...appendEvent(message),
+        sqlQueries: sqlText
+          ? [
+              ...(message.sqlQueries || []),
+              {
+                sql: sqlText,
+                source: 'agentic' as const,
+                reason: typeof data.reason === 'string' ? data.reason : '',
+                step: typeof data.step === 'number' ? data.step : undefined,
+              },
+            ]
+          : (message.sqlQueries || []),
       }));
       return;
     }
@@ -388,6 +419,7 @@ export default function ChatPage() {
       role: 'assistant',
       content: '',
       startedAt: Date.now(),
+      sqlQueries: [],
       currentStep: 0,
       statusText: '',
       statusHistory: [],

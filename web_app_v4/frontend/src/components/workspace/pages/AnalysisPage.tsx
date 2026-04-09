@@ -185,7 +185,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, instructio
                   />
                   {message.role === 'assistant' && message.isDone && (message.followUpSuggestions || []).length > 0 ? (
                     <div style={{ marginTop: 12 }} className="space-y-3">
-                      <ReferenceDataDisclosure columns={message.columns} rows={message.rows} sql={message.sql} />
+                      <ReferenceDataDisclosure columns={message.columns} rows={message.rows} sql={message.sql} sqlQueries={message.sqlQueries} />
                       <FollowUpSuggestions suggestions={message.followUpSuggestions || []} onSelect={onSend} />
                     </div>
                   ) : null}

@@ -58,7 +58,11 @@ async def process_chat(message: str, session_id: str, user_id: str,
             )
             timings_ms["sql_stage"] = _ms(t)
             yield sse_event("thinking", {"thinking": sql_result["thinking"]})
-            yield sse_event("sql", {"sql": sql_result["sql"], "token_usage": sql_result["token_usage"]})
+            yield sse_event("sql", {
+                "sql": sql_result["sql"],
+                "sql_attempts": sql_result.get("sql_attempts", []),
+                "token_usage": sql_result["token_usage"],
+            })
 
             # Step 2: Data
             yield sse_event("status", {"step": 2, "text": "Đã nhận dữ liệu từ database..."})
@@ -158,6 +162,7 @@ async def process_chat(message: str, session_id: str, user_id: str,
                 "reply": reply_result.get("reply", ""),
                 "chart_config": reply_result.get("chart_config"),
                 "blocks": reply_result.get("blocks"),
+                "additional_data": additional_data,
                 "reply_token_usage": reply_tokens,
                 "grand_total": grand_total,
             })

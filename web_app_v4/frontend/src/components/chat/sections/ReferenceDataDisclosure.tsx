@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { ChevronDown } from 'lucide-react';
+import type { SqlQueryEntry } from '@/types/types';
 
 function normalizeIdentifier(text: string) {
   return text.replace(/^[`"'[]+/, '').replace(/[`"'\]]+$/, '').replace(/[;,]$/, '').trim();
@@ -29,16 +30,31 @@ interface ReferenceDataDisclosureProps {
   columns?: string[];
   rows?: string[][];
   sql?: string;
+  sqlQueries?: SqlQueryEntry[];
 }
 
-export default function ReferenceDataDisclosure({ columns, rows, sql }: ReferenceDataDisclosureProps) {
+export default function ReferenceDataDisclosure({ columns, rows, sql, sqlQueries }: ReferenceDataDisclosureProps) {
   void rows;
 
   const colNames = useMemo(() => (Array.isArray(columns) ? columns.filter(Boolean) : []), [columns]);
-  const sqlText = useMemo(() => (typeof sql === 'string' ? sql.trim() : ''), [sql]);
-  const tableNames = useMemo(() => extractTableNames(sqlText), [sqlText]);
+  const sqlTexts = useMemo(() => {
+    const fromQueries = (sqlQueries || [])
+      .map((item) => (typeof item?.sql === 'string' ? item.sql.trim() : ''))
+      .filter(Boolean);
+    if (fromQueries.length > 0) return fromQueries;
+    return typeof sql === 'string' && sql.trim() ? [sql.trim()] : [];
+  }, [sql, sqlQueries]);
+  const tableNames = useMemo(() => {
+    const names: string[] = [];
+    sqlTexts.forEach((query) => {
+      extractTableNames(query).forEach((name) => {
+        if (!names.includes(name)) names.push(name);
+      });
+    });
+    return names;
+  }, [sqlTexts]);
 
-  if (!sqlText && colNames.length === 0) return null;
+  if (sqlTexts.length === 0 && colNames.length === 0) return null;
 
   return (
     <details className="rounded-2xl bg-white">
@@ -79,11 +95,11 @@ export default function ReferenceDataDisclosure({ columns, rows, sql }: Referenc
             )}
           </div>
 
-          {sqlText ? (
+          {sqlTexts.length > 0 ? (
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Câu SQL</div>
               <div className="mt-2 whitespace-pre-wrap break-words rounded-xl bg-slate-50 px-3 py-2 font-mono text-[12px] leading-relaxed text-slate-700">
-                {sqlText}
+                {sqlTexts.join('\n\n---\n\n')}
               </div>
             </div>
           ) : null}

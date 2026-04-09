@@ -93,6 +93,7 @@ def text_to_sql(question: str, memory_context: str = "", custom_instruction: str
 
     sql = clean_sql(message_text(response.choices[0].message))
     thinking = extract_thinking(response)
+    sql_attempts = [sql] if sql else []
 
     try:
         _validate_generated_sql(sql)
@@ -107,12 +108,15 @@ def text_to_sql(question: str, memory_context: str = "", custom_instruction: str
         for k in ("input", "thinking", "output", "total"):
             usage[k] += retry_usage[k]
         sql = clean_sql(message_text(retry_response.choices[0].message))
+        if sql:
+            sql_attempts.append(sql)
         thinking += "\n\n[Retry] " + extract_thinking(retry_response)
         _validate_generated_sql(sql)
         db_result = execute_sql(sql)
 
     return {
         "sql": sql,
+        "sql_attempts": sql_attempts,
         "thinking": thinking,
         "token_usage": usage,
         "columns": db_result["columns"],
@@ -139,6 +143,7 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
 
     sql = clean_sql(message_text(response.choices[0].message))
     thinking = extract_thinking(response)
+    sql_attempts = [sql] if sql else []
 
     retry_count = 0
     max_retries = int(os.getenv("SQL_MAX_RETRIES", "2"))
@@ -165,6 +170,8 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
             for k in ("input", "thinking", "output", "total"):
                 usage[k] += retry_usage[k]
             sql = clean_sql(message_text(retry_response.choices[0].message))
+            if sql:
+                sql_attempts.append(sql)
             thinking += f"\n\n[Retry {retry_count}] " + extract_thinking(retry_response)
 
     timing["retry_count"] = float(retry_count)
@@ -172,6 +179,7 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
 
     return {
         "sql": sql,
+        "sql_attempts": sql_attempts,
         "thinking": thinking,
         "token_usage": usage,
         "columns": db_result["columns"],

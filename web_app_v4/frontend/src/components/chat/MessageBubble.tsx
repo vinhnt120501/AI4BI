@@ -11,7 +11,7 @@ import BlockRenderer from './blocks/BlockRenderer';
 import UserBubble from './sections/UserBubble';
 import ActionButtons from './sections/ActionButtons';
 import ProgressTimeline from './sections/ProgressTimeline';
-import SqlSection from './sections/SqlSection';
+import SqlQueriesSection from './sections/SqlQueriesSection';
 import TokenSection from './sections/TokenSection';
 import { MarkdownTableWrapper } from './MarkdownTableRenderer';
 
@@ -75,7 +75,8 @@ export default function MessageBubble({
       : (columns && rows ? detectChartConfig(columns, rows) : null))
     : null;
   const canCopy = Boolean(copyText?.trim());
-  const hasExecutionLog = Boolean(message.sql || message.tokenUsage || message.replyTokenUsage);
+  const hasExecutionLog = Boolean((message.sqlQueries && message.sqlQueries.length > 0) || message.sql || message.tokenUsage || message.replyTokenUsage);
+  const sqlQueryCount = (message.sqlQueries || []).length || (message.sql ? 1 : 0);
 
   const hasProgress = Boolean(
     (eventTimeline && eventTimeline.length > 0) ||
@@ -153,11 +154,17 @@ export default function MessageBubble({
               Execution Log
             </div>
             <div className="mt-1 text-[13px] text-slate-600">
-              SQL query and token consumption for this response.
+              {sqlQueryCount > 0
+                ? `${sqlQueryCount} SQL quer${sqlQueryCount === 1 ? 'y' : 'ies'} and token consumption for this response.`
+                : 'Token consumption for this response.'}
             </div>
           </div>
           <div className="space-y-3 p-3">
-            {message.sql ? <SqlSection sql={message.sql} /> : null}
+            {(message.sqlQueries || []).length > 0 ? (
+              <SqlQueriesSection queries={message.sqlQueries} />
+            ) : message.sql ? (
+              <SqlQueriesSection queries={[{ sql: message.sql, source: 'primary', attempt: 1 }]} />
+            ) : null}
             {(message.tokenUsage || message.replyTokenUsage) ? (
               <TokenSection tokenUsage={message.tokenUsage} replyTokenUsage={message.replyTokenUsage} />
             ) : null}

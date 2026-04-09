@@ -11,6 +11,8 @@ import BlockRenderer from './blocks/BlockRenderer';
 import UserBubble from './sections/UserBubble';
 import ActionButtons from './sections/ActionButtons';
 import ProgressTimeline from './sections/ProgressTimeline';
+import SqlSection from './sections/SqlSection';
+import TokenSection from './sections/TokenSection';
 import { MarkdownTableWrapper } from './MarkdownTableRenderer';
 
 interface MessageBubbleProps {
@@ -73,6 +75,7 @@ export default function MessageBubble({
       : (columns && rows ? detectChartConfig(columns, rows) : null))
     : null;
   const canCopy = Boolean(copyText?.trim());
+  const hasExecutionLog = Boolean(message.sql || message.tokenUsage || message.replyTokenUsage);
 
   const hasProgress = Boolean(
     (eventTimeline && eventTimeline.length > 0) ||
@@ -142,6 +145,25 @@ export default function MessageBubble({
           )}
         </div>
       )}
+
+      {hasExecutionLog ? (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/70">
+          <div className="border-b border-slate-200 px-4 py-3">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Execution Log
+            </div>
+            <div className="mt-1 text-[13px] text-slate-600">
+              SQL query and token consumption for this response.
+            </div>
+          </div>
+          <div className="space-y-3 p-3">
+            {message.sql ? <SqlSection sql={message.sql} /> : null}
+            {(message.tokenUsage || message.replyTokenUsage) ? (
+              <TokenSection tokenUsage={message.tokenUsage} replyTokenUsage={message.replyTokenUsage} />
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

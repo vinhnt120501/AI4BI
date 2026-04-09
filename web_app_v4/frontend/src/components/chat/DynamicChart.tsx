@@ -414,8 +414,15 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ SCATTER ═══
       case 'scatter': {
-        const xF = activeYKeys[0] || xKey;
-        const yF = activeYKeys[1] || activeYKeys[0];
+        const numericFields = Object.keys(chartData[0] || {}).filter(
+          (key) => key !== xKey && typeof chartData[0]?.[key] === 'number',
+        );
+        const xF = xKey;
+        let yF = activeYKeys.find((key) => key && key !== xF) || '';
+        if (!yF) {
+          yF = numericFields.find((key) => key !== xF) || '';
+        }
+        if (!xF || !yF || xF === yF) return null;
         const zF = opts.zField;
         return (
           <ScatterChart>

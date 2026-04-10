@@ -394,6 +394,7 @@ def _fetch_return_rate_wow_by_region(as_of: date) -> list[dict]:
 
 
 def _fetch_target_mtd_by_shop(as_of: date) -> list[dict]:
+    start_of_month = as_of.replace(day=1)
     end_exclusive = _next_day(as_of)
     sql = """
     WITH mtd AS (
@@ -401,7 +402,7 @@ def _fetch_target_mtd_by_shop(as_of: date) -> list[dict]:
         sod.shop_code AS shop_code,
         SUM(sod.line_item_amount_after_discount) AS mtd_sales
       FROM view_genie_vaccine_sales_order_detail sod
-      WHERE sod.order_completion_date >= DATE_FORMAT(%s, '%%Y-%%m-01')
+      WHERE sod.order_completion_date >= %s
         AND sod.order_completion_date < %s
       GROUP BY sod.shop_code
     )
@@ -418,7 +419,7 @@ def _fetch_target_mtd_by_shop(as_of: date) -> list[dict]:
     """
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
-    cursor.execute(sql, (end_exclusive, end_exclusive, end_exclusive, end_exclusive))
+    cursor.execute(sql, (start_of_month, end_exclusive, as_of, as_of))
     rows = cursor.fetchall() or []
     cursor.close()
     conn.close()

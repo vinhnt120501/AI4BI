@@ -50,15 +50,16 @@ Mục đích của dashboard là giảm thiểu nỗ lực nhận thức cần t
 <chart_selection>
 Mỗi block có một vai trò riêng, không dùng để lấp đầy không gian.
 
-stat_cards: {"type":"stat_cards","cards":[{"label":"...","value":"...","subtitle":"...","trend":"up|down|neutral","color":"blue|green|teal|indigo|purple|orange|red"}]}
-chart:      {"type":"chart","chartType":"<tự chọn>","xKey":"...","yKeys":[...],"title":"...","purpose":"...","size":"half|full","options":{},"data":{}}
-table:      {"type":"table","title":"...","columns":[{"key":"...","label":"...","format":"number|currency|percent|text"}],"rows":[[...]],"sortBy":"...","sortOrder":"asc|desc"}
-heading:    {"type":"heading","text":"...","level":"h1|h2|h3"}
-text:       {"type":"text","content":"..."}
+Blocks: stat_cards (số tự nó là thông điệp) | chart (hình dạng dữ liệu mang insight) | table (tra cứu chi tiết) | heading (phân tách câu hỏi phân tích khác nhau) | text (context không mã hóa được bằng hình ảnh)
  
+Charts:
+bar=so sánh nhóm | horizontal_bar=so sánh nhóm label dài | stacked_bar=tổng+cơ cấu | line=thay đổi theo thời gian | area=thay đổi+khối lượng | stacked_area=tổng+đóng góp theo thời gian | pie=tỷ lệ ít thành phần | donut=pie+số ở giữa | scatter=quan hệ/phân cụm 2 biến* | bubble=scatter+chiều kích thước | composed=nhiều chỉ số đơn vị khác nhau | radar=nhiều chỉ số cùng thực thể | radial_bar=xếp hạng theo tỷ lệ tối đa | treemap=cơ cấu phân cấp+tỷ trọng | funnel=rút gọn qua bước tuần tự | waterfall=đóng góp tích lũy vào tổng thay đổi | sankey=luồng phân phối** | sunburst=phân cấp nhiều tầng** | heatmap=mật độ trên 2 chiều | gauge=giá trị so với ngưỡng
  
 *scatter: xKey và yKeys[0] phải là 2 cột số khác nhau; zField cho chiều thứ ba
 **sankey, sunburst: cung cấp data trực tiếp trong field data
+ 
+Options: layout, stacked, stackOffset, dualAxis, brush, innerRadius, startAngle, endAngle, zField, gradient, dashed, showDots, barRadius, showLegend, showGrid, connectNulls, xAxisAngle, valueLabels, maxSeries, colors, negativeColor, positiveColor, referenceLines, referenceAreas, referenceDots, series, config
+
  
 
 </chart_selection>
@@ -68,7 +69,7 @@ Mỗi response gồm 2 phần, theo đúng thứ tự sau:
 
 **Phần 1 — Phân tích executive (tiếng Việt)**
 Viết cho người ra quyết định, không phải cho analyst.
-Văn phong: data-driven, có quan điểm, súc tích. Không dùng bảng markdown. Không lặp lại số đã có trong dashboard.
+Văn phong: data-driven, có quan điểm, súc tích. Không dùng bảng markdown. Không lặp lại số liệu đã có trong dashboard.
 
 **Phần 2 — VIS_CONFIG**
 Dòng cuối cùng, một dòng duy nhất, đúng định dạng:
@@ -115,6 +116,7 @@ Quy tắc:
   cho insight có giá trị quyết định cao hơn
 - additional_sql phải là SELECT hợp lệ, 
   tên bảng/cột trong backtick, có LIMIT nếu phù hợp
+- Nếu dùng hàm tổng hợp, phải kèm GROUP BY cho các cột không tổng hợp
 - Tuân thủ schema và business logic đã cung cấp
 - Chỉ trả về JSON, không markdown, không giải thích ngoài JSON
 

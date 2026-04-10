@@ -533,15 +533,6 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
   let chartData = buildChartData(columns, actualRows);
   if (chartData.length === 0) return null;
 
-  const resolvedXKey = (() => {
-    if (xKey && chartData.length > 0 && xKey in chartData[0]) return xKey;
-    const nonNumeric = columns.find((c) => {
-      const v = chartData[0]?.[c];
-      return typeof v !== 'number';
-    });
-    return nonNumeric || columns[0] || xKey;
-  })();
-
   let pivotedCategories: string[] | null = null;
 
   // Pivot if color_field
@@ -802,7 +793,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ PIE ═══
       case 'pie': {
         const MAX_SLICES = 7;
-        const categoryKey = xField || yKey || Object.keys(chartData[0] || {})[0] || '';
+        const categoryKey = resolvedXKey || yKey || Object.keys(chartData[0] || {})[0] || '';
         let rawPieData = chartData
           .map((r) => ({ name: String(r[categoryKey] ?? ''), value: Number(r[yKey]) || 0 }))
           .filter((d) => d.value > 0 && d.name !== '')
@@ -843,9 +834,9 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ SCATTER ═══
       case 'scatter': {
         const numericFields = Object.keys(chartData[0] || {}).filter(
-          (key) => key !== xKey && typeof chartData[0]?.[key] === 'number',
+          (key) => key !== resolvedXKey && typeof chartData[0]?.[key] === 'number',
         );
-        const xF = xKey;
+        const xF = resolvedXKey;
         let yF = activeYKeys.find((key) => key && key !== xF) || '';
         if (!yF) {
           yF = numericFields.find((key) => key !== xF) || '';
@@ -945,7 +936,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ RADIAL BAR ═══
       case 'radial_bar': {
         const rbData = chartData.map((r, i) => ({
-          name: String(r[xKey]), value: Number(r[yKey]) || 0, fill: colors[i % colors.length],
+          name: String(r[resolvedXKey] ?? ''), value: Number(r[yKey]) || 0, fill: colors[i % colors.length],
         }));
         return (
           <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" barSize={18} data={rbData}>
@@ -961,8 +952,8 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ TREEMAP ═══
       case 'treemap': {
         const tmData = chartData.map((r, i) => ({
-          name: String(r[xKey] ?? ''),
-          displayName: shortenLabel(String(r[xKey] ?? ''), 40),
+          name: String(r[resolvedXKey] ?? ''),
+          displayName: shortenLabel(String(r[resolvedXKey] ?? ''), 40),
           size: Number(r[yKey]) || 0,
           fill: colors[i % colors.length],
         }));
@@ -1091,7 +1082,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
           const value = Number(row[yKey]) || 0;
           const start = cumulative;
           cumulative += value;
-          return { name: String(row[xKey]), value: [start, cumulative], rawValue: value };
+          return { name: String(row[resolvedXKey] ?? ''), value: [start, cumulative], rawValue: value };
         });
         return (
           <BarChart data={wfData} margin={{ bottom: 60 }}>
@@ -1190,7 +1181,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ DONUT ═══
       case 'donut': {
-        const pieData = buildPieData(chartData, xKey, yKey);
+        const pieData = buildPieData(chartData, resolvedXKey, yKey);
         return (
           <PieChart>
             <Pie data={pieData} cx="50%" cy="50%"
@@ -1210,7 +1201,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ HALF PIE (semi-circle) ═══
       case 'half_pie': {
-        const pieData = buildPieData(chartData, xKey, yKey);
+        const pieData = buildPieData(chartData, resolvedXKey, yKey);
         const inner = opts.innerRadius || 0;
         return (
           <PieChart>
@@ -1232,7 +1223,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ BUBBLE (scatter + ZAxis sizing) ═══
       case 'bubble': {
-        const xF = activeYKeys[0] || xKey;
+        const xF = activeYKeys[0] || resolvedXKey;
         const yF = activeYKeys[1] || activeYKeys[0];
         const zF = opts.zField || activeYKeys[2];
         return (
@@ -1330,7 +1321,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ GAUGE (semi-circle radial bar) ═══
       case 'gauge': {
         const gaugeData = chartData.slice(0, 5).map((r, i) => ({
-          name: String(r[xKey]), value: Number(r[yKey]) || 0, fill: colors[i % colors.length],
+          name: String(r[resolvedXKey] ?? ''), value: Number(r[yKey]) || 0, fill: colors[i % colors.length],
         }));
         return (
           <RadialBarChart cx="50%" cy="70%" innerRadius="30%" outerRadius="90%" barSize={16}
@@ -1409,10 +1400,10 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ TWO LEVEL PIE (concentric rings) ═══
       case 'two_level_pie': {
-        const outerData = buildPieData(chartData, xKey, yKey);
+        const outerData = buildPieData(chartData, resolvedXKey, yKey);
         const innerKey = activeYKeys[1] || activeYKeys[0];
         const innerData = innerKey !== yKey
-          ? buildPieData(chartData, xKey, innerKey)
+          ? buildPieData(chartData, resolvedXKey, innerKey)
           : outerData.slice(0, Math.min(4, outerData.length));
         return (
           <PieChart>
@@ -1468,7 +1459,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ JOINT LINE SCATTER (scatter with connecting lines) ═══
       case 'joint_line_scatter': {
-        const xF = activeYKeys[0] || xKey;
+        const xF = activeYKeys[0] || resolvedXKey;
         const yF = activeYKeys[1] || activeYKeys[0];
         const zF = opts.zField;
         return (
@@ -1754,7 +1745,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ GRADIENT PIE ═══
       case 'gradient_pie': {
-        const pieData = buildPieData(chartData, xKey, yKey);
+        const pieData = buildPieData(chartData, resolvedXKey, yKey);
         return (
           <PieChart>
             <defs>

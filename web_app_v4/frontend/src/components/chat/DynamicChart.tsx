@@ -72,6 +72,41 @@ function shortenLabel(label: string, max = 20): string {
   return label.length > max ? label.slice(0, max) + '…' : label;
 }
 
+function shortenLabelByWidth(label: string, width: number, min = 6, max = 28): string {
+  const safe = typeof label === 'string' ? label : String(label ?? '');
+  const estimated = Math.max(min, Math.min(max, Math.floor((width || 0) / 7)));
+  return shortenLabel(safe, estimated);
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function TreemapCellContent(props: any) {
+  const {
+    x, y, width, height, name, value, fill, payload,
+  } = props;
+
+  if (width < 24 || height < 20) return null;
+
+  const rawLabel = String(payload?.displayName ?? payload?.name ?? name ?? '');
+  const label = shortenLabelByWidth(rawLabel, width - 10);
+  const showValue = width >= 72 && height >= 42;
+
+  return (
+    <g>
+      <rect x={x} y={y} width={width} height={height} rx={4} ry={4} fill={fill} stroke="#fff" strokeWidth={2} />
+      {label ? (
+        <text x={x + 6} y={y + 14} fill="#ffffff" fontSize={11} fontWeight={600}>
+          {label}
+        </text>
+      ) : null}
+      {showValue ? (
+        <text x={x + 6} y={y + (label ? 28 : 16)} fill="rgba(255,255,255,0.92)" fontSize={10}>
+          {smartFormat(Number(value) || 0)}
+        </text>
+      ) : null}
+    </g>
+  );
+}
+
 // ─── Data Processing ───
 type Row = Record<string, string | number>;
 
@@ -147,11 +182,22 @@ function pivotData(data: Row[], xField: string, colorField: string, yField: stri
 // ─── Resolve yKeys ───
 function resolveYKeys(data: Row[], xKey: string, yKeys?: string[]): string[] {
   if (yKeys && yKeys.length > 0) {
-    const valid = yKeys.filter((k) => data.length > 0 && k in data[0]);
+    const valid = yKeys.filter((k) => data.length > 0 && k in data[0] && typeof data[0][k] === 'number');
     if (valid.length > 0) return valid;
   }
   if (data.length === 0) return [];
   return Object.keys(data[0]).filter((k) => k !== xKey && typeof data[0][k] === 'number');
+}
+
+function resolveXKey(data: Row[], xKey: string, columns: string[]): string {
+  if (data.length === 0) return xKey;
+  const rowKeys = Object.keys(data[0]);
+  if (xKey && rowKeys.includes(xKey)) return xKey;
+
+  const fallbackStringKey = rowKeys.find((k) => typeof data[0][k] !== 'number');
+  if (fallbackStringKey) return fallbackStringKey;
+
+  return rowKeys[0] || xKey;
 }
 
 function selectTopYKeys(data: Row[], yKeys: string[], maxSeries = 8): string[] {
@@ -218,15 +264,17 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
     chartData = aggregateData(chartData, transformConfig);
   }
 
-  let yKeys = pivotedCategories || resolveYKeys(chartData, xKey, block.yKeys);
-  if (yKeys.length === 0 && xKey) {
-    chartData = ensureCountMetric(chartData, xKey);
+  const resolvedXKey = resolveXKey(chartData, xKey, columns);
+  let yKeys = pivotedCategories || resolveYKeys(chartData, resolvedXKey, block.yKeys);
+  if (yKeys.length === 0 && resolvedXKey) {
+    chartData = ensureCountMetric(chartData, resolvedXKey);
     yKeys = ['__count__'];
   }
   const maxSeries = typeof opts.maxSeries === 'number' && opts.maxSeries > 0 ? opts.maxSeries : 8;
   const activeYKeys = selectTopYKeys(chartData, yKeys, maxSeries);
   if (activeYKeys.length === 0 && !['pie', 'treemap', 'funnel', 'radial_bar'].includes(chartType)) return null;
   const yKey = activeYKeys[0] || block.yKey || '';
+  const xField = resolvedXKey || Object.keys(chartData[0] || {})[0] || '';
 
   // Common props
   const xAxisProps = {
@@ -265,7 +313,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
   // ─── Render by type ───
   const colors = getChartColors(opts);
-  const renderChart = (): React.ReactElement => {
+  const renderChart = (): React.ReactElement | null => {
     switch (chartType) {
 
       // ═══ BAR ═══
@@ -377,10 +425,13 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ PIE ═══
       case 'pie': {
         const MAX_SLICES = 7;
+        const categoryKey = xField || yKey || Object.keys(chartData[0] || {})[0] || '';
         let rawPieData = chartData
-          .map((r) => ({ name: String(r[xKey]), value: Number(r[yKey]) || 0 }))
-          .filter((d) => d.value > 0)
+          .map((r) => ({ name: String(r[categoryKey] ?? ''), value: Number(r[yKey]) || 0 }))
+          .filter((d) => d.value > 0 && d.name !== '')
           .sort((a, b) => b.value - a.value);
+
+        if (rawPieData.length === 0) return null;
 
         // Collapse small slices into "Khác" if too many
         let pieData = rawPieData;
@@ -530,15 +581,31 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ TREEMAP ═══
       case 'treemap': {
         const tmData = chartData.map((r, i) => ({
-          name: String(r[xKey]), size: Number(r[yKey]) || 0, fill: colors[i % colors.length],
+          name: String(r[xKey] ?? ''),
+          displayName: shortenLabel(String(r[xKey] ?? ''), 40),
+          size: Number(r[yKey]) || 0,
+          fill: colors[i % colors.length],
         }));
         return (
-          <Treemap data={tmData} dataKey="size" nameKey="name" aspectRatio={4 / 3}
-            stroke="#fff" fill={colors[0]}>
+          <Treemap
+            data={tmData}
+            dataKey="size"
+            nameKey="displayName"
+            aspectRatio={4 / 3}
+            stroke="#fff"
+            fill={colors[0]}
+            content={<TreemapCellContent />}
+          >
             {tmData.map((entry, i) => (
               <Cell key={i} fill={entry.fill} />
             ))}
-            <Tooltip formatter={fmtTooltip} />
+            <Tooltip
+              formatter={fmtTooltip}
+              labelFormatter={(_, payload) => {
+                const item = Array.isArray(payload) ? payload[0] : undefined;
+                return String(item?.payload?.name ?? '');
+              }}
+            />
           </Treemap>
         );
       }

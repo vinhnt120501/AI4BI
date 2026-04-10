@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import MessageBubble from '@/components/chat/MessageBubble';
+import ReferenceDataDisclosure from '@/components/chat/sections/ReferenceDataDisclosure';
 import FollowUpSuggestions from '@/components/chat/sections/FollowUpSuggestions';
 import { Message } from '@/types/types';
 import { buildApiUrl, DEFAULT_USER_ID } from '@/lib/api';

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BarChart, Bar, LineChart, Line, AreaChart, Area,
   PieChart, Pie, Cell, ComposedChart, ScatterChart, Scatter,
@@ -439,6 +439,7 @@ function buildPieData(chartData: Row[], xKey: string, yKey: string) {
 export default function DynamicChart({ block, columns, rows }: DynamicChartProps) {
   const { xKey, options, series, referenceLine, config: transformConfig } = block;
   const hintText = `${block.title || ''} ${block.purpose || ''}`.trim();
+  const [mounted, setMounted] = useState(false);
 
   // ─── Normalize chartType: map truly unknown aliases to a known type ───
   const rawChartType = String((block as unknown as { chartType?: string }).chartType || 'bar').toLowerCase().trim().replace(/[\s-]+/g, '_');
@@ -1872,6 +1873,16 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
     || chartType === 'vertical_composed') && chartData.length > 0)
     chartHeight = Math.max(300, chartData.length * 35);
   else if (chartData.length > 8) chartHeight = 400;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div style={{ width: '100%', height: chartHeight }} className="rounded-lg bg-slate-50" />
+    );
+  }
 
   return (
     <ResponsiveContainer width="100%" height={chartHeight}>

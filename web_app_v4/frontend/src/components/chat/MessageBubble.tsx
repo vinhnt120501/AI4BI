@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message, ChartBlock } from '@/types/types';
 import StreamingText from './shared/StreamingText';
+import { formatAssistantText, stripFollowUpSection } from './shared/formatAssistantText';
 import DynamicChart from './DynamicChart';
 import BlockRenderer from './blocks/BlockRenderer';
 import UserBubble from './sections/UserBubble';
@@ -66,6 +67,11 @@ export default function MessageBubble({
     ? content.replace(/\n?\|[^\n]+\|(\n\|[^\n]+\|)*/g, '').trim()
     : content;
 
+  const strippedContent = displayContent
+    ? stripFollowUpSection(displayContent, message.followUpSuggestions || [])
+    : displayContent;
+  const formattedDoneContent = strippedContent ? formatAssistantText(strippedContent) : strippedContent;
+
   // Fallback: nếu không có blocks, tạo ChartBlock từ chartConfig hoặc auto-detect
   // Chỉ render fallback sau khi pipeline hoàn tất (tránh hiển thị chart "tạm" sơ sài khi mới có data).
   const fallbackBlock: ChartBlock | null = !hasBlocks && Boolean(isDone)
@@ -115,9 +121,9 @@ export default function MessageBubble({
         )
       )}
 
-      {displayContent && (
+      {strippedContent && (
         <div className="overflow-hidden px-1 py-1 text-[15px] leading-relaxed text-slate-800">
-          <div className="prose prose-slate max-w-none prose-p:my-2 prose-headings:mb-3 prose-headings:mt-6 first:prose-headings:mt-0 prose-table:my-4 prose-table:text-sm">
+          <div className="markdown-output prose prose-slate max-w-none prose-p:my-2 prose-headings:mb-3 prose-headings:mt-6 first:prose-headings:mt-0 prose-table:my-4 prose-table:text-sm prose-headings:font-bold prose-headings:text-slate-900 prose-strong:text-slate-900 prose-li:text-slate-900 prose-ol:text-slate-900 prose-ol:marker:text-slate-900 prose-li:marker:font-bold prose-ol:marker:font-bold">
             {message.isDone ? (
               <MarkdownTableWrapper>
                 <ReactMarkdown
@@ -134,11 +140,11 @@ export default function MessageBubble({
                     tr: ({ children }) => <tr className="even:bg-slate-50/30 hover:bg-blue-50/30 transition-colors">{children}</tr>,
                   }}
                 >
-                  {displayContent}
+                  {formattedDoneContent}
                 </ReactMarkdown>
               </MarkdownTableWrapper>
             ) : (
-              <StreamingText text={displayContent} />
+              <StreamingText text={strippedContent} />
             )}
           </div>
           {canCopy && (

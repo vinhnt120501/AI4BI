@@ -8,14 +8,16 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   Treemap, Brush, ReferenceLine as RLine, RadialBarChart, RadialBar, ZAxis,
 } from 'recharts';
-import { ChartBlock } from '@/types/types';
+import { ChartBlock, SeriesConfig } from '@/types/types';
 
-// ─── Colors ───
-const COLORS = [
+// ─── Default Fallback Colors (dùng khi AI không chỉ định) ───
+const FALLBACK_COLORS = [
   '#6366f1', '#10b981', '#f59e0b', '#ef4444',
   '#8b5cf6', '#06b6d4', '#f97316', '#ec4899',
   '#14b8a6', '#a855f7', '#84cc16', '#e11d48',
 ];
+
+const NO_DATA = <div className="text-xs text-slate-400 italic px-3 py-4">Không đủ dữ liệu để vẽ biểu đồ</div>;
 
 // ─── Format Helpers ───
 function smartFormat(val: number): string {
@@ -42,6 +44,7 @@ function buildChartData(columns: string[], rows: string[][]): Row[] {
   return rows.map((row) => {
     const obj: Row = {};
     columns.forEach((col, i) => {
+      if (i >= row.length) return; // guard: row shorter than columns
       const val = row[i];
       const num = Number(val);
       obj[col] = isNaN(num) ? val : num;
@@ -51,19 +54,24 @@ function buildChartData(columns: string[], rows: string[][]): Row[] {
 }
 
 function aggregateData(data: Row[], config: ChartBlock['config']): Row[] {
-  if (!config) return data;
+  if (!config || data.length === 0) return data;
   let processed = [...data];
   const { x_field, y_fields, group_by, aggregate, sort_by, sort_order, limit } = config;
 
-  if (group_by && aggregate) {
+  // Validate fields exist in data
+  const sampleKeys = Object.keys(data[0]);
+  const validGroupBy = group_by && sampleKeys.includes(group_by) ? group_by : undefined;
+  const validXField = x_field && sampleKeys.includes(x_field) ? x_field : undefined;
+
+  if (validGroupBy && aggregate) {
     const groups: Record<string, Row[]> = {};
     processed.forEach((row) => {
-      const key = String(row[group_by] ?? row[x_field] ?? '');
+      const key = String(row[validGroupBy] ?? row[validXField ?? ''] ?? '');
       if (!groups[key]) groups[key] = [];
       groups[key].push(row);
     });
     processed = Object.entries(groups).map(([key, gRows]) => {
-      const result: Row = { [group_by || x_field]: key };
+      const result: Row = { [validGroupBy || validXField || 'group']: key };
       (y_fields || []).forEach((f) => {
         const vals = gRows.map((r) => r[f]).filter((v): v is number => typeof v === 'number');
         if (aggregate === 'sum') result[f] = vals.reduce((s, v) => s + v, 0);
@@ -75,7 +83,7 @@ function aggregateData(data: Row[], config: ChartBlock['config']): Row[] {
     });
   }
 
-  if (sort_by) {
+  if (sort_by && processed.length > 0 && sort_by in processed[0]) {
     processed.sort((a, b) => sort_order === 'asc'
       ? (a[sort_by] > b[sort_by] ? 1 : -1)
       : (a[sort_by] < b[sort_by] ? 1 : -1));
@@ -85,24 +93,55 @@ function aggregateData(data: Row[], config: ChartBlock['config']): Row[] {
 }
 
 function pivotData(data: Row[], xField: string, colorField: string, yField: string) {
+  // Validate fields exist
+  if (data.length === 0) return { data: [], categories: [] };
+  const sampleKeys = Object.keys(data[0]);
+  if (!sampleKeys.includes(xField) || !sampleKeys.includes(colorField)) {
+    return { data, categories: [] };
+  }
+
   const pivoted: Record<string, Row> = {};
   const categories = [...new Set(data.map((r) => String(r[colorField])))];
   data.forEach((row) => {
     const x = String(row[xField]);
     if (!pivoted[x]) pivoted[x] = { [xField]: x };
-    pivoted[x][String(row[colorField])] = row[yField];
+    pivoted[x][String(row[colorField])] = row[yField] ?? 0;
   });
   return { data: Object.values(pivoted), categories };
 }
 
-// ─── Resolve yKeys ───
+// ─── Resolve keys ───
+function resolveKey(data: Row[], key: string): string | null {
+  if (data.length === 0 || !key) return null;
+  if (key in data[0]) return key;
+  // Case-insensitive
+  const found = Object.keys(data[0]).find((k) => k.toLowerCase() === key.toLowerCase());
+  return found || null;
+}
+
 function resolveYKeys(data: Row[], xKey: string, yKeys?: string[]): string[] {
-  if (yKeys && yKeys.length > 0) {
-    const valid = yKeys.filter((k) => data.length > 0 && k in data[0]);
-    if (valid.length > 0) return valid;
-  }
   if (data.length === 0) return [];
-  return Object.keys(data[0]).filter((k) => k !== xKey && typeof data[0][k] === 'number');
+  const allKeys = Object.keys(data[0]);
+
+  if (yKeys && yKeys.length > 0) {
+    // Exact match
+    const exact = yKeys.filter((k) => k in data[0]);
+    if (exact.length > 0) return exact;
+    // Case-insensitive
+    const resolved = yKeys.map((k) => resolveKey(data, k)).filter((k): k is string => !!k);
+    if (resolved.length > 0) return resolved;
+  }
+
+  // Auto-detect: cột số trừ xKey, tối đa 3 để chart không bị rối
+  return allKeys.filter((k) => k !== xKey && typeof data[0][k] === 'number').slice(0, 3);
+}
+
+function resolveYKey(data: Row[], xKey: string, yKey: string | undefined, yKeys: string[]): string {
+  if (yKeys.length > 0 && resolveKey(data, yKeys[0])) return resolveKey(data, yKeys[0])!;
+  if (yKey && resolveKey(data, yKey)) return resolveKey(data, yKey)!;
+  // Fallback: first numeric column not xKey
+  if (data.length === 0) return yKey || '';
+  return Object.keys(data[0]).find((k) => k !== xKey && typeof data[0][k] === 'number') || yKey || '';
 }
 
 // ─── Props ───
@@ -114,8 +153,9 @@ interface DynamicChartProps {
 
 // ─── Main Component ───
 export default function DynamicChart({ block, columns, rows }: DynamicChartProps) {
-  const { chartType, xKey, options, series, referenceLine, config: transformConfig } = block;
+  const { chartType, options, series, referenceLine, config: transformConfig } = block;
   const opts = options || {};
+  const COLORS = (block.colors && block.colors.length > 0) ? block.colors : FALLBACK_COLORS;
 
   // Build & transform data
   let chartData = buildChartData(columns, rows);
@@ -123,18 +163,42 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
   let pivotedCategories: string[] | null = null;
 
-  // Pivot if color_field
+  // Pivot if color_field — validate fields exist before attempting
   if (transformConfig?.color_field && transformConfig.x_field && transformConfig.y_fields?.length === 1) {
     const piv = pivotData(chartData, transformConfig.x_field, transformConfig.color_field, transformConfig.y_fields[0]);
-    chartData = piv.data;
-    pivotedCategories = piv.categories;
+    if (piv.categories.length > 0) {
+      chartData = piv.data;
+      pivotedCategories = piv.categories;
+    } else if (transformConfig) {
+      chartData = aggregateData(chartData, transformConfig);
+    }
   } else if (transformConfig) {
     chartData = aggregateData(chartData, transformConfig);
   }
 
+  if (chartData.length === 0) return NO_DATA;
+
+  // Resolve xKey — sau pivot dùng config.x_field, fallback tìm cột phù hợp
+  let xKey = (pivotedCategories && transformConfig?.x_field) ? transformConfig.x_field : block.xKey;
+  const resolvedX = resolveKey(chartData, xKey);
+  if (resolvedX) {
+    xKey = resolvedX;
+  } else {
+    // Fallback: cột string đầu tiên hoặc cột đầu tiên
+    const allKeys = Object.keys(chartData[0]);
+    xKey = allKeys.find((k) => typeof chartData[0][k] === 'string') || allKeys[0] || xKey;
+  }
+
+  // Resolve yKeys — áp dụng cho mọi chart type (kể cả pie/treemap/funnel/radial_bar)
   const yKeys = pivotedCategories || resolveYKeys(chartData, xKey, block.yKeys);
-  if (yKeys.length === 0 && !['pie', 'treemap', 'funnel', 'radial_bar'].includes(chartType)) return null;
-  const yKey = yKeys[0] || block.yKey || '';
+  if (yKeys.length === 0) {
+    const fallbackYKeys = Object.keys(chartData[0]).filter((k) => k !== xKey && typeof chartData[0][k] === 'number').slice(0, 3);
+    if (fallbackYKeys.length === 0) return NO_DATA;
+    yKeys.push(...fallbackYKeys);
+  }
+
+  // Resolve yKey cho single-series charts (pie, treemap, funnel, radial_bar, waterfall)
+  const yKey = resolveYKey(chartData, xKey, block.yKey, yKeys);
 
   // Common props
   const xAxisProps = {
@@ -255,7 +319,9 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ PIE ═══
       case 'pie': {
-        const pieData = chartData.map((r) => ({ name: String(r[xKey]), value: Number(r[yKey]) || 0 }));
+        const pieData = chartData.map((r) => ({ name: String(r[xKey] ?? ''), value: Number(r[yKey]) || 0 }))
+          .filter((d) => d.value > 0);
+        if (pieData.length === 0) return NO_DATA as React.ReactElement;
         const inner = opts.innerRadius || 0;
         const sAngle = opts.startAngle ?? 0;
         const eAngle = opts.endAngle ?? 360;
@@ -279,9 +345,10 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ SCATTER ═══
       case 'scatter': {
-        const xF = yKeys[0] || xKey;
-        const yF = yKeys[1] || yKeys[0];
-        const zF = opts.zField;
+        const numericKeys = Object.keys(chartData[0] || {}).filter((k) => typeof chartData[0][k] === 'number');
+        const xF = resolveKey(chartData, yKeys[0]) || numericKeys[0] || xKey;
+        const yF = resolveKey(chartData, yKeys[1] || yKeys[0]) || numericKeys[1] || numericKeys[0] || xKey;
+        const zF = opts.zField ? resolveKey(chartData, opts.zField) : null;
         return (
           <ScatterChart>
             <CartesianGrid {...gridProps} />
@@ -301,12 +368,15 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ COMPOSED ═══
       case 'composed': {
-        const seriesConfig = series || yKeys.map((k, i) => ({
+        const seriesConfig: SeriesConfig[] = series || yKeys.map((k, i) => ({
           key: k,
           renderAs: (i === 0 ? 'bar' : 'line') as 'bar' | 'line' | 'area',
           yAxisId: (hasDualAxis ? (i === 0 ? 'left' : 'right') : 'left') as 'left' | 'right',
         }));
-        const hasDual = seriesConfig.some((s) => s.yAxisId === 'right');
+        // Filter series whose key actually exists in data
+        const validSeries = seriesConfig.filter((s) => !chartData[0] || resolveKey(chartData, s.key));
+        if (validSeries.length === 0) return NO_DATA as React.ReactElement;
+        const hasDual = validSeries.some((s) => s.yAxisId === 'right');
 
         return (
           <ComposedChart data={chartData} margin={{ bottom: 60, right: hasDual ? 20 : 5 }}>
@@ -321,18 +391,19 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
                 stroke={referenceLine.color || '#ef4444'} strokeDasharray="5 5"
                 label={{ value: referenceLine.label || '', position: 'insideTopRight', fontSize: 11 }} />
             )}
-            {seriesConfig.map((s, i) => {
-              const color = COLORS[i % COLORS.length];
+            {validSeries.map((s, i) => {
+              const color = s.color || COLORS[i % COLORS.length];
               const axisId = s.yAxisId || 'left';
+              const resolvedKey = resolveKey(chartData, s.key) || s.key;
               switch (s.renderAs) {
                 case 'area':
-                  return <Area key={s.key} type="monotone" dataKey={s.key} yAxisId={axisId}
+                  return <Area key={resolvedKey} type="monotone" dataKey={resolvedKey} yAxisId={axisId}
                     stroke={color} fill={color} fillOpacity={0.15} />;
                 case 'line':
-                  return <Line key={s.key} type="monotone" dataKey={s.key} yAxisId={axisId}
+                  return <Line key={resolvedKey} type="monotone" dataKey={resolvedKey} yAxisId={axisId}
                     stroke={color} strokeWidth={2.5} dot={{ r: 3, fill: '#fff', strokeWidth: 2 }} />;
                 default:
-                  return <Bar key={s.key} dataKey={s.key} yAxisId={axisId}
+                  return <Bar key={resolvedKey} dataKey={resolvedKey} yAxisId={axisId}
                     fill={color} radius={[4, 4, 0, 0]} opacity={0.9} />;
               }
             })}
@@ -361,8 +432,9 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ RADIAL BAR ═══
       case 'radial_bar': {
         const rbData = chartData.map((r, i) => ({
-          name: String(r[xKey]), value: Number(r[yKey]) || 0, fill: COLORS[i % COLORS.length],
-        }));
+          name: String(r[xKey] ?? ''), value: Number(r[yKey]) || 0, fill: COLORS[i % COLORS.length],
+        })).filter((d) => d.value > 0);
+        if (rbData.length === 0) return NO_DATA as React.ReactElement;
         return (
           <RadialBarChart cx="50%" cy="50%" innerRadius="20%" outerRadius="90%" barSize={18} data={rbData}>
             <RadialBar dataKey="value" background={{ fill: '#f1f5f9' }}
@@ -377,8 +449,9 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
       // ═══ TREEMAP ═══
       case 'treemap': {
         const tmData = chartData.map((r, i) => ({
-          name: String(r[xKey]), size: Number(r[yKey]) || 0, fill: COLORS[i % COLORS.length],
-        }));
+          name: String(r[xKey] ?? ''), size: Number(r[yKey]) || 0, fill: COLORS[i % COLORS.length],
+        })).filter((d) => d.size > 0);
+        if (tmData.length === 0) return NO_DATA as React.ReactElement;
         return (
           <Treemap data={tmData} dataKey="size" nameKey="name" aspectRatio={4 / 3}
             stroke="#fff" fill={COLORS[0]}>
@@ -392,7 +465,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
 
       // ═══ FUNNEL (using horizontal stacked bar as visual) ═══
       case 'funnel': {
-        const sorted = [...chartData].sort((a, b) => Number(b[yKey]) - Number(a[yKey]));
+        const sorted = [...chartData].sort((a, b) => Number(b[yKey] ?? 0) - Number(a[yKey] ?? 0));
         return (
           <BarChart data={sorted} layout="vertical" margin={{ left: 100 }}>
             <CartesianGrid {...gridProps} />
@@ -415,7 +488,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
           const value = Number(row[yKey]) || 0;
           const start = cumulative;
           cumulative += value;
-          return { name: String(row[xKey]), value: [start, cumulative], rawValue: value };
+          return { name: String(row[xKey] ?? ''), value: [start, cumulative], rawValue: value };
         });
         return (
           <BarChart data={wfData} margin={{ bottom: 60 }}>
@@ -452,13 +525,14 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
     }
   };
 
-  // ─── Height ───
-  const heightMap: Record<string, number> = {
-    radar: 400, radial_bar: 400, treemap: 350,
-  };
-  let chartHeight = heightMap[chartType] || 320;
-  if (isVertical || chartType === 'funnel') chartHeight = Math.max(300, chartData.length * 35);
-  else if (chartData.length > 8) chartHeight = 400;
+  // ─── Height (AI có thể chỉ định, fallback tự tính) ───
+  let chartHeight = block.height || 320;
+  if (!block.height) {
+    const heightMap: Record<string, number> = { radar: 400, radial_bar: 400, treemap: 350 };
+    chartHeight = heightMap[chartType] || 320;
+    if (isVertical || chartType === 'funnel') chartHeight = Math.max(300, chartData.length * 35);
+    else if (chartData.length > 8) chartHeight = 400;
+  }
 
   return (
     <ResponsiveContainer width="100%" height={chartHeight}>

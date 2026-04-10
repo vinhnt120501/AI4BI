@@ -43,9 +43,9 @@ interface AnalysisTableProps {
 export default function AnalysisTable({ block, data }: AnalysisTableProps) {
   const { title, columns, sortBy, sortOrder, limit } = block;
 
-  // Sort
+  // Sort — validate sortBy key exists in data
   let rows = [...data];
-  if (sortBy) {
+  if (sortBy && rows.length > 0 && sortBy in rows[0]) {
     rows.sort((a, b) => {
       const va = Number(a[sortBy]) || 0;
       const vb = Number(b[sortBy]) || 0;

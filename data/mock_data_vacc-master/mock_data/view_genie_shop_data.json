@@ -1,0 +1,2972 @@
+[
+  {
+    "shop_code": "75206",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Củ Chi",
+    "ward_name": "Phú Hòa Đông",
+    "address": "257 Lý Thái Tổ, Phú Hòa Đông, Huyện Củ Chi, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "17706",
+    "province_name": "Lạng Sơn",
+    "district_name": "Thành phố Lạng Sơn",
+    "ward_name": "Chi Lăng",
+    "address": "51 Hàng Bài, Chi Lăng, Thành phố Lạng Sơn, Lạng Sơn",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "99279",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Vì",
+    "ward_name": "Khánh Thượng",
+    "address": "245 Hàng Bài, Khánh Thượng, Ba Vì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "60145",
+    "province_name": "Hải Phòng",
+    "district_name": "Ngô Quyền",
+    "ward_name": "Đằng Giang",
+    "address": "261 Kim Mã, Đằng Giang, Ngô Quyền, Hải Phòng",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "62092",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Bình",
+    "ward_name": "Phường 1",
+    "address": "13 Nguyễn Văn Cừ, Phường 1, Quận Tân Bình, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "15282",
+    "province_name": "Ninh Bình",
+    "district_name": "Thành phố Ninh Bình",
+    "ward_name": "Nam Thành",
+    "address": "405 Nguyễn Công Trứ, Nam Thành, Thành phố Ninh Bình, Ninh Bình",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "65769",
+    "province_name": "Bến Tre",
+    "district_name": "Bến Tre",
+    "ward_name": "Phú Tú",
+    "address": "282 Ngô Quyền, Phú Tú, Bến Tre, Bến Tre",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "18152",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàng Mai",
+    "ward_name": "Lĩnh Nam",
+    "address": "407 Lý Thái Tổ, Lĩnh Nam, Hoàng Mai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "73646",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Nhà Bè",
+    "ward_name": "Phú Xuân",
+    "address": "18 Nguyễn Trãi, Phú Xuân, Huyện Nhà Bè, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "91234",
+    "province_name": "Kon Tum",
+    "district_name": "Ngọc Hồi",
+    "ward_name": "Đắk Kan",
+    "address": "187 Đội Cấn, Đắk Kan, Ngọc Hồi, Kon Tum",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "99319",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Gò Vấp",
+    "ward_name": "Phường 4",
+    "address": "202 Lý Thường Kiệt, Phường 4, Quận Gò Vấp, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "64730",
+    "province_name": "Tây Ninh",
+    "district_name": "Hòa Thành",
+    "ward_name": "Hiệp Tân",
+    "address": "5 Phan Đình Phùng, Hiệp Tân, Hòa Thành, Tây Ninh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "23216",
+    "province_name": "Hà Nội",
+    "district_name": "Thường Tín",
+    "ward_name": "Văn Bình",
+    "address": "261 Ngô Quyền, Văn Bình, Thường Tín, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "27627",
+    "province_name": "Vĩnh Long",
+    "district_name": "Long Hồ",
+    "ward_name": "An Bình",
+    "address": "76 Lê Văn Hưu, An Bình, Long Hồ, Vĩnh Long",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "84353",
+    "province_name": "Lai Châu",
+    "district_name": "Tam Đường",
+    "ward_name": "Bản Giang",
+    "address": "42 Phan Đình Phùng, Bản Giang, Tam Đường, Lai Châu",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "24324",
+    "province_name": "Hà Nội",
+    "district_name": "Hà Đông",
+    "ward_name": "Nguyễn Trãi",
+    "address": "262 Nguyễn Văn Cừ, Nguyễn Trãi, Hà Đông, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "98963",
+    "province_name": "Hà Nội",
+    "district_name": "Hà Đông",
+    "ward_name": "Phú La",
+    "address": "43 Cầu Giấy, Phú La, Hà Đông, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "11274",
+    "province_name": "Hải Dương",
+    "district_name": "Thành phố Hải Dương",
+    "ward_name": "Hải Tân",
+    "address": "128 Trần Hưng Đạo, Hải Tân, Thành phố Hải Dương, Hải Dương",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "42903",
+    "province_name": "Hà Nội",
+    "district_name": "Sơn Tây",
+    "ward_name": "Xuân Khanh",
+    "address": "146 Kim Mã, Xuân Khanh, Sơn Tây, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "35064",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàn Kiếm",
+    "ward_name": "Hàng Bạc",
+    "address": "260 Láng Hạ, Hàng Bạc, Hoàn Kiếm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "69325",
+    "province_name": "Gia Lai",
+    "district_name": "Pleiku",
+    "ward_name": "Diên Hồng",
+    "address": "329 Đinh Tiên Hoàng, Diên Hồng, Pleiku, Gia Lai",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "24116",
+    "province_name": "Vĩnh Phúc",
+    "district_name": "Phúc Yên",
+    "ward_name": "Nam Viêm",
+    "address": "48 Cầu Giấy, Nam Viêm, Phúc Yên, Vĩnh Phúc",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "34713",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 3",
+    "ward_name": "Phường 7",
+    "address": "188 Ngô Quyền, Phường 7, Quận 3, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "60485",
+    "province_name": "Bình Dương",
+    "district_name": "Dĩ An",
+    "ward_name": "Bình Thắng",
+    "address": "485 Phan Chu Trinh, Bình Thắng, Dĩ An, Bình Dương",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "95914",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Vì",
+    "ward_name": "Thuần Mỹ",
+    "address": "269 Trần Hưng Đạo, Thuần Mỹ, Ba Vì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "10869",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 12",
+    "ward_name": "Tân Thới Nhất",
+    "address": "285 Đinh Lễ, Tân Thới Nhất, Quận 12, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "92500",
+    "province_name": "Thanh Hóa",
+    "district_name": "Thành phố Thanh Hóa",
+    "ward_name": "Ba Đình",
+    "address": "18 Giải Phóng, Ba Đình, Thành phố Thanh Hóa, Thanh Hóa",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "83643",
+    "province_name": "Hà Nội",
+    "district_name": "Chương Mỹ",
+    "ward_name": "Ngọc Hòa",
+    "address": "432 Tràng Thi, Ngọc Hòa, Chương Mỹ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "14134",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 1",
+    "ward_name": "Cô Giang",
+    "address": "340 Đinh Lễ, Cô Giang, Quận 1, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "62723",
+    "province_name": "Hà Nội",
+    "district_name": "Sơn Tây",
+    "ward_name": "Ngô Quyền",
+    "address": "100 Đội Cấn, Ngô Quyền, Sơn Tây, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "23515",
+    "province_name": "Hà Nội",
+    "district_name": "Chương Mỹ",
+    "ward_name": "Tiên Phương",
+    "address": "75 Hai Bà Trưng, Tiên Phương, Chương Mỹ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "51553",
+    "province_name": "Điện Biên",
+    "district_name": "Thành phố Điện Biên Phủ",
+    "ward_name": "Thanh Bình",
+    "address": "56 Phan Chu Trinh, Thanh Bình, Thành phố Điện Biên Phủ, Điện Biên",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17334",
+    "province_name": "Hà Nội",
+    "district_name": "Hai Bà Trưng",
+    "ward_name": "Nguyễn Du",
+    "address": "334 Lý Thái Tổ, Nguyễn Du, Hai Bà Trưng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "13199",
+    "province_name": "Hà Nội",
+    "district_name": "Thường Tín",
+    "ward_name": "Hiền Giang",
+    "address": "243 Nguyễn Công Trứ, Hiền Giang, Thường Tín, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "78417",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Bình",
+    "ward_name": "Phường 7",
+    "address": "116 Cầu Giấy, Phường 7, Quận Tân Bình, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "25029",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 11",
+    "ward_name": "Phường 1",
+    "address": "497 Tràng Thi, Phường 1, Quận 11, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "65361",
+    "province_name": "Hà Nội",
+    "district_name": "Sóc Sơn",
+    "ward_name": "Quang Tiến",
+    "address": "354 Trần Hưng Đạo, Quang Tiến, Sóc Sơn, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "50504",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Gò Vấp",
+    "ward_name": "Phường 6",
+    "address": "112 Ngô Quyền, Phường 6, Quận Gò Vấp, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "93656",
+    "province_name": "Hà Nội",
+    "district_name": "Thường Tín",
+    "ward_name": "Chương Dương",
+    "address": "301 Nguyễn Huệ, Chương Dương, Thường Tín, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "51571",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Cần Giờ",
+    "ward_name": "An Thới Đông",
+    "address": "39 Giải Phóng, An Thới Đông, Huyện Cần Giờ, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "28132",
+    "province_name": "Hà Nội",
+    "district_name": "Đống Đa",
+    "ward_name": "Hàng Bột",
+    "address": "394 Xuân Thủy, Hàng Bột, Đống Đa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "20610",
+    "province_name": "Hà Nội",
+    "district_name": "Tây Hồ",
+    "ward_name": "Thụy Khuê",
+    "address": "433 Nguyễn Văn Cừ, Thụy Khuê, Tây Hồ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "93899",
+    "province_name": "Cà Mau",
+    "district_name": "Cà Mau",
+    "ward_name": "2",
+    "address": "266 Ngô Quyền, 2, Cà Mau, Cà Mau",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "98482",
+    "province_name": "Quảng Ninh",
+    "district_name": "Cẩm Phả",
+    "ward_name": "Cẩm Phú",
+    "address": "226 Phan Chu Trinh, Cẩm Phú, Cẩm Phả, Quảng Ninh",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "13293",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 6",
+    "ward_name": "Phường 8",
+    "address": "217 Kim Mã, Phường 8, Quận 6, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "65678",
+    "province_name": "Kon Tum",
+    "district_name": "Thành phố Kon Tum",
+    "ward_name": "Nguyễn Trãi",
+    "address": "199 Quang Trung, Nguyễn Trãi, Thành phố Kon Tum, Kon Tum",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "57902",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 8",
+    "ward_name": "Phường 2",
+    "address": "493 Xuân Thủy, Phường 2, Quận 8, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "24987",
+    "province_name": "Đồng Tháp",
+    "district_name": "Cao Lãnh",
+    "ward_name": "4",
+    "address": "391 Bà Triệu, 4, Cao Lãnh, Đồng Tháp",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "89314",
+    "province_name": "Hà Nội",
+    "district_name": "Đan Phượng",
+    "ward_name": "Trung Châu",
+    "address": "347 Nguyễn Công Trứ, Trung Châu, Đan Phượng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17331",
+    "province_name": "Cần Thơ",
+    "district_name": "Ninh Kiều",
+    "ward_name": "An Khánh",
+    "address": "466 Nguyễn Huệ, An Khánh, Ninh Kiều, Cần Thơ",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "88009",
+    "province_name": "Quảng Nam",
+    "district_name": "Hội An",
+    "ward_name": "Cẩm Châu",
+    "address": "225 Trần Hưng Đạo, Cẩm Châu, Hội An, Quảng Nam",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "91566",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Phú Nhuận",
+    "ward_name": "Phường 8",
+    "address": "67 Hoàng Văn Thụ, Phường 8, Quận Phú Nhuận, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "16538",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 8",
+    "ward_name": "Phường 4",
+    "address": "88 Lê Lợi, Phường 4, Quận 8, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "24422",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Oai",
+    "ward_name": "Thanh Oai",
+    "address": "180 Bà Triệu, Thanh Oai, Thanh Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "36948",
+    "province_name": "Đà Nẵng",
+    "district_name": "Hải Châu",
+    "ward_name": "Bình Hiên",
+    "address": "248 Trần Phú, Bình Hiên, Hải Châu, Đà Nẵng",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "57904",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 5",
+    "ward_name": "Phường 3",
+    "address": "379 Quang Trung, Phường 3, Quận 5, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "98946",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Bình Chánh",
+    "ward_name": "Lê Minh Xuân",
+    "address": "21 Láng Hạ, Lê Minh Xuân, Huyện Bình Chánh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "16889",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 3",
+    "ward_name": "Phường 4",
+    "address": "380 Trần Nhân Tông, Phường 4, Quận 3, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "55655",
+    "province_name": "Bình Dương",
+    "district_name": "Thủ Dầu Một",
+    "ward_name": "Hiệp An",
+    "address": "63 Quang Trung, Hiệp An, Thủ Dầu Một, Bình Dương",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "87819",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Gò Vấp",
+    "ward_name": "Phường 8",
+    "address": "239 Đội Cấn, Phường 8, Quận Gò Vấp, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "70898",
+    "province_name": "Bắc Giang",
+    "district_name": "Lạng Giang",
+    "ward_name": "Hương Lạc",
+    "address": "211 Trần Phú, Hương Lạc, Lạng Giang, Bắc Giang",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "80145",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 3",
+    "ward_name": "Phường 3",
+    "address": "45 Phan Chu Trinh, Phường 3, Quận 3, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "63184",
+    "province_name": "Hà Nội",
+    "district_name": "Ứng Hòa",
+    "ward_name": "Đông Lỗ",
+    "address": "276 Trần Phú, Đông Lỗ, Ứng Hòa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "43320",
+    "province_name": "Hà Nội",
+    "district_name": "Phúc Thọ",
+    "ward_name": "Long Xuyên",
+    "address": "182 Xuân Thủy, Long Xuyên, Phúc Thọ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "80789",
+    "province_name": "Quảng Nam",
+    "district_name": "Tam Kỳ",
+    "ward_name": "An Xuân",
+    "address": "144 Bà Triệu, An Xuân, Tam Kỳ, Quảng Nam",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "85645",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Trì",
+    "ward_name": "Thanh Trì",
+    "address": "151 Quang Trung, Thanh Trì, Thanh Trì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "44226",
+    "province_name": "Hà Nội",
+    "district_name": "Thạch Thất",
+    "ward_name": "Hương Ngải",
+    "address": "13 Lê Văn Hưu, Hương Ngải, Thạch Thất, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "71411",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 10",
+    "ward_name": "Phường 1",
+    "address": "19 Hai Bà Trưng, Phường 1, Quận 10, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "68992",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 3",
+    "ward_name": "Phường 6",
+    "address": "362 Đinh Lễ, Phường 6, Quận 3, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "51532",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Cần Giờ",
+    "ward_name": "Lý Nhơn",
+    "address": "450 Đinh Lễ, Lý Nhơn, Huyện Cần Giờ, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "28858",
+    "province_name": "Vĩnh Long",
+    "district_name": "Vĩnh Long",
+    "ward_name": "3",
+    "address": "145 Hoàng Văn Thụ, 3, Vĩnh Long, Vĩnh Long",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "11736",
+    "province_name": "Đắk Lắk",
+    "district_name": "Buôn Ma Thuột",
+    "ward_name": "Khánh Xuân",
+    "address": "297 Ngô Quyền, Khánh Xuân, Buôn Ma Thuột, Đắk Lắk",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "95841",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Củ Chi",
+    "ward_name": "Hòa Phú",
+    "address": "143 Bà Triệu, Hòa Phú, Huyện Củ Chi, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "11717",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Nhà Bè",
+    "ward_name": "Phước Lộc",
+    "address": "201 Đội Cấn, Phước Lộc, Huyện Nhà Bè, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "60679",
+    "province_name": "Hà Nội",
+    "district_name": "Mỹ Đức",
+    "ward_name": "Hùng Tiến",
+    "address": "378 Đinh Lễ, Hùng Tiến, Mỹ Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "25297",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 7",
+    "ward_name": "Tân Phong",
+    "address": "332 Quang Trung, Tân Phong, Quận 7, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "21222",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Củ Chi",
+    "ward_name": "Bình Mỹ",
+    "address": "104 Giải Phóng, Bình Mỹ, Huyện Củ Chi, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "44037",
+    "province_name": "Sóc Trăng",
+    "district_name": "Vĩnh Châu",
+    "ward_name": "Vĩnh Châu",
+    "address": "116 Đội Cấn, Vĩnh Châu, Vĩnh Châu, Sóc Trăng",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "34117",
+    "province_name": "Bạc Liêu",
+    "district_name": "Bạc Liêu",
+    "ward_name": "1",
+    "address": "126 Láng Hạ, 1, Bạc Liêu, Bạc Liêu",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "87421",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 4",
+    "ward_name": "Phường 1",
+    "address": "237 Lý Thường Kiệt, Phường 1, Quận 4, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "67765",
+    "province_name": "Phú Thọ",
+    "district_name": "Việt Trì",
+    "ward_name": "Gia Cẩm",
+    "address": "496 Ngô Quyền, Gia Cẩm, Việt Trì, Phú Thọ",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "51289",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Vì",
+    "ward_name": "Vạn Thắng",
+    "address": "468 Nguyễn Văn Cừ, Vạn Thắng, Ba Vì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "95789",
+    "province_name": "Hà Nội",
+    "district_name": "Hai Bà Trưng",
+    "ward_name": "Lê Đại Hành",
+    "address": "49 Hai Bà Trưng, Lê Đại Hành, Hai Bà Trưng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "43002",
+    "province_name": "Thái Nguyên",
+    "district_name": "Thành phố Thái Nguyên",
+    "ward_name": "Hoàng Văn Thụ",
+    "address": "216 Lý Thái Tổ, Hoàng Văn Thụ, Thành phố Thái Nguyên, Thái Nguyên",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "45795",
+    "province_name": "Bắc Ninh",
+    "district_name": "Từ Sơn",
+    "ward_name": "Đồng Kỵ",
+    "address": "113 Đinh Tiên Hoàng, Đồng Kỵ, Từ Sơn, Bắc Ninh",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "42748",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 6",
+    "ward_name": "Phường 1",
+    "address": "397 Lê Văn Hưu, Phường 1, Quận 6, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "36096",
+    "province_name": "Sơn La",
+    "district_name": "Thành phố Sơn La",
+    "ward_name": "Chiềng Lề",
+    "address": "90 Quang Trung, Chiềng Lề, Thành phố Sơn La, Sơn La",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "52137",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàn Kiếm",
+    "ward_name": "Tràng Tiền",
+    "address": "61 Trần Phú, Tràng Tiền, Hoàn Kiếm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "46838",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Vì",
+    "ward_name": "Vật Lại",
+    "address": "497 Bà Triệu, Vật Lại, Ba Vì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "87183",
+    "province_name": "Hà Nội",
+    "district_name": "Đan Phượng",
+    "ward_name": "Hạ Mỗ",
+    "address": "320 Trần Nhân Tông, Hạ Mỗ, Đan Phượng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "88788",
+    "province_name": "Hà Nội",
+    "district_name": "Nam Từ Liêm",
+    "ward_name": "Mễ Trì",
+    "address": "214 Lý Thái Tổ, Mễ Trì, Nam Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "19137",
+    "province_name": "Hà Nội",
+    "district_name": "Mê Linh",
+    "ward_name": "Tráng Việt",
+    "address": "24 Trần Nhân Tông, Tráng Việt, Mê Linh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "72545",
+    "province_name": "Lạng Sơn",
+    "district_name": "Cao Lộc",
+    "ward_name": "Gia Cát",
+    "address": "483 Lý Thường Kiệt, Gia Cát, Cao Lộc, Lạng Sơn",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "79318",
+    "province_name": "Quảng Ngãi",
+    "district_name": "Thành phố Quảng Ngãi",
+    "ward_name": "Trần Hưng Đạo",
+    "address": "226 Đinh Lễ, Trần Hưng Đạo, Thành phố Quảng Ngãi, Quảng Ngãi",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "60873",
+    "province_name": "Hà Nội",
+    "district_name": "Mê Linh",
+    "ward_name": "Đại Thịnh",
+    "address": "262 Tràng Thi, Đại Thịnh, Mê Linh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "48315",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Đình",
+    "ward_name": "Vĩnh Phúc",
+    "address": "244 Trần Nhân Tông, Vĩnh Phúc, Ba Đình, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "26973",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Thạnh",
+    "ward_name": "Phường 1",
+    "address": "64 Giải Phóng, Phường 1, Quận Bình Thạnh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "28903",
+    "province_name": "Phú Thọ",
+    "district_name": "Phú Thọ",
+    "ward_name": "Âu Cơ",
+    "address": "429 Nguyễn Huệ, Âu Cơ, Phú Thọ, Phú Thọ",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "86828",
+    "province_name": "Trà Vinh",
+    "district_name": "Duyên Hải",
+    "ward_name": "Long Toàn",
+    "address": "392 Hoàng Văn Thụ, Long Toàn, Duyên Hải, Trà Vinh",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "96168",
+    "province_name": "Lào Cai",
+    "district_name": "Thành phố Lào Cai",
+    "ward_name": "Bắc Cường",
+    "address": "317 Cầu Giấy, Bắc Cường, Thành phố Lào Cai, Lào Cai",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "82861",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Đình",
+    "ward_name": "Đội Cấn",
+    "address": "323 Đinh Lễ, Đội Cấn, Ba Đình, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "67250",
+    "province_name": "Quảng Ngãi",
+    "district_name": "Đức Phổ",
+    "ward_name": "Phổ Cường",
+    "address": "193 Lê Văn Hưu, Phổ Cường, Đức Phổ, Quảng Ngãi",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "24381",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Phú Nhuận",
+    "ward_name": "Phường 1",
+    "address": "231 Lê Duẩn, Phường 1, Quận Phú Nhuận, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "20945",
+    "province_name": "Bà Rịa - Vũng Tàu",
+    "district_name": "Bà Rịa",
+    "ward_name": "Phước Hiệp",
+    "address": "441 Tràng Thi, Phước Hiệp, Bà Rịa, Bà Rịa - Vũng Tàu",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "59016",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Nhà Bè",
+    "ward_name": "Phước Kiển",
+    "address": "320 Cầu Giấy, Phước Kiển, Huyện Nhà Bè, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "82970",
+    "province_name": "Hà Nội",
+    "district_name": "Mỹ Đức",
+    "ward_name": "An Tiến",
+    "address": "402 Nguyễn Văn Cừ, An Tiến, Mỹ Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "62962",
+    "province_name": "Hà Nội",
+    "district_name": "Cầu Giấy",
+    "ward_name": "Quan Hoa",
+    "address": "385 Nguyễn Công Trứ, Quan Hoa, Cầu Giấy, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "27776",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Xuân",
+    "ward_name": "Hạ Đình",
+    "address": "123 Lê Duẩn, Hạ Đình, Thanh Xuân, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17106",
+    "province_name": "Sơn La",
+    "district_name": "Mộc Châu",
+    "ward_name": "Mộc Châu",
+    "address": "218 Nguyễn Huệ, Mộc Châu, Mộc Châu, Sơn La",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "20304",
+    "province_name": "Tây Ninh",
+    "district_name": "Tây Ninh",
+    "ward_name": "2",
+    "address": "214 Trần Nhân Tông, 2, Tây Ninh, Tây Ninh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "92082",
+    "province_name": "Khánh Hòa",
+    "district_name": "Nha Trang",
+    "ward_name": "Lộc Thọ",
+    "address": "148 Phan Chu Trinh, Lộc Thọ, Nha Trang, Khánh Hòa",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "18733",
+    "province_name": "Quảng Trị",
+    "district_name": "Quảng Trị",
+    "ward_name": "Trường Phước",
+    "address": "468 Lê Duẩn, Trường Phước, Quảng Trị, Quảng Trị",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "23579",
+    "province_name": "Quảng Trị",
+    "district_name": "Đông Hà",
+    "ward_name": "Đông Lễ",
+    "address": "135 Hàng Bài, Đông Lễ, Đông Hà, Quảng Trị",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "67226",
+    "province_name": "Vĩnh Phúc",
+    "district_name": "Vĩnh Yên",
+    "ward_name": "Liên Bảo",
+    "address": "98 Lê Lợi, Liên Bảo, Vĩnh Yên, Vĩnh Phúc",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17964",
+    "province_name": "Tiền Giang",
+    "district_name": "Cai Lậy",
+    "ward_name": "Long Khánh",
+    "address": "478 Đinh Lễ, Long Khánh, Cai Lậy, Tiền Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "40224",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 1",
+    "ward_name": "Cầu Ông Lãnh",
+    "address": "300 Đội Cấn, Cầu Ông Lãnh, Quận 1, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "80194",
+    "province_name": "An Giang",
+    "district_name": "Châu Đốc",
+    "ward_name": "Châu Phú B",
+    "address": "335 Láng Hạ, Châu Phú B, Châu Đốc, An Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "66271",
+    "province_name": "Hà Nội",
+    "district_name": "Phú Xuyên",
+    "ward_name": "Phú Túc",
+    "address": "98 Phan Chu Trinh, Phú Túc, Phú Xuyên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17615",
+    "province_name": "Hà Nội",
+    "district_name": "Ứng Hòa",
+    "ward_name": "Ứng Hòa",
+    "address": "372 Bà Triệu, Ứng Hòa, Ứng Hòa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "19603",
+    "province_name": "Nghệ An",
+    "district_name": "Thành phố Vinh",
+    "ward_name": "Đông Vĩnh",
+    "address": "191 Quang Trung, Đông Vĩnh, Thành phố Vinh, Nghệ An",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "42679",
+    "province_name": "Cà Mau",
+    "district_name": "Sông Đốc",
+    "ward_name": "Khánh Lộc",
+    "address": "10 Lê Văn Hưu, Khánh Lộc, Sông Đốc, Cà Mau",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "80381",
+    "province_name": "An Giang",
+    "district_name": "Long Xuyên",
+    "ward_name": "Bình Khánh",
+    "address": "209 Giải Phóng, Bình Khánh, Long Xuyên, An Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "58464",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 4",
+    "ward_name": "Phường 6",
+    "address": "87 Lý Thường Kiệt, Phường 6, Quận 4, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "73129",
+    "province_name": "Hà Nội",
+    "district_name": "Mê Linh",
+    "ward_name": "Mê Linh",
+    "address": "105 Trần Nhân Tông, Mê Linh, Mê Linh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "15568",
+    "province_name": "Hà Tĩnh",
+    "district_name": "Hồng Lĩnh",
+    "ward_name": "Nam Hồng",
+    "address": "28 Kim Mã, Nam Hồng, Hồng Lĩnh, Hà Tĩnh",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "53332",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Oai",
+    "ward_name": "Cao Viên",
+    "address": "465 Bà Triệu, Cao Viên, Thanh Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "61464",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Phú",
+    "ward_name": "Phú Thọ Hòa",
+    "address": "462 Nguyễn Trãi, Phú Thọ Hòa, Quận Tân Phú, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "12398",
+    "province_name": "Hà Nội",
+    "district_name": "Bắc Từ Liêm",
+    "ward_name": "Đức Thắng",
+    "address": "304 Lý Thái Tổ, Đức Thắng, Bắc Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "75096",
+    "province_name": "Đắk Nông",
+    "district_name": "Đắk Mil",
+    "ward_name": "Đắk Lao",
+    "address": "327 Nguyễn Trãi, Đắk Lao, Đắk Mil, Đắk Nông",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "73776",
+    "province_name": "Hà Nội",
+    "district_name": "Ứng Hòa",
+    "ward_name": "Phù Lưu",
+    "address": "240 Lê Duẩn, Phù Lưu, Ứng Hòa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "24463",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Phú",
+    "ward_name": "Hiệp Tân",
+    "address": "49 Trần Nhân Tông, Hiệp Tân, Quận Tân Phú, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "88524",
+    "province_name": "Hà Nội",
+    "district_name": "Hoài Đức",
+    "ward_name": "La Phù",
+    "address": "480 Lê Duẩn, La Phù, Hoài Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "91939",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Củ Chi",
+    "ward_name": "An Nhơn Tây",
+    "address": "462 Lê Lợi, An Nhơn Tây, Huyện Củ Chi, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "89425",
+    "province_name": "Đồng Nai",
+    "district_name": "Biên Hòa",
+    "ward_name": "Bình Đa",
+    "address": "483 Quang Trung, Bình Đa, Biên Hòa, Đồng Nai",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "57124",
+    "province_name": "Hà Nội",
+    "district_name": "Gia Lâm",
+    "ward_name": "Đặng Xá",
+    "address": "233 Ngô Quyền, Đặng Xá, Gia Lâm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "94848",
+    "province_name": "Bình Định",
+    "district_name": "Quy Nhơn",
+    "ward_name": "Ghềnh Ráng",
+    "address": "65 Nguyễn Công Trứ, Ghềnh Ráng, Quy Nhơn, Bình Định",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "97391",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Hóc Môn",
+    "ward_name": "Đông Thạnh",
+    "address": "32 Đội Cấn, Đông Thạnh, Huyện Hóc Môn, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "67106",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Thạnh",
+    "ward_name": "Phường 7",
+    "address": "329 Trần Hưng Đạo, Phường 7, Quận Bình Thạnh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "99542",
+    "province_name": "Hòa Bình",
+    "district_name": "Lương Sơn",
+    "ward_name": "Cư Yên",
+    "address": "477 Láng Hạ, Cư Yên, Lương Sơn, Hòa Bình",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "85543",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 1",
+    "ward_name": "Cầu Kho",
+    "address": "488 Tràng Thi, Cầu Kho, Quận 1, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "90461",
+    "province_name": "Hà Nội",
+    "district_name": "Phú Xuyên",
+    "ward_name": "Phượng Dực",
+    "address": "336 Ngô Quyền, Phượng Dực, Phú Xuyên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "84469",
+    "province_name": "Cần Thơ",
+    "district_name": "Bình Thủy",
+    "ward_name": "Bình Thủy",
+    "address": "234 Nguyễn Văn Cừ, Bình Thủy, Bình Thủy, Cần Thơ",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "78374",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 11",
+    "ward_name": "Phường 5",
+    "address": "132 Lê Lợi, Phường 5, Quận 11, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "19377",
+    "province_name": "Hà Nội",
+    "district_name": "Mê Linh",
+    "ward_name": "Kim Hoa",
+    "address": "92 Hàng Bài, Kim Hoa, Mê Linh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "52362",
+    "province_name": "Bình Định",
+    "district_name": "An Nhơn",
+    "ward_name": "Nhơn Hưng",
+    "address": "119 Lê Duẩn, Nhơn Hưng, An Nhơn, Bình Định",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "72377",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Xuân",
+    "ward_name": "Nhân Chính",
+    "address": "53 Đội Cấn, Nhân Chính, Thanh Xuân, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "18753",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Tân",
+    "ward_name": "Tân Tạo",
+    "address": "273 Trần Phú, Tân Tạo, Quận Bình Tân, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "75114",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 7",
+    "ward_name": "Phú Thuận",
+    "address": "93 Trần Hưng Đạo, Phú Thuận, Quận 7, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "66592",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Bình",
+    "ward_name": "Phường 4",
+    "address": "205 Trần Hưng Đạo, Phường 4, Quận Tân Bình, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "59697",
+    "province_name": "Hà Nội",
+    "district_name": "Nam Từ Liêm",
+    "ward_name": "Phú Đô",
+    "address": "496 Nguyễn Công Trứ, Phú Đô, Nam Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "86903",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Phú",
+    "ward_name": "Hòa Thạnh",
+    "address": "410 Giải Phóng, Hòa Thạnh, Quận Tân Phú, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "63654",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Thành phố Thủ Đức",
+    "ward_name": "An Phú",
+    "address": "437 Đinh Tiên Hoàng, An Phú, Thành phố Thủ Đức, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "61503",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Thành phố Thủ Đức",
+    "ward_name": "An Lợi Đông",
+    "address": "152 Hai Bà Trưng, An Lợi Đông, Thành phố Thủ Đức, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "60928",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàn Kiếm",
+    "ward_name": "Hàng Mã",
+    "address": "94 Quang Trung, Hàng Mã, Hoàn Kiếm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "80903",
+    "province_name": "Hà Nội",
+    "district_name": "Bắc Từ Liêm",
+    "ward_name": "Phú Diễn",
+    "address": "142 Hùng Vương, Phú Diễn, Bắc Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "44721",
+    "province_name": "Hà Nội",
+    "district_name": "Phúc Thọ",
+    "ward_name": "Vân Hà",
+    "address": "270 Đinh Tiên Hoàng, Vân Hà, Phúc Thọ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "13503",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàng Mai",
+    "ward_name": "Mai Động",
+    "address": "359 Lê Lợi, Mai Động, Hoàng Mai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "13957",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Thạnh",
+    "ward_name": "Phường 3",
+    "address": "406 Tràng Thi, Phường 3, Quận Bình Thạnh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "53375",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 7",
+    "ward_name": "Tân Thuận Đông",
+    "address": "121 Giải Phóng, Tân Thuận Đông, Quận 7, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "21931",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 6",
+    "ward_name": "Phường 7",
+    "address": "486 Nguyễn Văn Cừ, Phường 7, Quận 6, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "28021",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Phú Nhuận",
+    "ward_name": "Phường 7",
+    "address": "158 Nguyễn Trãi, Phường 7, Quận Phú Nhuận, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "88901",
+    "province_name": "Kiên Giang",
+    "district_name": "Rạch Giá",
+    "ward_name": "Rạch Sỏi",
+    "address": "161 Trần Phú, Rạch Sỏi, Rạch Giá, Kiên Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "95414",
+    "province_name": "Quảng Bình",
+    "district_name": "Ba Đồn",
+    "ward_name": "Quảng Trung",
+    "address": "324 Đội Cấn, Quảng Trung, Ba Đồn, Quảng Bình",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "59468",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Hóc Môn",
+    "ward_name": "Nhị Bình",
+    "address": "428 Hùng Vương, Nhị Bình, Huyện Hóc Môn, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "71896",
+    "province_name": "Lào Cai",
+    "district_name": "Sa Pa",
+    "ward_name": "Tả Phìn",
+    "address": "265 Giải Phóng, Tả Phìn, Sa Pa, Lào Cai",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "19344",
+    "province_name": "Bà Rịa - Vũng Tàu",
+    "district_name": "Vũng Tàu",
+    "ward_name": "4",
+    "address": "135 Đội Cấn, 4, Vũng Tàu, Bà Rịa - Vũng Tàu",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "27687",
+    "province_name": "Hậu Giang",
+    "district_name": "Vị Thanh",
+    "ward_name": "2",
+    "address": "39 Tràng Thi, 2, Vị Thanh, Hậu Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "95549",
+    "province_name": "Hà Nội",
+    "district_name": "Đông Anh",
+    "ward_name": "Cổ Loa",
+    "address": "497 Quang Trung, Cổ Loa, Đông Anh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "96001",
+    "province_name": "Hà Giang",
+    "district_name": "Bắc Quang",
+    "ward_name": "Bằng Hành",
+    "address": "80 Phan Chu Trinh, Bằng Hành, Bắc Quang, Hà Giang",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "72564",
+    "province_name": "Ninh Thuận",
+    "district_name": "Ninh Hải",
+    "ward_name": "Hộ Hải",
+    "address": "84 Lê Lợi, Hộ Hải, Ninh Hải, Ninh Thuận",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "93464",
+    "province_name": "Hà Nội",
+    "district_name": "Hoài Đức",
+    "ward_name": "Kim Chung",
+    "address": "414 Lê Duẩn, Kim Chung, Hoài Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "47056",
+    "province_name": "Trà Vinh",
+    "district_name": "Trà Vinh",
+    "ward_name": "1",
+    "address": "455 Đinh Tiên Hoàng, 1, Trà Vinh, Trà Vinh",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "40187",
+    "province_name": "Bình Thuận",
+    "district_name": "La Gi",
+    "ward_name": "Tân An",
+    "address": "394 Kim Mã, Tân An, La Gi, Bình Thuận",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "23396",
+    "province_name": "Hà Nội",
+    "district_name": "Sóc Sơn",
+    "ward_name": "Tân Minh",
+    "address": "352 Đinh Tiên Hoàng, Tân Minh, Sóc Sơn, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "59836",
+    "province_name": "Nam Định",
+    "district_name": "Mỹ Lộc",
+    "ward_name": "Mỹ Thắng",
+    "address": "415 Trần Hưng Đạo, Mỹ Thắng, Mỹ Lộc, Nam Định",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "76454",
+    "province_name": "Long An",
+    "district_name": "Tân An",
+    "ward_name": "3",
+    "address": "145 Trần Nhân Tông, 3, Tân An, Long An",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "51909",
+    "province_name": "Sóc Trăng",
+    "district_name": "Sóc Trăng",
+    "ward_name": "3",
+    "address": "438 Nguyễn Trãi, 3, Sóc Trăng, Sóc Trăng",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "30115",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Phú",
+    "ward_name": "Phú Trung",
+    "address": "269 Kim Mã, Phú Trung, Quận Tân Phú, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "39569",
+    "province_name": "Hà Nội",
+    "district_name": "Tây Hồ",
+    "ward_name": "Xuân La",
+    "address": "99 Trần Phú, Xuân La, Tây Hồ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "50170",
+    "province_name": "Tuyên Quang",
+    "district_name": "Thành phố Tuyên Quang",
+    "ward_name": "Minh Xuân",
+    "address": "494 Trần Phú, Minh Xuân, Thành phố Tuyên Quang, Tuyên Quang",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "65422",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 10",
+    "ward_name": "Phường 8",
+    "address": "482 Đội Cấn, Phường 8, Quận 10, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "66307",
+    "province_name": "Hà Nội",
+    "district_name": "Thạch Thất",
+    "ward_name": "Phú Kim",
+    "address": "314 Cầu Giấy, Phú Kim, Thạch Thất, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "65138",
+    "province_name": "Hưng Yên",
+    "district_name": "Văn Lâm",
+    "ward_name": "Đình Dù",
+    "address": "472 Đinh Lễ, Đình Dù, Văn Lâm, Hưng Yên",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "69601",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Thành phố Thủ Đức",
+    "ward_name": "Bình Chiểu",
+    "address": "422 Lê Lợi, Bình Chiểu, Thành phố Thủ Đức, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "47915",
+    "province_name": "Hà Nội",
+    "district_name": "Quốc Oai",
+    "ward_name": "Đông Yên",
+    "address": "89 Lê Lợi, Đông Yên, Quốc Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "96920",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Trì",
+    "ward_name": "Ngũ Hiệp",
+    "address": "132 Cầu Giấy, Ngũ Hiệp, Thanh Trì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "81744",
+    "province_name": "Điện Biên",
+    "district_name": "Điện Biên",
+    "ward_name": "Hua Thanh",
+    "address": "78 Phan Đình Phùng, Hua Thanh, Điện Biên, Điện Biên",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "45300",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 11",
+    "ward_name": "Phường 3",
+    "address": "387 Hùng Vương, Phường 3, Quận 11, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "56245",
+    "province_name": "Yên Bái",
+    "district_name": "Nghĩa Lộ",
+    "ward_name": "Trung Tâm",
+    "address": "304 Lý Thường Kiệt, Trung Tâm, Nghĩa Lộ, Yên Bái",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "37516",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Xuân",
+    "ward_name": "Kim Giang",
+    "address": "396 Láng Hạ, Kim Giang, Thanh Xuân, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "39211",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 12",
+    "ward_name": "Hiệp Thành",
+    "address": "212 Lê Duẩn, Hiệp Thành, Quận 12, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "55184",
+    "province_name": "Hà Nội",
+    "district_name": "Phúc Thọ",
+    "ward_name": "Tam Thuấn",
+    "address": "344 Hai Bà Trưng, Tam Thuấn, Phúc Thọ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "49090",
+    "province_name": "Hà Nội",
+    "district_name": "Hai Bà Trưng",
+    "ward_name": "Thanh Nhàn",
+    "address": "272 Trần Phú, Thanh Nhàn, Hai Bà Trưng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "73369",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 12",
+    "ward_name": "Tân Chánh Hiệp",
+    "address": "440 Đinh Lễ, Tân Chánh Hiệp, Quận 12, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "66578",
+    "province_name": "Hà Nội",
+    "district_name": "Thường Tín",
+    "ward_name": "Quất Động",
+    "address": "119 Nguyễn Văn Cừ, Quất Động, Thường Tín, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "69472",
+    "province_name": "Hà Nội",
+    "district_name": "Bắc Từ Liêm",
+    "ward_name": "Thượng Cát",
+    "address": "448 Nguyễn Văn Cừ, Thượng Cát, Bắc Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "31692",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Trì",
+    "ward_name": "Tứ Hiệp",
+    "address": "25 Lý Thái Tổ, Tứ Hiệp, Thanh Trì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "84727",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Hóc Môn",
+    "ward_name": "Thới Tam Thôn",
+    "address": "390 Láng Hạ, Thới Tam Thôn, Huyện Hóc Môn, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "10666",
+    "province_name": "Hà Nội",
+    "district_name": "Gia Lâm",
+    "ward_name": "Phú Thị",
+    "address": "25 Đinh Tiên Hoàng, Phú Thị, Gia Lâm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "60985",
+    "province_name": "Cao Bằng",
+    "district_name": "Trùng Khánh",
+    "ward_name": "Đình Phong",
+    "address": "11 Ngô Quyền, Đình Phong, Trùng Khánh, Cao Bằng",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "70328",
+    "province_name": "Hải Dương",
+    "district_name": "Chí Linh",
+    "ward_name": "Hoàng Tiến",
+    "address": "350 Láng Hạ, Hoàng Tiến, Chí Linh, Hải Dương",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "21725",
+    "province_name": "Hậu Giang",
+    "district_name": "Ngã Bảy",
+    "ward_name": "Hiệp Thành",
+    "address": "331 Lê Lợi, Hiệp Thành, Ngã Bảy, Hậu Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "42363",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Gò Vấp",
+    "ward_name": "Phường 1",
+    "address": "279 Lê Duẩn, Phường 1, Quận Gò Vấp, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "48780",
+    "province_name": "Hà Nội",
+    "district_name": "Quốc Oai",
+    "ward_name": "Sài Sơn",
+    "address": "299 Nguyễn Trãi, Sài Sơn, Quốc Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "13015",
+    "province_name": "Đồng Nai",
+    "district_name": "Long Khánh",
+    "ward_name": "Suối Tre",
+    "address": "224 Nguyễn Công Trứ, Suối Tre, Long Khánh, Đồng Nai",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "13909",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 8",
+    "ward_name": "Phường 8",
+    "address": "418 Nguyễn Huệ, Phường 8, Quận 8, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "54561",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 12",
+    "ward_name": "Thạnh Lộc",
+    "address": "89 Ngô Quyền, Thạnh Lộc, Quận 12, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "99360",
+    "province_name": "Hà Nội",
+    "district_name": "Quốc Oai",
+    "ward_name": "Nghĩa Hương",
+    "address": "35 Lê Duẩn, Nghĩa Hương, Quốc Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "91784",
+    "province_name": "Hà Nội",
+    "district_name": "Đông Anh",
+    "ward_name": "Kim Chung",
+    "address": "299 Trần Hưng Đạo, Kim Chung, Đông Anh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "31187",
+    "province_name": "Quảng Bình",
+    "district_name": "Đồng Hới",
+    "ward_name": "Đồng Phú",
+    "address": "196 Ngô Quyền, Đồng Phú, Đồng Hới, Quảng Bình",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "95191",
+    "province_name": "Hà Nội",
+    "district_name": "Sơn Tây",
+    "ward_name": "Quang Trung",
+    "address": "220 Kim Mã, Quang Trung, Sơn Tây, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "41115",
+    "province_name": "Quảng Ninh",
+    "district_name": "Hạ Long",
+    "ward_name": "Giếng Đáy",
+    "address": "293 Hoàng Văn Thụ, Giếng Đáy, Hạ Long, Quảng Ninh",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "89376",
+    "province_name": "Hà Nội",
+    "district_name": "Cầu Giấy",
+    "ward_name": "Trung Hòa",
+    "address": "272 Hoàng Văn Thụ, Trung Hòa, Cầu Giấy, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "35313",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Đình",
+    "ward_name": "Điện Biên",
+    "address": "422 Lý Thường Kiệt, Điện Biên, Ba Đình, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "75879",
+    "province_name": "Ninh Bình",
+    "district_name": "Hoa Lư",
+    "ward_name": "Ninh An",
+    "address": "304 Hàng Bài, Ninh An, Hoa Lư, Ninh Bình",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "29509",
+    "province_name": "Hà Nội",
+    "district_name": "Gia Lâm",
+    "ward_name": "Trâu Quỳ",
+    "address": "254 Trần Hưng Đạo, Trâu Quỳ, Gia Lâm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "90128",
+    "province_name": "Hà Nội",
+    "district_name": "Ba Đình",
+    "ward_name": "Trúc Bạch",
+    "address": "122 Hai Bà Trưng, Trúc Bạch, Ba Đình, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "25745",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Bình Chánh",
+    "ward_name": "Bình Lợi",
+    "address": "119 Hùng Vương, Bình Lợi, Huyện Bình Chánh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "30989",
+    "province_name": "Bắc Kạn",
+    "district_name": "Chợ Mới",
+    "ward_name": "Nông Hạ",
+    "address": "245 Lê Duẩn, Nông Hạ, Chợ Mới, Bắc Kạn",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "74321",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 8",
+    "ward_name": "Phường 6",
+    "address": "131 Trần Nhân Tông, Phường 6, Quận 8, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "45512",
+    "province_name": "Hà Nội",
+    "district_name": "Đông Anh",
+    "ward_name": "Vân Nội",
+    "address": "407 Phan Đình Phùng, Vân Nội, Đông Anh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "40505",
+    "province_name": "Khánh Hòa",
+    "district_name": "Cam Ranh",
+    "ward_name": "Cam Phúc Bắc",
+    "address": "305 Hoàng Văn Thụ, Cam Phúc Bắc, Cam Ranh, Khánh Hòa",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "85547",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Oai",
+    "ward_name": "Mỹ Hưng",
+    "address": "40 Trần Hưng Đạo, Mỹ Hưng, Thanh Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "12860",
+    "province_name": "Hà Nội",
+    "district_name": "Ứng Hòa",
+    "ward_name": "Minh Đức",
+    "address": "47 Lê Lợi, Minh Đức, Ứng Hòa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "67218",
+    "province_name": "Thanh Hóa",
+    "district_name": "Sầm Sơn",
+    "ward_name": "Quảng Vinh",
+    "address": "404 Nguyễn Văn Cừ, Quảng Vinh, Sầm Sơn, Thanh Hóa",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "48612",
+    "province_name": "Bắc Ninh",
+    "district_name": "Thành phố Bắc Ninh",
+    "ward_name": "Suối Hoa",
+    "address": "104 Quang Trung, Suối Hoa, Thành phố Bắc Ninh, Bắc Ninh",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "50201",
+    "province_name": "Hà Nội",
+    "district_name": "Phú Xuyên",
+    "ward_name": "Đại Xuyên",
+    "address": "330 Đinh Lễ, Đại Xuyên, Phú Xuyên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "14124",
+    "province_name": "Hà Nội",
+    "district_name": "Hoài Đức",
+    "ward_name": "Di Trạch",
+    "address": "193 Cầu Giấy, Di Trạch, Hoài Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "43858",
+    "province_name": "Đắk Nông",
+    "district_name": "Gia Nghĩa",
+    "ward_name": "Nghĩa Tân",
+    "address": "261 Bà Triệu, Nghĩa Tân, Gia Nghĩa, Đắk Nông",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "77934",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Tân",
+    "ward_name": "Bình Trị Đông",
+    "address": "384 Hai Bà Trưng, Bình Trị Đông, Quận Bình Tân, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "55645",
+    "province_name": "Cao Bằng",
+    "district_name": "Thành phố Cao Bằng",
+    "ward_name": "Duyệt Trung",
+    "address": "100 Ngô Quyền, Duyệt Trung, Thành phố Cao Bằng, Cao Bằng",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "77193",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Phú Nhuận",
+    "ward_name": "Phường 3",
+    "address": "300 Lê Lợi, Phường 3, Quận Phú Nhuận, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "11908",
+    "province_name": "Tiền Giang",
+    "district_name": "Mỹ Tho",
+    "ward_name": "2",
+    "address": "261 Lý Thường Kiệt, 2, Mỹ Tho, Tiền Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "67495",
+    "province_name": "Hà Nội",
+    "district_name": "Thạch Thất",
+    "ward_name": "Canh Nậu",
+    "address": "262 Kim Mã, Canh Nậu, Thạch Thất, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "37802",
+    "province_name": "Hà Nội",
+    "district_name": "Đan Phượng",
+    "ward_name": "Liên Hồng",
+    "address": "467 Láng Hạ, Liên Hồng, Đan Phượng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "78785",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Thành phố Thủ Đức",
+    "ward_name": "An Khánh",
+    "address": "119 Hàng Bài, An Khánh, Thành phố Thủ Đức, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "30794",
+    "province_name": "Nam Định",
+    "district_name": "Thành phố Nam Định",
+    "ward_name": "Cửa Bắc",
+    "address": "215 Hai Bà Trưng, Cửa Bắc, Thành phố Nam Định, Nam Định",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "90620",
+    "province_name": "Kiên Giang",
+    "district_name": "Hà Tiên",
+    "ward_name": "Mỹ Đức",
+    "address": "15 Đinh Lễ, Mỹ Đức, Hà Tiên, Kiên Giang",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "83401",
+    "province_name": "Thừa Thiên Huế",
+    "district_name": "Thành phố Huế",
+    "ward_name": "Hương Sơ",
+    "address": "413 Hai Bà Trưng, Hương Sơ, Thành phố Huế, Thừa Thiên Huế",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "13588",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Cần Giờ",
+    "ward_name": "Long Hòa",
+    "address": "146 Nguyễn Trãi, Long Hòa, Huyện Cần Giờ, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "79431",
+    "province_name": "Hà Nội",
+    "district_name": "Cầu Giấy",
+    "ward_name": "Dịch Vọng",
+    "address": "29 Láng Hạ, Dịch Vọng, Cầu Giấy, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "24870",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Xuân",
+    "ward_name": "Khương Mai",
+    "address": "443 Trần Hưng Đạo, Khương Mai, Thanh Xuân, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "60374",
+    "province_name": "Hà Nội",
+    "district_name": "Đống Đa",
+    "ward_name": "Nam Đồng",
+    "address": "7 Nguyễn Huệ, Nam Đồng, Đống Đa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "32887",
+    "province_name": "Phú Yên",
+    "district_name": "Tuy Hòa",
+    "ward_name": "5",
+    "address": "249 Nguyễn Công Trứ, 5, Tuy Hòa, Phú Yên",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "83413",
+    "province_name": "Hà Nội",
+    "district_name": "Tây Hồ",
+    "ward_name": "Quảng An",
+    "address": "462 Đinh Tiên Hoàng, Quảng An, Tây Hồ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "83769",
+    "province_name": "Hà Nội",
+    "district_name": "Hai Bà Trưng",
+    "ward_name": "Vĩnh Tuy",
+    "address": "353 Lý Thái Tổ, Vĩnh Tuy, Hai Bà Trưng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "98735",
+    "province_name": "Đồng Tháp",
+    "district_name": "Sa Đéc",
+    "ward_name": "Tân Quy Đông",
+    "address": "495 Lý Thái Tổ, Tân Quy Đông, Sa Đéc, Đồng Tháp",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "37689",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Thạnh",
+    "ward_name": "Phường 11",
+    "address": "412 Trần Hưng Đạo, Phường 11, Quận Bình Thạnh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "31699",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Tân",
+    "ward_name": "Bình Hưng Hòa B",
+    "address": "490 Hùng Vương, Bình Hưng Hòa B, Quận Bình Tân, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "52579",
+    "province_name": "Long An",
+    "district_name": "Bến Lức",
+    "ward_name": "Bến Lức",
+    "address": "494 Lý Thường Kiệt, Bến Lức, Bến Lức, Long An",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "83786",
+    "province_name": "Ninh Thuận",
+    "district_name": "Phan Rang - Tháp Chàm",
+    "ward_name": "Đông Hải",
+    "address": "326 Phan Chu Trinh, Đông Hải, Phan Rang - Tháp Chàm, Ninh Thuận",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "56300",
+    "province_name": "Hà Nam",
+    "district_name": "Duy Tiên",
+    "ward_name": "Hoàng Đông",
+    "address": "311 Đội Cấn, Hoàng Đông, Duy Tiên, Hà Nam",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "58257",
+    "province_name": "Hòa Bình",
+    "district_name": "Thành phố Hòa Bình",
+    "ward_name": "Hữu Nghị",
+    "address": "189 Phan Đình Phùng, Hữu Nghị, Thành phố Hòa Bình, Hòa Bình",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "22441",
+    "province_name": "Hà Nội",
+    "district_name": "Long Biên",
+    "ward_name": "Thượng Thanh",
+    "address": "296 Đinh Tiên Hoàng, Thượng Thanh, Long Biên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "62541",
+    "province_name": "Hưng Yên",
+    "district_name": "Thành phố Hưng Yên",
+    "ward_name": "Lam Sơn",
+    "address": "389 Láng Hạ, Lam Sơn, Thành phố Hưng Yên, Hưng Yên",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17484",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Bình Chánh",
+    "ward_name": "Bình Hưng",
+    "address": "271 Lê Văn Hưu, Bình Hưng, Huyện Bình Chánh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "26963",
+    "province_name": "Hà Giang",
+    "district_name": "Thành phố Hà Giang",
+    "ward_name": "Ngọc Hà",
+    "address": "486 Trần Hưng Đạo, Ngọc Hà, Thành phố Hà Giang, Hà Giang",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "98492",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 6",
+    "ward_name": "Phường 5",
+    "address": "219 Hoàng Văn Thụ, Phường 5, Quận 6, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "40023",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 5",
+    "ward_name": "Phường 5",
+    "address": "463 Xuân Thủy, Phường 5, Quận 5, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "14953",
+    "province_name": "Bình Phước",
+    "district_name": "Đồng Xoài",
+    "ward_name": "Tân Thiện",
+    "address": "459 Hoàng Văn Thụ, Tân Thiện, Đồng Xoài, Bình Phước",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "22323",
+    "province_name": "Hà Nội",
+    "district_name": "Quốc Oai",
+    "ward_name": "Cộng Hòa",
+    "address": "246 Nguyễn Công Trứ, Cộng Hòa, Quốc Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "16164",
+    "province_name": "Bình Phước",
+    "district_name": "Bình Long",
+    "ward_name": "Hưng Chiến",
+    "address": "144 Đinh Tiên Hoàng, Hưng Chiến, Bình Long, Bình Phước",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "56828",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Trì",
+    "ward_name": "Đông Mỹ",
+    "address": "486 Trần Phú, Đông Mỹ, Thanh Trì, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "11156",
+    "province_name": "Hà Nội",
+    "district_name": "Hà Đông",
+    "ward_name": "Mộ Lao",
+    "address": "47 Đinh Lễ, Mộ Lao, Hà Đông, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "88029",
+    "province_name": "Hà Nội",
+    "district_name": "Tây Hồ",
+    "ward_name": "Nhật Tân",
+    "address": "361 Trần Nhân Tông, Nhật Tân, Tây Hồ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "62426",
+    "province_name": "Bạc Liêu",
+    "district_name": "Giá Rai",
+    "ward_name": "Giá Rai",
+    "address": "166 Kim Mã, Giá Rai, Giá Rai, Bạc Liêu",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "15822",
+    "province_name": "Nghệ An",
+    "district_name": "Cửa Lò",
+    "ward_name": "Nghi Hải",
+    "address": "318 Cầu Giấy, Nghi Hải, Cửa Lò, Nghệ An",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "91498",
+    "province_name": "Hà Nội",
+    "district_name": "Bắc Từ Liêm",
+    "ward_name": "Xuân Đỉnh",
+    "address": "213 Hùng Vương, Xuân Đỉnh, Bắc Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "32776",
+    "province_name": "Đà Nẵng",
+    "district_name": "Sơn Trà",
+    "ward_name": "Mân Thái",
+    "address": "453 Lý Thái Tổ, Mân Thái, Sơn Trà, Đà Nẵng",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "54188",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Tân Bình",
+    "ward_name": "Phường 3",
+    "address": "309 Hàng Bài, Phường 3, Quận Tân Bình, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "40585",
+    "province_name": "Hà Nội",
+    "district_name": "Nam Từ Liêm",
+    "ward_name": "Trung Văn",
+    "address": "344 Phan Chu Trinh, Trung Văn, Nam Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "26596",
+    "province_name": "Hà Nội",
+    "district_name": "Hoài Đức",
+    "ward_name": "Đức Thượng",
+    "address": "20 Giải Phóng, Đức Thượng, Hoài Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "65727",
+    "province_name": "Hà Nội",
+    "district_name": "Hà Đông",
+    "ward_name": "Hà Cầu",
+    "address": "85 Lý Thường Kiệt, Hà Cầu, Hà Đông, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17466",
+    "province_name": "Hà Nội",
+    "district_name": "Đan Phượng",
+    "ward_name": "Song Phượng",
+    "address": "271 Lê Lợi, Song Phượng, Đan Phượng, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "17266",
+    "province_name": "Lâm Đồng",
+    "district_name": "Đà Lạt",
+    "ward_name": "1",
+    "address": "103 Xuân Thủy, 1, Đà Lạt, Lâm Đồng",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "27701",
+    "province_name": "Thái Bình",
+    "district_name": "Thành phố Thái Bình",
+    "ward_name": "Phú Khánh",
+    "address": "404 Cầu Giấy, Phú Khánh, Thành phố Thái Bình, Thái Bình",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "71771",
+    "province_name": "Bắc Kạn",
+    "district_name": "Thành phố Bắc Kạn",
+    "ward_name": "Nguyễn Thị Minh Khai",
+    "address": "57 Nguyễn Huệ, Nguyễn Thị Minh Khai, Thành phố Bắc Kạn, Bắc Kạn",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "38548",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Cần Giờ",
+    "ward_name": "Cần Thạnh",
+    "address": "429 Nguyễn Trãi, Cần Thạnh, Huyện Cần Giờ, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "51000",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 5",
+    "ward_name": "Phường 8",
+    "address": "382 Lê Duẩn, Phường 8, Quận 5, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "49993",
+    "province_name": "Hà Nội",
+    "district_name": "Thạch Thất",
+    "ward_name": "Bình Yên",
+    "address": "485 Hùng Vương, Bình Yên, Thạch Thất, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "58281",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 11",
+    "ward_name": "Phường 2",
+    "address": "493 Láng Hạ, Phường 2, Quận 11, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "29193",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàng Mai",
+    "ward_name": "Đại Kim",
+    "address": "390 Láng Hạ, Đại Kim, Hoàng Mai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "53347",
+    "province_name": "Hà Nội",
+    "district_name": "Phú Xuyên",
+    "ward_name": "Phú Xuyên",
+    "address": "174 Ngô Quyền, Phú Xuyên, Phú Xuyên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "37307",
+    "province_name": "Lâm Đồng",
+    "district_name": "Bảo Lộc",
+    "ward_name": "Lộc Châu",
+    "address": "354 Lý Thường Kiệt, Lộc Châu, Bảo Lộc, Lâm Đồng",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "23848",
+    "province_name": "Bắc Giang",
+    "district_name": "Thành phố Bắc Giang",
+    "ward_name": "Hoàng Văn Thụ",
+    "address": "4 Lê Lợi, Hoàng Văn Thụ, Thành phố Bắc Giang, Bắc Giang",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "96112",
+    "province_name": "Hà Nội",
+    "district_name": "Thanh Oai",
+    "ward_name": "Bình Minh",
+    "address": "137 Lê Văn Hưu, Bình Minh, Thanh Oai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "34889",
+    "province_name": "Hà Nội",
+    "district_name": "Mỹ Đức",
+    "ward_name": "Lê Thanh",
+    "address": "249 Nguyễn Công Trứ, Lê Thanh, Mỹ Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "15171",
+    "province_name": "Hà Nội",
+    "district_name": "Đống Đa",
+    "ward_name": "Khâm Thiên",
+    "address": "382 Bà Triệu, Khâm Thiên, Đống Đa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "71169",
+    "province_name": "Thừa Thiên Huế",
+    "district_name": "Hương Thủy",
+    "ward_name": "Phú Bài",
+    "address": "195 Phan Chu Trinh, Phú Bài, Hương Thủy, Thừa Thiên Huế",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "50557",
+    "province_name": "Thái Nguyên",
+    "district_name": "Sông Công",
+    "ward_name": "Lương Châu",
+    "address": "359 Lý Thường Kiệt, Lương Châu, Sông Công, Thái Nguyên",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "91287",
+    "province_name": "Hà Nội",
+    "district_name": "Gia Lâm",
+    "ward_name": "Lệ Chi",
+    "address": "378 Kim Mã, Lệ Chi, Gia Lâm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "96340",
+    "province_name": "Hà Nội",
+    "district_name": "Chương Mỹ",
+    "ward_name": "Mỹ Lương",
+    "address": "159 Giải Phóng, Mỹ Lương, Chương Mỹ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "25922",
+    "province_name": "Hà Nội",
+    "district_name": "Cầu Giấy",
+    "ward_name": "Dịch Vọng Hậu",
+    "address": "180 Giải Phóng, Dịch Vọng Hậu, Cầu Giấy, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "80513",
+    "province_name": "Hà Nội",
+    "district_name": "Long Biên",
+    "ward_name": "Phúc Đồng",
+    "address": "499 Lý Thường Kiệt, Phúc Đồng, Long Biên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "28118",
+    "province_name": "Yên Bái",
+    "district_name": "Thành phố Yên Bái",
+    "ward_name": "Minh Tân",
+    "address": "36 Lý Thường Kiệt, Minh Tân, Thành phố Yên Bái, Yên Bái",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "53106",
+    "province_name": "Hà Nội",
+    "district_name": "Long Biên",
+    "ward_name": "Ngọc Thụy",
+    "address": "436 Trần Phú, Ngọc Thụy, Long Biên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "27444",
+    "province_name": "Lai Châu",
+    "district_name": "Thành phố Lai Châu",
+    "ward_name": "Đông Phong",
+    "address": "284 Lý Thái Tổ, Đông Phong, Thành phố Lai Châu, Lai Châu",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "68628",
+    "province_name": "Bến Tre",
+    "district_name": "Châu Thành",
+    "ward_name": "An Phước",
+    "address": "236 Trần Hưng Đạo, An Phước, Châu Thành, Bến Tre",
+    "area_name": "Đồng bằng sông Cửu Long",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "88407",
+    "province_name": "Phú Yên",
+    "district_name": "Sông Cầu",
+    "ward_name": "Xuân Lộc",
+    "address": "374 Lê Lợi, Xuân Lộc, Sông Cầu, Phú Yên",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "20398",
+    "province_name": "Hà Nội",
+    "district_name": "Long Biên",
+    "ward_name": "Bồ Đề",
+    "address": "470 Xuân Thủy, Bồ Đề, Long Biên, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "16010",
+    "province_name": "Hà Tĩnh",
+    "district_name": "Thành phố Hà Tĩnh",
+    "ward_name": "Bắc Hà",
+    "address": "91 Trần Nhân Tông, Bắc Hà, Thành phố Hà Tĩnh, Hà Tĩnh",
+    "area_name": "Bắc Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "16846",
+    "province_name": "Hà Nội",
+    "district_name": "Đống Đa",
+    "ward_name": "Ngã Tư Sở",
+    "address": "254 Ngô Quyền, Ngã Tư Sở, Đống Đa, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "20812",
+    "province_name": "Hải Phòng",
+    "district_name": "Hồng Bàng",
+    "ward_name": "Sở Dầu",
+    "address": "22 Lê Lợi, Sở Dầu, Hồng Bàng, Hải Phòng",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "53591",
+    "province_name": "Hà Nam",
+    "district_name": "Phủ Lý",
+    "ward_name": "Lê Hồng Phong",
+    "address": "498 Hai Bà Trưng, Lê Hồng Phong, Phủ Lý, Hà Nam",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "74057",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 7",
+    "ward_name": "Phú Mỹ",
+    "address": "305 Nguyễn Công Trứ, Phú Mỹ, Quận 7, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "96598",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Nhà Bè",
+    "ward_name": "Long Thới",
+    "address": "487 Trần Hưng Đạo, Long Thới, Huyện Nhà Bè, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "22729",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Bình Chánh",
+    "ward_name": "Hưng Long",
+    "address": "155 Láng Hạ, Hưng Long, Huyện Bình Chánh, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "74243",
+    "province_name": "Hà Nội",
+    "district_name": "Sóc Sơn",
+    "ward_name": "Hồng Kỳ",
+    "address": "469 Trần Hưng Đạo, Hồng Kỳ, Sóc Sơn, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "53228",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 5",
+    "ward_name": "Phường 2",
+    "address": "482 Lý Thái Tổ, Phường 2, Quận 5, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "75162",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàn Kiếm",
+    "ward_name": "Phúc Tân",
+    "address": "89 Xuân Thủy, Phúc Tân, Hoàn Kiếm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "87465",
+    "province_name": "Thái Bình",
+    "district_name": "Đông Hưng",
+    "ward_name": "Đông Cường",
+    "address": "287 Kim Mã, Đông Cường, Đông Hưng, Thái Bình",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "58147",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 10",
+    "ward_name": "Phường 3",
+    "address": "237 Kim Mã, Phường 3, Quận 10, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "79799",
+    "province_name": "Hà Nội",
+    "district_name": "Sơn Tây",
+    "ward_name": "Trung Hưng",
+    "address": "356 Láng Hạ, Trung Hưng, Sơn Tây, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "13289",
+    "province_name": "Hà Nội",
+    "district_name": "Nam Từ Liêm",
+    "ward_name": "Xuân Phương",
+    "address": "26 Kim Mã, Xuân Phương, Nam Từ Liêm, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "81975",
+    "province_name": "Đắk Lắk",
+    "district_name": "Buôn Hồ",
+    "ward_name": "Thiện An",
+    "address": "378 Đội Cấn, Thiện An, Buôn Hồ, Đắk Lắk",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "81447",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 10",
+    "ward_name": "Phường 5",
+    "address": "50 Lê Văn Hưu, Phường 5, Quận 10, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "11237",
+    "province_name": "Tuyên Quang",
+    "district_name": "Sơn Dương",
+    "ward_name": "Ninh Lai",
+    "address": "272 Lê Văn Hưu, Ninh Lai, Sơn Dương, Tuyên Quang",
+    "area_name": "Trung du và Miền núi Bắc Bộ",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "20340",
+    "province_name": "Hà Nội",
+    "district_name": "Chương Mỹ",
+    "ward_name": "Phụng Châu",
+    "address": "141 Đinh Lễ, Phụng Châu, Chương Mỹ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "69379",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận Bình Tân",
+    "ward_name": "Bình Trị Đông A",
+    "address": "358 Hai Bà Trưng, Bình Trị Đông A, Quận Bình Tân, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "72849",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 4",
+    "ward_name": "Phường 10",
+    "address": "230 Hàng Bài, Phường 10, Quận 4, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "26878",
+    "province_name": "Bình Thuận",
+    "district_name": "Phan Thiết",
+    "ward_name": "Đức Long",
+    "address": "10 Láng Hạ, Đức Long, Phan Thiết, Bình Thuận",
+    "area_name": "Nam Trung Bộ",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "81018",
+    "province_name": "Hà Nội",
+    "district_name": "Sóc Sơn",
+    "ward_name": "Mai Đình",
+    "address": "183 Lý Thái Tổ, Mai Đình, Sóc Sơn, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "41063",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Huyện Hóc Môn",
+    "ward_name": "Tân Hiệp",
+    "address": "344 Ngô Quyền, Tân Hiệp, Huyện Hóc Môn, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "67169",
+    "province_name": "Hà Nội",
+    "district_name": "Mỹ Đức",
+    "ward_name": "Đại Nghĩa",
+    "address": "482 Nguyễn Công Trứ, Đại Nghĩa, Mỹ Đức, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "60279",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 4",
+    "ward_name": "Phường 2",
+    "address": "372 Nguyễn Trãi, Phường 2, Quận 4, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "64457",
+    "province_name": "Hà Nội",
+    "district_name": "Hoàng Mai",
+    "ward_name": "Vĩnh Hưng",
+    "address": "295 Lê Lợi, Vĩnh Hưng, Hoàng Mai, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "10705",
+    "province_name": "Gia Lai",
+    "district_name": "An Khê",
+    "ward_name": "Ngô Mây",
+    "address": "333 Nguyễn Công Trứ, Ngô Mây, An Khê, Gia Lai",
+    "area_name": "Tây Nguyên",
+    "region_name": "Miền Trung"
+  },
+  {
+    "shop_code": "17927",
+    "province_name": "Hà Nội",
+    "district_name": "Đông Anh",
+    "ward_name": "Xuân Nộn",
+    "address": "348 Phan Chu Trinh, Xuân Nộn, Đông Anh, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  },
+  {
+    "shop_code": "31608",
+    "province_name": "Hồ Chí Minh",
+    "district_name": "Quận 1",
+    "ward_name": "Nguyễn Cư Trinh",
+    "address": "92 Láng Hạ, Nguyễn Cư Trinh, Quận 1, Hồ Chí Minh",
+    "area_name": "Đông Nam Bộ",
+    "region_name": "Miền Nam"
+  },
+  {
+    "shop_code": "39586",
+    "province_name": "Hà Nội",
+    "district_name": "Phúc Thọ",
+    "ward_name": "Phụng Thượng",
+    "address": "481 Phan Đình Phùng, Phụng Thượng, Phúc Thọ, Hà Nội",
+    "area_name": "Đồng bằng sông Hồng",
+    "region_name": "Miền Bắc"
+  }
+]

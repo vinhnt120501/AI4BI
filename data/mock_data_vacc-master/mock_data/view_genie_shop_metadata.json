@@ -1,0 +1,105 @@
+{
+  "table": {
+    "name": "view_genie_shop",
+    "type": "dimension_table",
+    "description": "Bảng chiều lưu thông tin cửa hàng/trung tâm tiêm chủng. Mỗi bản ghi đại diện cho một địa điểm vật lý nơi khách hàng đến tiêm vaccine. Dữ liệu bao phủ toàn bộ 63 tỉnh thành Việt Nam, với mật độ cao hơn tại Hà Nội (120 shop) và Hồ Chí Minh (88 shop). Tổng cộng 330 shop.",
+    "estimated_rows": 330,
+    "primary_key": "shop_code",
+    "database": "MySQL"
+  },
+  "columns": [
+    {
+      "column_name": "shop_code",
+      "data_type": "VARCHAR(5)",
+      "nullable": false,
+      "unique": true,
+      "is_primary_key": true,
+      "description": "Mã định danh duy nhất của cửa hàng/trung tâm tiêm chủng. Dùng để join với các bảng giao dịch và lịch hẹn.",
+      "format": "Chuỗi 5 chữ số (00000–99999), zero-padded nếu cần.",
+      "example": "10234"
+    },
+    {
+      "column_name": "province_name",
+      "data_type": "VARCHAR(100)",
+      "nullable": false,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Tên tỉnh/thành phố nơi cửa hàng tọa lạc. Cột này sử dụng ILIKE khi truy vấn để hỗ trợ phân tích và lọc theo vùng địa lý (ví dụ: tìm tất cả shop tại 'Hà Nội' hoặc 'Miền Nam'). Bao gồm đủ 63 tỉnh thành.",
+      "format": "Tên tỉnh thành chuẩn theo phân chia hành chính Việt Nam.",
+      "example": "Hà Nội",
+      "notes": "Sử dụng ILIKE thay vì = khi query để hỗ trợ tìm kiếm case-insensitive và partial match.",
+      "distribution": {
+        "Hà Nội": 120,
+        "Hồ Chí Minh": 88,
+        "Các tỉnh khác": "2 shop mỗi tỉnh × 61 tỉnh = 122 shop"
+      }
+    },
+    {
+      "column_name": "district_name",
+      "data_type": "VARCHAR(100)",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Tên quận/huyện/thị xã của trung tâm. Dùng để phân tích theo đơn vị hành chính cấp 2. Hà Nội có 30 quận/huyện, Hồ Chí Minh có 22 quận/huyện.",
+      "example": "Hoàn Kiếm"
+    },
+    {
+      "column_name": "ward_name",
+      "data_type": "VARCHAR(100)",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Tên phường/xã/thị trấn của trung tâm. Là đơn vị hành chính cấp 3, chi tiết nhất trong địa chỉ.",
+      "example": "Hàng Bạc"
+    },
+    {
+      "column_name": "address",
+      "data_type": "TEXT",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Địa chỉ chi tiết đầy đủ của trung tâm, bao gồm số nhà, tên đường, phường, quận, tỉnh.",
+      "format": "[Số nhà] [Tên đường], [Phường/Xã], [Quận/Huyện], [Tỉnh/Thành]",
+      "example": "123 Lê Lợi, Hàng Bạc, Hoàn Kiếm, Hà Nội"
+    },
+    {
+      "column_name": "area_name",
+      "data_type": "VARCHAR(100)",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Tên khu vực/vùng kinh tế nội bộ dùng để phân nhóm các trung tâm theo địa lý cấp vùng. Phục vụ phân tích doanh thu, chiến dịch tiêm theo vùng.",
+      "allowed_values": [
+        "Đồng bằng sông Hồng",
+        "Trung du và Miền núi Bắc Bộ",
+        "Bắc Trung Bộ",
+        "Nam Trung Bộ",
+        "Tây Nguyên",
+        "Đông Nam Bộ",
+        "Đồng bằng sông Cửu Long"
+      ]
+    },
+    {
+      "column_name": "region_name",
+      "data_type": "VARCHAR(50)",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Tên miền/vùng lớn dùng để phân cấp quản lý theo miền địa lý. Là cấp tổng hợp cao nhất trong phân cấp địa lý của hệ thống.",
+      "allowed_values": [
+        {
+          "value": "Miền Bắc",
+          "provinces": "25 tỉnh thành"
+        },
+        {
+          "value": "Miền Trung",
+          "provinces": "19 tỉnh thành"
+        },
+        {
+          "value": "Miền Nam",
+          "provinces": "19 tỉnh thành"
+        }
+      ]
+    }
+  ]
+}

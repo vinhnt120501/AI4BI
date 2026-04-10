@@ -18,6 +18,7 @@ export default function BlockRenderer({ blocks, columns, rows }: BlockRendererPr
   const tableData = rows.map((row) => {
     const obj: Record<string, string | number> = {};
     columns.forEach((col, i) => {
+      if (i >= row.length) return;
       const val = row[i];
       const num = Number(val);
       obj[col] = isNaN(num) ? val : num;

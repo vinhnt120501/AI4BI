@@ -572,14 +572,25 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
     return hasPercent && hasLarge;
   })();
   const hasDualAxis = autoDualAxis && activeYKeys.length > 1;
-  // Default: disable brush selection unless explicitly enabled by LLM (to avoid blue overlay appearance)
-  const showBrush = opts.brush === true;
+  // Default: disable brush selection unless explicitly enabled by LLM (and only when it adds value).
+  const showBrush = opts.brush === true && chartData.length > 18;
   const isStacked = opts.stacked;
   const isPercent = opts.stackOffset === 'expand';
   const isVertical = opts.layout === 'vertical';
   const showValueLabels = opts.valueLabels === true;
   const showBackground = opts.background === true;
   const curveType = opts.curveType || 'monotone';
+
+  const renderBrush = () => (
+    <Brush
+      dataKey={resolvedXKey}
+      height={18}
+      travellerWidth={10}
+      stroke="#94a3b8"
+      fill="#eef2ff"
+      tickFormatter={() => ''}
+    />
+  );
 
   const xLabelMaxLen = chartData.reduce((max, row) => {
     const raw = row?.[resolvedXKey];
@@ -671,7 +682,13 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
             {hasDualAxis && <YAxis yAxisId="right" orientation="right" {...yAxisProps}
               tickFormatter={(v) => `${v}%`} />}
             <Tooltip formatter={fmtTooltip} />
-            {!isCategorical && <Legend wrapperStyle={{ fontSize: 12 }} />}
+            {!isCategorical && (
+              <Legend
+                verticalAlign={showBrush ? 'top' : 'bottom'}
+                height={showBrush ? 28 : undefined}
+                wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+              />
+            )}
             {referenceLine && (
               <RLine yAxisId={hasDualAxis ? 'left' : undefined} y={referenceLine.value}
                 stroke={referenceLine.color || '#ef4444'} strokeDasharray="5 5"
@@ -690,7 +707,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
               </Bar>
             ))}
             {renderReferenceOverlays(hasDualAxis ? 'left' : undefined)}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </BarChart>
         );
       }
@@ -705,7 +722,11 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
             {hasDualAxis && <YAxis yAxisId="right" orientation="right" {...yAxisProps}
               tickFormatter={(v) => `${v}%`} />}
             <Tooltip formatter={fmtTooltip} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              verticalAlign={showBrush ? 'top' : 'bottom'}
+              height={showBrush ? 28 : undefined}
+              wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+            />
             {activeYKeys.map((f, i) => (
               <Line key={f} type={curveType} dataKey={f} stroke={colors[i % colors.length]}
                 yAxisId={hasDualAxis ? (i === 0 ? 'left' : 'right') : undefined}
@@ -717,7 +738,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
               </Line>
             ))}
             {renderReferenceOverlays(hasDualAxis ? 'left' : undefined)}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </LineChart>
         );
       }
@@ -738,7 +759,11 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} tickFormatter={isPercent ? (v) => `${(v * 100).toFixed(0)}%` : smartFormat} />
             <Tooltip formatter={isPercent ? (v) => `${(Number(v) * 100).toFixed(1)}%` : fmtTooltip} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              verticalAlign={showBrush ? 'top' : 'bottom'}
+              height={showBrush ? 28 : undefined}
+              wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+            />
             {yKeys.map((f, i) => (
               <Area key={f} type={curveType} dataKey={f} stroke={colors[i % colors.length]}
                 stackId={isStacked || isPercent ? '1' : undefined}
@@ -747,7 +772,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
                 fillOpacity={opts.gradient !== false ? 1 : 0.2} strokeWidth={2} />
             ))}
             {renderReferenceOverlays()}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </AreaChart>
         );
       }
@@ -820,14 +845,18 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
         const hasDual = seriesConfig.some((s) => s.yAxisId === 'right');
 
         return (
-          <ComposedChart data={chartData} margin={{ bottom: 60, right: hasDual ? 20 : 5 }}>
+          <ComposedChart data={chartData} margin={{ top: showBrush ? 18 : 0, bottom: 60, right: hasDual ? 20 : 5 }}>
             <CartesianGrid {...gridProps} />
             <XAxis {...xAxisProps} angle={-35} textAnchor="end" height={80} />
             <YAxis yAxisId="left" {...yAxisProps} />
             {hasDual && <YAxis yAxisId="right" orientation="right" {...yAxisProps}
               tickFormatter={(v) => `${v}%`} />}
             <Tooltip formatter={fmtTooltip} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              verticalAlign={showBrush ? 'top' : 'bottom'}
+              height={showBrush ? 28 : undefined}
+              wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+            />
             {referenceLine && (
               <RLine yAxisId="left" y={referenceLine.value}
                 stroke={referenceLine.color || '#ef4444'} strokeDasharray="5 5"
@@ -849,7 +878,7 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
               }
             })}
             {renderReferenceOverlays('left')}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </ComposedChart>
         );
       }
@@ -1056,12 +1085,16 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
             <XAxis {...xAxisProps} angle={-35} textAnchor="end" height={80} />
             <YAxis {...yAxisProps} />
             <Tooltip formatter={fmtTooltip} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              verticalAlign={showBrush ? 'top' : 'bottom'}
+              height={showBrush ? 28 : undefined}
+              wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+            />
             {activeYKeys.map((f, i) => (
               <Bar key={f} dataKey={f} fill={colors[i % colors.length]}
                 stackId="stack" radius={0} opacity={0.9} />
             ))}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </BarChart>
         );
       }
@@ -1074,12 +1107,16 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
             <XAxis {...xAxisProps} angle={-35} textAnchor="end" height={80} />
             <YAxis {...yAxisProps} />
             <Tooltip formatter={fmtTooltip} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              verticalAlign={showBrush ? 'top' : 'bottom'}
+              height={showBrush ? 28 : undefined}
+              wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+            />
             {activeYKeys.map((f, i) => (
               <Bar key={f} dataKey={f} fill={colors[i % colors.length]}
                 radius={[4, 4, 0, 0]} opacity={0.9} />
             ))}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </BarChart>
         );
       }
@@ -1181,12 +1218,16 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} />
             <Tooltip formatter={fmtTooltip} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              verticalAlign={showBrush ? 'top' : 'bottom'}
+              height={showBrush ? 28 : undefined}
+              wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+            />
             {activeYKeys.map((f, i) => (
               <Area key={f} type="monotone" dataKey={f} stroke={colors[i % colors.length]}
                 stackId="1" fill={`url(#grad-sa-${f}-${block.title})`} fillOpacity={1} strokeWidth={2} />
             ))}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </AreaChart>
         );
       }
@@ -1216,13 +1257,17 @@ export default function DynamicChart({ block, columns, rows }: DynamicChartProps
             <XAxis {...xAxisProps} />
             <YAxis {...yAxisProps} />
             <Tooltip formatter={fmtTooltip} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <Legend
+              verticalAlign={showBrush ? 'top' : 'bottom'}
+              height={showBrush ? 28 : undefined}
+              wrapperStyle={{ fontSize: 12, paddingBottom: showBrush ? 6 : undefined }}
+            />
             {activeYKeys.map((f, i) => (
               <Line key={f} type="stepAfter" dataKey={f} stroke={colors[i % colors.length]}
                 strokeWidth={2.5} dot={{ r: 3, fill: '#fff', strokeWidth: 2 }}
                 activeDot={{ r: 5, strokeWidth: 0, fill: colors[i % colors.length] }} />
             ))}
-            {showBrush && <Brush dataKey={resolvedXKey} height={25} stroke="#6366f1" />}
+            {showBrush && renderBrush()}
           </LineChart>
         );
       }

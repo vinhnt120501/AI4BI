@@ -12,11 +12,12 @@ export default function FollowUpSuggestions({ suggestions, onSelect, variant = '
   if (!suggestions || suggestions.length === 0) return null;
 
   const isLanding = variant === 'landing';
+  const visible = suggestions.slice(0, 4);
 
   return (
     <div className="w-full">
       <div className={isLanding ? 'grid grid-cols-1 gap-3 md:grid-cols-2' : 'grid grid-cols-1 gap-2 md:grid-cols-2'}>
-        {suggestions.map((text, idx) => (
+        {visible.map((text, idx) => (
           <button
             key={`${idx}-${text}`}
             type="button"

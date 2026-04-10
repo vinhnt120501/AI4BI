@@ -89,14 +89,13 @@ function buildWorkingSet(messages: Message[]): ReferenceItem[] {
 }
 
 function buildRelatedAnalyses(query: string) {
-  const normalized = query.trim().replace(/[?.!]+$/, '');
+  const normalized = query.trim().replace(/[?.!]+$/, '').replace(/\s+/g, ' ');
   if (!normalized) return [];
 
-  const shortPrompt = truncate(normalized, 54);
   return [
-    `So sánh ${shortPrompt} với 2 kỳ trước`,
-    `Yếu tố nào tác động mạnh nhất tới ${shortPrompt}?`,
-    `Phân tách ${shortPrompt} theo từng nhóm chi tiết`,
+    `So sánh ${normalized} với 2 kỳ trước`,
+    `Yếu tố nào tác động mạnh nhất tới ${normalized}?`,
+    `Phân tách ${normalized} theo từng nhóm chi tiết`,
   ];
 }
 
@@ -105,8 +104,13 @@ export default function AnalysisPage({ busy, messages, query, onSend, instructio
   const endRef = useRef<HTMLDivElement | null>(null);
   const contentMaxWidth = instructionPanelOpen ? 1080 : 1320;
 
+  const baseQuery = useMemo(() => {
+    const latestUser = [...messages].reverse().find((message) => message.role === 'user' && message.content.trim());
+    return (latestUser?.content || query || '').trim();
+  }, [messages, query]);
+
   const workingSet = useMemo(() => buildWorkingSet(messages), [messages]);
-  const relatedAnalyses = useMemo(() => buildRelatedAnalyses(query), [query]);
+  const relatedAnalyses = useMemo(() => buildRelatedAnalyses(baseQuery), [baseQuery]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -124,7 +128,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, instructio
       <div style={{ padding: '24px 32px 18px', borderBottom: BD, flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <p style={{ fontSize: 24, fontWeight: 600, margin: 0, color: '#0f172a' }}>
-            {query ? `Phân tích: ${query}` : 'Phân tích'}
+            {baseQuery ? `Phân tích: ${baseQuery}` : 'Phân tích'}
           </p>
           {busy ? (
             <span style={{ fontSize: 11, background: C.brandLight, color: C.brand, padding: '4px 12px', borderRadius: 10, fontWeight: 600 }}>
@@ -175,7 +179,18 @@ export default function AnalysisPage({ busy, messages, query, onSend, instructio
                     <div
                       key={`${item}-${index}`}
                       onClick={() => onSend(item)}
-                      style={{ padding: '8px 0', borderBottom: index === relatedAnalyses.length - 1 ? 'none' : BDL, cursor: 'pointer', fontSize: 13, color: C.brand, fontWeight: 500 }}
+                      title={item}
+                      style={{
+                        padding: '8px 0',
+                        borderBottom: index === relatedAnalyses.length - 1 ? 'none' : BDL,
+                        cursor: 'pointer',
+                        fontSize: 13,
+                        color: C.brand,
+                        fontWeight: 500,
+                        whiteSpace: 'normal',
+                        wordBreak: 'break-word',
+                        lineHeight: 1.4,
+                      }}
                     >
                       {item}
                     </div>
@@ -210,7 +225,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, instructio
                     copyText={message.role === 'assistant' ? copyParts.join('\n\n') : undefined}
                   />
                   {message.role === 'assistant' && message.isDone && (message.followUpSuggestions || []).length > 0 ? (
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+                    <div style={{ marginTop: 12 }}>
                       <FollowUpSuggestions suggestions={message.followUpSuggestions || []} onSelect={onSend} />
                     </div>
                   ) : null}

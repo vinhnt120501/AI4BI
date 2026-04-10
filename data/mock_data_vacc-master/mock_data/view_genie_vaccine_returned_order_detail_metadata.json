@@ -1,0 +1,129 @@
+{
+  "table_name": "view_genie_vaccine_returned_order_detail",
+  "description": "Bảng dữ liệu chi tiết đơn hàng trả lại vaccine. Mỗi bản ghi đại diện cho một dòng sản phẩm đã bị trả lại từ một đơn hàng gốc trong bảng view_genie_vaccine_sales_order_detail. Doanh thu thực tế của cửa hàng được tính bằng tổng doanh thu bán (sales) trừ đi tổng giá trị trả hàng (returns) theo từng kỳ.",
+  "row_count": 1000,
+  "time_range": {
+    "return_date_min": "2024-01-02",
+    "return_date_max": "2025-12-31"
+  },
+  "business_context": {
+    "purpose": "Theo dõi các đơn hàng vaccine bị trả lại, phục vụ tính toán doanh thu thực tế (net revenue = sales - returns)",
+    "return_rate": "~10% số lượng line-item từ bảng sales bị trả lại",
+    "revenue_formula": "Doanh thu thực tế = SUM(line_item_amount_after_discount) - SUM(return_line_item_amount_after_discount) theo shop và kỳ thời gian",
+    "relationship_to_sales": "Bảng này là bảng đối lập với view_genie_vaccine_sales_order_detail; attachment_code là khóa ngoại liên kết về bảng gốc"
+  },
+  "columns": [
+    {
+      "column_name": "customer_id",
+      "data_type": "VARCHAR(24)",
+      "nullable": false,
+      "description": "Mã định danh duy nhất của người mua đơn hàng (người đặt hàng/thanh toán). Luôn có giá trị, không được null.",
+      "format": "24 ký tự chữ thường và số (lowercase alphanumeric)",
+      "example": "toqw9ja2m0w10lbt3g2qzw3c",
+      "foreign_key": "view_genie_person.customer_id",
+      "notes": "Phải là người trưởng thành (≥18 tuổi). Khớp với customer_id trong bảng sales order gốc."
+    },
+    {
+      "column_name": "lcv_id",
+      "data_type": "VARCHAR(15)",
+      "nullable": true,
+      "description": "Mã định danh của người thụ hưởng mũi tiêm (người được tiêm vaccine). Có thể null cho ~1% bản ghi.",
+      "format": "15 ký tự bắt đầu bằng 'LCV' theo sau là 12 ký tự chữ hoa và số",
+      "example": "LCV1QKBHB7S9TJ1",
+      "foreign_key": "view_genie_person.lcv_id",
+      "null_rate": "~1%",
+      "notes": "Có thể khác với customer_id (mua hộ người khác). Khi null, không xác định được người thụ hưởng."
+    },
+    {
+      "column_name": "attachment_code",
+      "data_type": "VARCHAR(16)",
+      "nullable": false,
+      "description": "Mã định danh duy nhất của dòng sản phẩm trong đơn hàng (line item identifier). Là khóa ngoại liên kết về bảng sales order gốc.",
+      "format": "16 ký tự chữ cái (hoa/thường) và số (mixed alphanumeric)",
+      "example": "52FSO9i7YDPukCsD",
+      "foreign_key": "view_genie_vaccine_sales_order_detail.attachment_code",
+      "notes": "Mỗi attachment_code chỉ xuất hiện một lần trong bảng trả hàng (không trả cùng một mũi tiêm 2 lần). Liên kết 1-1 về bảng sales."
+    },
+    {
+      "column_name": "sku",
+      "data_type": "VARCHAR(20)",
+      "nullable": false,
+      "description": "Mã SKU (Stock Keeping Unit) xác định sản phẩm vaccine cụ thể bị trả lại.",
+      "format": "Chuỗi số 8 chữ số",
+      "example": "00038270",
+      "foreign_key": "view_genie_vaccine_product.sku",
+      "notes": "Khớp với sku trong attachment_code gốc của bảng sales."
+    },
+    {
+      "column_name": "package_type",
+      "data_type": "VARCHAR(3)",
+      "nullable": false,
+      "description": "Loại hình mua vaccine: 'LE' (mua lẻ - single purchase) hoặc 'GOI' (mua theo gói - package purchase). Khớp với loại hình trong đơn hàng gốc.",
+      "allowed_values": ["LE", "GOI"],
+      "distribution": {
+        "LE": "~59% (mua lẻ từng mũi)",
+        "GOI": "~41% (mua theo gói, giá cao hơn lẻ ~5%)"
+      },
+      "notes": "Phản ánh loại hình của đơn hàng gốc bị trả lại."
+    },
+    {
+      "column_name": "return_line_item_amount_after_discount",
+      "data_type": "NUMERIC(1,2)",
+      "nullable": false,
+      "description": "Giá trị tiền thực tế trả lại của một sản phẩm trong đơn hàng sau khi đã trừ các khoản chiết khấu/giảm giá. Bằng với giá trị line_item_amount_after_discount trong đơn hàng gốc.",
+      "unit": "VND (Việt Nam Đồng)",
+      "range": {
+        "min": 83000,
+        "max": 11571000,
+        "avg": 736446
+      },
+      "notes": "Giá trị này bằng với giá trị gốc trong bảng sales (hoàn trả 100% giá trị). Được dùng để tính: Doanh thu thực = Tổng sales - Tổng returns."
+    },
+    {
+      "column_name": "return_date",
+      "data_type": "DATE",
+      "nullable": false,
+      "description": "Ngày trả hàng / ngày hoàn trả đơn hàng.",
+      "format": "YYYY-MM-DD",
+      "range": {
+        "min": "2024-01-02",
+        "max": "2025-12-31"
+      },
+      "notes": "Luôn lớn hơn order_completion_date của đơn hàng gốc. Thời gian từ khi hoàn thành đơn đến khi trả hàng: 1-30 ngày (phân phối đều)."
+    }
+  ],
+  "relationships": {
+    "parent_tables": [
+      {
+        "table": "view_genie_vaccine_sales_order_detail",
+        "join_key": "attachment_code",
+        "description": "Bảng đơn hàng gốc - mỗi bản ghi trả hàng liên kết 1-1 về một dòng trong bảng sales"
+      },
+      {
+        "table": "view_genie_person",
+        "join_key_buyer": "customer_id",
+        "join_key_beneficiary": "lcv_id",
+        "description": "Thông tin người mua và người thụ hưởng"
+      },
+      {
+        "table": "view_genie_vaccine_product",
+        "join_key": "sku",
+        "description": "Thông tin sản phẩm vaccine bị trả"
+      }
+    ]
+  },
+  "usage_examples": [
+    {
+      "use_case": "Tính doanh thu thực tế theo tháng của từng shop",
+      "description": "JOIN sales với returns qua attachment_code, tính net revenue = SUM(sales.amount) - SUM(return.amount) GROUP BY shop_code, YEAR(date), MONTH(date)"
+    },
+    {
+      "use_case": "Tỷ lệ trả hàng theo loại vaccine",
+      "description": "GROUP BY sku để tính return rate của từng sản phẩm"
+    },
+    {
+      "use_case": "So sánh achievement thực tế với target",
+      "description": "Doanh thu thực = bảng sales - bảng returns, so sánh với view_genie_vaccine_shop_target.target_sales"
+    }
+  ]
+}

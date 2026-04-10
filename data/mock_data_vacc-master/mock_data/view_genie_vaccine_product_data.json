@@ -1,0 +1,1417 @@
+[
+  {
+    "sku": "00039301",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - EUVAX B 20MCG"
+  },
+  {
+    "sku": "00045683",
+    "disease_group_name": "VIÊM GAN A",
+    "product_name": "Epaxal"
+  },
+  {
+    "sku": "00045717",
+    "disease_group_name": "HUYẾT THANH UỐN VÁN",
+    "product_name": "TETANEA 1500UI"
+  },
+  {
+    "sku": "00039280",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - BOOSTRIX 0.5ML 1DOSE"
+  },
+  {
+    "sku": "00045652",
+    "disease_group_name": "CÚM",
+    "product_name": "Fluarix 0.5ml"
+  },
+  {
+    "sku": "00038234",
+    "disease_group_name": "DẠI",
+    "product_name": "SPEEDA"
+  },
+  {
+    "sku": "00043507",
+    "disease_group_name": "THỦY ĐẬU",
+    "product_name": "OKAVAX"
+  },
+  {
+    "sku": "00043982",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "RECOMBIVAX HB"
+  },
+  {
+    "sku": "00043501",
+    "disease_group_name": "CÚM",
+    "product_name": "INFLUVAC"
+  },
+  {
+    "sku": "00043983",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "VIVOTIF"
+  },
+  {
+    "sku": "00045660",
+    "disease_group_name": "NÃO MÔ CẦU BC",
+    "product_name": "Mengo-BC"
+  },
+  {
+    "sku": "00038275",
+    "disease_group_name": null,
+    "product_name": "HUYẾT THANH KHÁNG ĐỘC TỐ UỐN VÁN TINH CHẾ (SAT)"
+  },
+  {
+    "sku": "00043502",
+    "disease_group_name": null,
+    "product_name": "INFLUVAC"
+  },
+  {
+    "sku": "00039361",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 2 - GÓI DỊCH VỤ TIÊM CHỦNG 24 THÁNG"
+  },
+  {
+    "sku": "00043509",
+    "disease_group_name": "BỆNH DO HIB",
+    "product_name": "HIBERIX"
+  },
+  {
+    "sku": "00045653",
+    "disease_group_name": "CÚM",
+    "product_name": "Fluarix 0.25ml"
+  },
+  {
+    "sku": "00043981",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "HIPABIG"
+  },
+  {
+    "sku": "00039276",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - JEEV 6MCG"
+  },
+  {
+    "sku": "00038276",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "MMR"
+  },
+  {
+    "sku": "00045700",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "JE vaccine"
+  },
+  {
+    "sku": "00038266",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "TYPHOID VI"
+  },
+  {
+    "sku": "00045654",
+    "disease_group_name": "CÚM",
+    "product_name": "Agrippal S1"
+  },
+  {
+    "sku": "00043986",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Viêm gan B)",
+    "product_name": "QUIVAXEM"
+  },
+  {
+    "sku": "00045678",
+    "disease_group_name": "UỐN VÁN HẤP PHỤ (TT)",
+    "product_name": "Uốn ván"
+  },
+  {
+    "sku": "00045690",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "r-HBvax"
+  },
+  {
+    "sku": "00045701",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "R.S.Jev"
+  },
+  {
+    "sku": "00042025",
+    "disease_group_name": null,
+    "product_name": "data tàu ngành vaccine (23/11)"
+  },
+  {
+    "sku": "00042026",
+    "disease_group_name": null,
+    "product_name": "data tàu ngành vaccine 02 (23/11)"
+  },
+  {
+    "sku": "00039289",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VARILRIX 0.5ML"
+  },
+  {
+    "sku": "00045666",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "Trivivac"
+  },
+  {
+    "sku": "A052300000484",
+    "disease_group_name": null,
+    "product_name": "INFLUVAC TETRA ABBOTT 0.5ML"
+  },
+  {
+    "sku": "00039287",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - SYNFLORIX INJ 0.5ML"
+  },
+  {
+    "sku": "00038224",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Bại liệt)",
+    "product_name": "INFANRIX IPV-HIB"
+  },
+  {
+    "sku": "00045648",
+    "disease_group_name": "BẠCH HẦU, UỐN VÁN",
+    "product_name": "D.T.VAX"
+  },
+  {
+    "sku": "00045715",
+    "disease_group_name": "HUYẾT THANH KHÁNG VIÊM GAN B",
+    "product_name": "ImmunoHbs - 180 IU/ml"
+  },
+  {
+    "sku": "00042181",
+    "disease_group_name": null,
+    "product_name": "NƯỚC PHA TIÊM 6ML DÙNG CHO VẮC XIN MVVAC 10 LỌ"
+  },
+  {
+    "sku": "00043989",
+    "disease_group_name": "BẠI LIỆT",
+    "product_name": "IPV"
+  },
+  {
+    "sku": "00045662",
+    "disease_group_name": "SỞI",
+    "product_name": "ROUVAX"
+  },
+  {
+    "sku": "00043976",
+    "disease_group_name": "4 TRONG 1",
+    "product_name": "TETRACOQ"
+  },
+  {
+    "sku": "00045721",
+    "disease_group_name": "HUYẾT THANH UỐN VÁN",
+    "product_name": "Teatanus Antitoxin"
+  },
+  {
+    "sku": "00042297",
+    "disease_group_name": null,
+    "product_name": "data test tàu combo vaccine"
+  },
+  {
+    "sku": "00039286",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - ROTARIX VIAL 1.5ML 1'S"
+  },
+  {
+    "sku": "00039296",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - MMR II"
+  },
+  {
+    "sku": "00038248",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Bại liệt)",
+    "product_name": "PENTAXIM"
+  },
+  {
+    "sku": "00045702",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "RS JEV"
+  },
+  {
+    "sku": "00039299",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - ADACEL"
+  },
+  {
+    "sku": "00039316",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - ROTAVIN-M1"
+  },
+  {
+    "sku": "00039360",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 2 - GÓI DỊCH VỤ TIÊM CHỦNG 12 THÁNG"
+  },
+  {
+    "sku": "00045651",
+    "disease_group_name": "BỆNH DO HIB",
+    "product_name": "ACT-HIB"
+  },
+  {
+    "sku": "00039277",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - JEEV 3MCG"
+  },
+  {
+    "sku": "00039290",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - HEBERBIOVAC HB 20MCG"
+  },
+  {
+    "sku": "00045673",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "Zerotyph cap"
+  },
+  {
+    "sku": "00045691",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "SCI-B-VAC 5mg/0.5ml"
+  },
+  {
+    "sku": "00039324",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - ABHAYRAB 0.5ML"
+  },
+  {
+    "sku": "00039325",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - HUYẾT THANH KHÁNG DẠI TINH CHẾ (SAR)"
+  },
+  {
+    "sku": "00039326",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - GENE HBVAX 1ML"
+  },
+  {
+    "sku": "00039357",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 1_GÓI DỊCH VỤ TIÊM CHỦNG NGƯỜI CÓ BỆNH MÃN TÍNH"
+  },
+  {
+    "sku": "00039327",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - GENE HBVAX 0.5ML"
+  },
+  {
+    "sku": "00039312",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VAXIGRIP 0.25ML"
+  },
+  {
+    "sku": "00038274",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "HUYẾT THANH HEPABIG INJ"
+  },
+  {
+    "sku": "00046457",
+    "disease_group_name": "HUYẾT THANH KHÁNG DẠI",
+    "product_name": "SAR 1000IU"
+  },
+  {
+    "sku": "00047587",
+    "disease_group_name": "BỆNH KHÁC",
+    "product_name": "VẮC XIN KHÁC"
+  },
+  {
+    "sku": "00045659",
+    "disease_group_name": "LAO",
+    "product_name": "BCG-TCDV"
+  },
+  {
+    "sku": "00038222",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "ENGERIX-B 20mcg/1ml"
+  },
+  {
+    "sku": "00045671",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "Vắc xin thương hàn vi Polysaccharide (Lọ 2.5ml)"
+  },
+  {
+    "sku": "00045695",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "Jebevax (Lọ 1 ml)"
+  },
+  {
+    "sku": "00039331",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - HEPABIG INJ"
+  },
+  {
+    "sku": "00043483",
+    "disease_group_name": "CÚM",
+    "product_name": "VAXIGRIP 0.25ML"
+  },
+  {
+    "sku": "00043990",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Viêm gan B)",
+    "product_name": "COMBE FIVE"
+  },
+  {
+    "sku": "00038253",
+    "disease_group_name": null,
+    "product_name": "VAXIGRIP 0.25ML"
+  },
+  {
+    "sku": "00038254",
+    "disease_group_name": null,
+    "product_name": "VAXIGRIP 0.25ML"
+  },
+  {
+    "sku": "00045684",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "Viêm gan B"
+  },
+  {
+    "sku": "00040035",
+    "disease_group_name": null,
+    "product_name": "Dịch vụ tiêm chủng Vắc-xin"
+  },
+  {
+    "sku": "00039311",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VAXIGRIP 0.5ML"
+  },
+  {
+    "sku": "00045681",
+    "disease_group_name": "UỐN VÁN HẤP PHỤ (TT)",
+    "product_name": "VAT (Lọ 20 liều)"
+  },
+  {
+    "sku": "00046460",
+    "disease_group_name": "HUYẾT THANH UỐN VÁN",
+    "product_name": "HT Uốn Ván 1500 IU"
+  },
+  {
+    "sku": "00039354",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 1 - GÓI DỊCH VỤ TIÊM CHỦNG 24 THÁNG"
+  },
+  {
+    "sku": "00045675",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "VI vaccine"
+  },
+  {
+    "sku": "00039294",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - GARDASIL INJ 0.5ML"
+  },
+  {
+    "sku": "00043503",
+    "disease_group_name": "BỆNH DO PHẾ CẦU",
+    "product_name": "PNEUMO 23"
+  },
+  {
+    "sku": "00039322",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - MORCVAX"
+  },
+  {
+    "sku": "00038257",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Viêm gan B)",
+    "product_name": "DTP-HEPB-HIB (SII)"
+  },
+  {
+    "sku": "00046458",
+    "disease_group_name": "HUYẾT THANH KHÁNG DẠI",
+    "product_name": "SAR 2ml"
+  },
+  {
+    "sku": "00046459",
+    "disease_group_name": "HUYẾT THANH UỐN VÁN",
+    "product_name": "SAT 1500IU"
+  },
+  {
+    "sku": "00039284",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - INFANRIX IPV-HIB"
+  },
+  {
+    "sku": "00039727",
+    "disease_group_name": null,
+    "product_name": "GÓI DỊCH VỤ TIÊM CHỦNG COMBO 3 MŨI HPV"
+  },
+  {
+    "sku": "00045712",
+    "disease_group_name": "HUYẾT THANH KHÁNG DẠI",
+    "product_name": "FAVIRAB"
+  },
+  {
+    "sku": "00045676",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "Vắc xin thương hàn vi Polysaccharide (Lọ 0.5ml)"
+  },
+  {
+    "sku": "00045677",
+    "disease_group_name": "UỐN VÁN HẤP PHỤ (TT)",
+    "product_name": "Tetavax"
+  },
+  {
+    "sku": "00045667",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "Tresivac"
+  },
+  {
+    "sku": "00038221",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "ENGERIX-B 10mcg/0,5ml"
+  },
+  {
+    "sku": "00045694",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "HBVaxPRO"
+  },
+  {
+    "sku": "00045719",
+    "disease_group_name": "HUYẾT THANH UỐN VÁN",
+    "product_name": "TETANUS Antitoxin (A.T.S)"
+  },
+  {
+    "sku": "00045650",
+    "disease_group_name": "BẠI LIỆT",
+    "product_name": "Imovax Polio (Lọ 1 liều)- TCDV"
+  },
+  {
+    "sku": "00045672",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "Vắc xin thương hàn vi Polysaccharide (Lọ 10ml)"
+  },
+  {
+    "sku": "00039364",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 2_GÓI DỊCH VỤ TIÊM CHỦNG NGƯỜI CÓ BỆNH MÃN TÍNH"
+  },
+  {
+    "sku": "00043991",
+    "disease_group_name": "SỞI, RUBELLA",
+    "product_name": "MEASLES AND RUBELLA (MR)"
+  },
+  {
+    "sku": "00039281",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - ENGERIX B 10MCG"
+  },
+  {
+    "sku": "00040463",
+    "disease_group_name": null,
+    "product_name": "Test Vaccine"
+  },
+  {
+    "sku": "00038268",
+    "disease_group_name": null,
+    "product_name": "HUYẾT THANH KHÁNG DẠI TINH CHẾ (SAR)"
+  },
+  {
+    "sku": "00045682",
+    "disease_group_name": "VIÊM GAN A",
+    "product_name": "Avaxim 160U"
+  },
+  {
+    "sku": "00039300",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - AVAXIM 80U PEDIATRIC"
+  },
+  {
+    "sku": "00045713",
+    "disease_group_name": "HUYẾT THANH KHÁNG DẠI",
+    "product_name": "Anti-Rab 1000IU"
+  },
+  {
+    "sku": "00039352",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 1 - GÓI DỊCH VỤ TIÊM CHỦNG THANH THIẾU NIÊN (Từ 9 TUỔI – 18 TUỔI)"
+  },
+  {
+    "sku": "00039329",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VẮC XIN UỐN VÁN BẠCH HẦU HẤP PHỤ (TD)"
+  },
+  {
+    "sku": "00039362",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 2 - GÓI DỊCH VỤ TIÊM CHỦNG 6 THÁNG"
+  },
+  {
+    "sku": "00039283",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - INFANRIX HEXA"
+  },
+  {
+    "sku": "00043505",
+    "disease_group_name": "NÃO MÔ CẦU AC",
+    "product_name": "MENINGO A+C"
+  },
+  {
+    "sku": "00039366",
+    "disease_group_name": null,
+    "product_name": "GÓI DỊCH VỤ TIÊM CHỦNG PHỤ NỮ TRƯỚC KHI MANG THAI"
+  },
+  {
+    "sku": "00039292",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VA-MENGOC BC"
+  },
+  {
+    "sku": "00039363",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 2 - GÓI DỊCH VỤ TIÊM CHỦNG 9 THÁNG"
+  },
+  {
+    "sku": "00043980",
+    "disease_group_name": "VIÊM GAN A",
+    "product_name": "HAVRIX"
+  },
+  {
+    "sku": "00039335",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - ROTATEQ 2ML"
+  },
+  {
+    "sku": "00043979",
+    "disease_group_name": "VIÊM GAN A",
+    "product_name": "VAQTA"
+  },
+  {
+    "sku": "00045668",
+    "disease_group_name": "TẢ",
+    "product_name": "Tả"
+  },
+  {
+    "sku": "00039353",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 1 - GÓI DỊCH VỤ TIÊM CHỦNG 12 THÁNG"
+  },
+  {
+    "sku": "00045656",
+    "disease_group_name": "DẠI",
+    "product_name": "Rabies vaccine"
+  },
+  {
+    "sku": "00039365",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 2_GÓI DỊCH VỤ TIÊM CHỦNG TRƯỞNG THÀNH"
+  },
+  {
+    "sku": "00045657",
+    "disease_group_name": "DẠI",
+    "product_name": "Vinrab 1000 I.U"
+  },
+  {
+    "sku": "00045692",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "SCI-B-VAC 10mg/1ml"
+  },
+  {
+    "sku": "00039288",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - TWINRIX VIA 1ML"
+  },
+  {
+    "sku": "00039279",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VARICELLA-GCC 0.7 ML"
+  },
+  {
+    "sku": "00045704",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "Jebevax (Lọ 5 ml)"
+  },
+  {
+    "sku": "00045686",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "Hepavax-Gene TF Inj 10mcg/0,5ml"
+  },
+  {
+    "sku": "A052300000486",
+    "disease_group_name": null,
+    "product_name": "INDIRAB 2.5IU BHARAT 0.5ML 5 LỌ + 5 ỐNG DUNG MÔI"
+  },
+  {
+    "sku": "00043482",
+    "disease_group_name": "CÚM",
+    "product_name": "VAXIGRIP 0.5ML"
+  },
+  {
+    "sku": "00038252",
+    "disease_group_name": null,
+    "product_name": "VAXIGRIP 0.5ML"
+  },
+  {
+    "sku": "00045649",
+    "disease_group_name": "BẠI LIỆT",
+    "product_name": "Imovax Polio (Lọ 10 liều)- TCDV"
+  },
+  {
+    "sku": "00045693",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "HEPA- B- VAC"
+  },
+  {
+    "sku": "A052300000502",
+    "disease_group_name": null,
+    "product_name": "JEEV 3MCG BIOLOGICAL 0.5ML"
+  },
+  {
+    "sku": "00039308",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - STAMARIL 1000UI"
+  },
+  {
+    "sku": "00045687",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "r-Hbvax (1ml)"
+  },
+  {
+    "sku": "00041239",
+    "disease_group_name": null,
+    "product_name": "data test tàu vaccine (01)"
+  },
+  {
+    "sku": "00045685",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "Hepavax-Gene TF Inj 20mcg/1ml"
+  },
+  {
+    "sku": "00041240",
+    "disease_group_name": null,
+    "product_name": "data test tàu vaccine (02)"
+  },
+  {
+    "sku": "00045689",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "H-B-VAX II"
+  },
+  {
+    "sku": "00042296",
+    "disease_group_name": null,
+    "product_name": "data tàu combo"
+  },
+  {
+    "sku": "00042298",
+    "disease_group_name": null,
+    "product_name": "data tàu (06/12/2023)"
+  },
+  {
+    "sku": "00042299",
+    "disease_group_name": null,
+    "product_name": "data tàu (07/12/2023)"
+  },
+  {
+    "sku": "00042300",
+    "disease_group_name": null,
+    "product_name": "data tàu yy"
+  },
+  {
+    "sku": "00039274",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - INFLUVAC TETRA"
+  },
+  {
+    "sku": "00045644",
+    "disease_group_name": "6 TRONG 1",
+    "product_name": "Hexavac"
+  },
+  {
+    "sku": "00045679",
+    "disease_group_name": "UỐN VÁN HẤP PHỤ (TT)",
+    "product_name": "TETANUS vaccine"
+  },
+  {
+    "sku": "00045699",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "Boryung JE vaccine"
+  },
+  {
+    "sku": "00039317",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - IVACFLU-S 0.5ML"
+  },
+  {
+    "sku": "00039359",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 2 - GÓI DỊCH VỤ TIÊM CHỦNG THANH THIẾU NIÊN (Từ 9 TUỔI – 18 TUỔI)"
+  },
+  {
+    "sku": "00039336",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - BCG"
+  },
+  {
+    "sku": "00039358",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 1_GÓI DỊCH VỤ TIÊM CHỦNG TRƯỞNG THÀNH"
+  },
+  {
+    "sku": "00039319",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - MVVAC"
+  },
+  {
+    "sku": "00045841",
+    "disease_group_name": null,
+    "product_name": "QDENGA"
+  },
+  {
+    "sku": "00039313",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VAXIGRIP TETRA"
+  },
+  {
+    "sku": "00044765",
+    "disease_group_name": "VIÊM GAN B SƠ SINH",
+    "product_name": "Viêm Gan B Sơ Sinh"
+  },
+  {
+    "sku": "00045663",
+    "disease_group_name": "SỞI",
+    "product_name": "Measles vaccine"
+  },
+  {
+    "sku": "00039295",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - GARDASIL 9 0.5ML"
+  },
+  {
+    "sku": "00038955",
+    "disease_group_name": "LAO",
+    "product_name": "BCG"
+  },
+  {
+    "sku": "00045645",
+    "disease_group_name": "BẠCH HẦU, HO GÀ, UỐN VÁN",
+    "product_name": "DTCOQ"
+  },
+  {
+    "sku": "00045674",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "TYPHERIX"
+  },
+  {
+    "sku": "00039275",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - INDIRAB"
+  },
+  {
+    "sku": "00039293",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - SPEEDA"
+  },
+  {
+    "sku": "00046461",
+    "disease_group_name": "SỞI, RUBELLA",
+    "product_name": "Measles and Rubella Vaccine Live, Attenuated (Freeze-Dried)"
+  },
+  {
+    "sku": "00039303",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - HEXAXIM"
+  },
+  {
+    "sku": "00039282",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - ENGERIX B 20MCG"
+  },
+  {
+    "sku": "00039285",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - PRIORIX 0.5ML VIAL 1'S"
+  },
+  {
+    "sku": "00039305",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - MENACTRA"
+  },
+  {
+    "sku": "00039315",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - DTP-HEPB-HIB"
+  },
+  {
+    "sku": "00045688",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "r-Hbvax (0.5ml)"
+  },
+  {
+    "sku": "00039334",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - MMR"
+  },
+  {
+    "sku": "A052300000503",
+    "disease_group_name": null,
+    "product_name": "JEEV 6MCG BIOLOGICAL 0.5ML"
+  },
+  {
+    "sku": "00039356",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 1 - GÓI DỊCH VỤ TIÊM CHỦNG 9 THÁNG"
+  },
+  {
+    "sku": "00039355",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 1 - GÓI DỊCH VỤ TIÊM CHỦNG 6 THÁNG"
+  },
+  {
+    "sku": "00039318",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - JEVAX"
+  },
+  {
+    "sku": "00039332",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - HUYẾT THANH KHÁNG ĐỘC TỐ UỐN VÁN TINH CHẾ (SAT)"
+  },
+  {
+    "sku": "00039309",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - TETRAXIM"
+  },
+  {
+    "sku": "00045664",
+    "disease_group_name": "SỞI",
+    "product_name": "MRVAC"
+  },
+  {
+    "sku": "00042180",
+    "disease_group_name": null,
+    "product_name": "DUNG MÔI VÀ KHUẨN 0.7ML DÙNG CHO VẮC XIN MMR II 10 LỌ"
+  },
+  {
+    "sku": "00039302",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - EUVAX B 10MCG"
+  },
+  {
+    "sku": "00039291",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - QUIMI-HIB"
+  },
+  {
+    "sku": "00039367",
+    "disease_group_name": null,
+    "product_name": "GÓI DỊCH VỤ TIÊM CHỦNG TRẺ TIỀN HỌC ĐƯỜNG (Từ 3 TUỔI – 6 TUỔI)"
+  },
+  {
+    "sku": "00045720",
+    "disease_group_name": "HUYẾT THANH UỐN VÁN",
+    "product_name": "ANTITETA II. 1500IU"
+  },
+  {
+    "sku": "00043506",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "TRIMOVAX"
+  },
+  {
+    "sku": "00045716",
+    "disease_group_name": "HUYẾT THANH KHÁNG VIÊM GAN B",
+    "product_name": "Kháng huyết thanh viêm gan B Fovepta"
+  },
+  {
+    "sku": "00038232",
+    "disease_group_name": null,
+    "product_name": "ABHAYRAB 2.5"
+  },
+  {
+    "sku": "00038244",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "EUVAX B 10mcg/0,5ml"
+  },
+  {
+    "sku": "00045655",
+    "disease_group_name": "DẠI",
+    "product_name": "Lyssavac"
+  },
+  {
+    "sku": "00043984",
+    "disease_group_name": "DẠI",
+    "product_name": "RABIPUR"
+  },
+  {
+    "sku": "00045669",
+    "disease_group_name": "TẢ",
+    "product_name": "Orcvax"
+  },
+  {
+    "sku": "00045670",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "Vắc xin thương hàn vi Polysaccharide (Lọ 1ml)"
+  },
+  {
+    "sku": "00039307",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - PENTAXIM"
+  },
+  {
+    "sku": "00039323",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - TYPHOID VI"
+  },
+  {
+    "sku": "00045703",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "Japanese Encephalitis vaccine-GCC"
+  },
+  {
+    "sku": "00039304",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - IMOJEV"
+  },
+  {
+    "sku": "00039310",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - TYPHIM VI 25MCG"
+  },
+  {
+    "sku": "00039328",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - HEBERBIOVAC 0.5ML"
+  },
+  {
+    "sku": "00039278",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - GCFLU QUADRIVALENT"
+  },
+  {
+    "sku": "00039297",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VARIVAX"
+  },
+  {
+    "sku": "00039320",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - HAVAX 0.5ML"
+  },
+  {
+    "sku": "00045680",
+    "disease_group_name": "UỐN VÁN HẤP PHỤ (TT)",
+    "product_name": "VAT (ống 1 liều)"
+  },
+  {
+    "sku": "00045842",
+    "disease_group_name": null,
+    "product_name": "SHINGRIX"
+  },
+  {
+    "sku": "00039314",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VERORAB VẮC XIN DẠI"
+  },
+  {
+    "sku": "00039330",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - VẮC XIN UỐN VÁN HẤP PHỤ (TT) 0.5 ML/ỐNG"
+  },
+  {
+    "sku": "00038243",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "EUVAX B 20mcg/1ml"
+  },
+  {
+    "sku": "00041144",
+    "disease_group_name": null,
+    "product_name": "NƯỚC MUỐI SINH LÝ DÙNG CHO VẮC XIN BCG IVAC 20 ỐNG X 1ML"
+  },
+  {
+    "sku": "00043508",
+    "disease_group_name": null,
+    "product_name": "CERVARIX"
+  },
+  {
+    "sku": "00038249",
+    "disease_group_name": null,
+    "product_name": "STAMARIL"
+  },
+  {
+    "sku": "00038245",
+    "disease_group_name": "6 TRONG 1",
+    "product_name": "HEXAXIM"
+  },
+  {
+    "sku": "00038223",
+    "disease_group_name": "6 TRONG 1",
+    "product_name": "INFANRIX HEXA"
+  },
+  {
+    "sku": "00038219",
+    "disease_group_name": "THỦY ĐẬU",
+    "product_name": "VARICELLA-GCC 0.7 ML"
+  },
+  {
+    "sku": "00046555",
+    "disease_group_name": null,
+    "product_name": "DUNG MÔI NƯỚC CẤT PHA TIÊM DÙNG CHO VẮC XIN MMR 50 LỌ"
+  },
+  {
+    "sku": "00049402",
+    "disease_group_name": null,
+    "product_name": "IVACRIG"
+  },
+  {
+    "sku": "00045647",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Viêm gan B)",
+    "product_name": "DPT (Lọ 1 liều)"
+  },
+  {
+    "sku": "00045646",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Viêm gan B)",
+    "product_name": "DPT (Lọ 2 liều)"
+  },
+  {
+    "sku": "00043481",
+    "disease_group_name": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Viêm gan B)",
+    "product_name": "DPT"
+  },
+  {
+    "sku": "00043988",
+    "disease_group_name": "BẠI LIỆT",
+    "product_name": "OPV"
+  },
+  {
+    "sku": "00047223",
+    "disease_group_name": null,
+    "product_name": "NƯỚC PHA TIÊM 6ML DÙNG CHO VẮC XIN MRVAC"
+  },
+  {
+    "sku": "00038220",
+    "disease_group_name": "BẠCH HẦU, HO GÀ, UỐN VÁN",
+    "product_name": "BOOSTRIX 0.5ML 1DOSE"
+  },
+  {
+    "sku": "00038262",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "JEVAX"
+  },
+  {
+    "sku": "00038265",
+    "disease_group_name": "TẢ",
+    "product_name": "MORCVAX"
+  },
+  {
+    "sku": "00046876",
+    "disease_group_name": "BẠCH HẦU, UỐN VÁN",
+    "product_name": "UỐN VÁN BẠCH HẦU HẤP PHỤ (Td) LỌ 10 LIỀU"
+  },
+  {
+    "sku": "00038240",
+    "disease_group_name": "BỆNH DO PHẾ CẦU",
+    "product_name": "PREVENAR 13 0.5ML INJ"
+  },
+  {
+    "sku": "00038218",
+    "disease_group_name": "CÚM",
+    "product_name": "GCFLU QUADRIVALENT"
+  },
+  {
+    "sku": "00038235",
+    "disease_group_name": "UNG THƯ DO HPV 4 CHỦNG",
+    "product_name": "GARDASIL 4 0.5ML"
+  },
+  {
+    "sku": "00038230",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "HEBERBIOVAC 1ML"
+  },
+  {
+    "sku": "00038150",
+    "disease_group_name": "DẠI",
+    "product_name": "INDIRAB"
+  },
+  {
+    "sku": "00038152",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "JEEV 3MCG/0.5ML"
+  },
+  {
+    "sku": "00038231",
+    "disease_group_name": "BỆNH DO HIB",
+    "product_name": "QUIMI-HIB"
+  },
+  {
+    "sku": "00038260",
+    "disease_group_name": "TIÊU CHẢY DO ROTA VIRUS",
+    "product_name": "ROTAVIN"
+  },
+  {
+    "sku": "00038270",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "GENE HBVAX 0.5ML"
+  },
+  {
+    "sku": "00038236",
+    "disease_group_name": "UNG THƯ DO HPV 9 CHỦNG",
+    "product_name": "GARDASIL 9 0.5ML"
+  },
+  {
+    "sku": "00045857",
+    "disease_group_name": "ZONA THẦN KINH (GIỜI LEO)",
+    "product_name": "SHINGRIX"
+  },
+  {
+    "sku": "00047222",
+    "disease_group_name": "SỞI, RUBELLA",
+    "product_name": "VẮC XIN PHỐI HỢP SỞI - RUBELLA (MRVAC)"
+  },
+  {
+    "sku": "00046554",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "MMR"
+  },
+  {
+    "sku": "00038225",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "PRIORIX 0.5ML VIAL 1'S"
+  },
+  {
+    "sku": "00042224",
+    "disease_group_name": null,
+    "product_name": "GÓI TRẺ TIỀN HỌC ĐƯỜNG (Từ 3 TUỔI - 9 TUỔI)"
+  },
+  {
+    "sku": "00042221",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 6 THÁNG"
+  },
+  {
+    "sku": "00042217",
+    "disease_group_name": null,
+    "product_name": "GÓI THANH THIẾU NIÊN (Từ 9 TUỔI - 18 TUỔI)"
+  },
+  {
+    "sku": "00042220",
+    "disease_group_name": null,
+    "product_name": "GÓI NGƯỜI CÓ BỆNH MÃN TÍNH"
+  },
+  {
+    "sku": "00042223",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 24 THÁNG"
+  },
+  {
+    "sku": "00042218",
+    "disease_group_name": null,
+    "product_name": "GÓI PHỤ NỮ TRƯỚC KHI MANG THAI"
+  },
+  {
+    "sku": "00042222",
+    "disease_group_name": null,
+    "product_name": "GÓI COMBO 12 THÁNG"
+  },
+  {
+    "sku": "00042219",
+    "disease_group_name": null,
+    "product_name": "GÓI CHO NGƯỜI TRƯỞNG THÀNH"
+  },
+  {
+    "sku": "00044085",
+    "disease_group_name": null,
+    "product_name": "GÓI TIỀN HÔN NHÂN TOÀN DIỆN 7 LOẠI"
+  },
+  {
+    "sku": "00044086",
+    "disease_group_name": null,
+    "product_name": "GÓI TIỀN HÔN NHÂN BẢO VỆ 5 LOẠI"
+  },
+  {
+    "sku": "00038251",
+    "disease_group_name": "THƯƠNG HÀN",
+    "product_name": "TYPHIM VI 25MCG"
+  },
+  {
+    "sku": "00038255",
+    "disease_group_name": "CÚM",
+    "product_name": "VAXIGRIP TETRA"
+  },
+  {
+    "sku": "00038149",
+    "disease_group_name": "CÚM",
+    "product_name": "INFLUVAC TETRA"
+  },
+  {
+    "sku": "00048369",
+    "disease_group_name": "NÃO MÔ CẦU ACYW",
+    "product_name": "MENQUADFI"
+  },
+  {
+    "sku": "00038273",
+    "disease_group_name": "UỐN VÁN HẤP PHỤ (TT)",
+    "product_name": "UỐN VÁN HẤP PHỤ (TT) 0.5 ML/ỐNG"
+  },
+  {
+    "sku": "00045843",
+    "disease_group_name": "BỆNH DO PHẾ CẦU",
+    "product_name": "PNEUMOVAX 23"
+  },
+  {
+    "sku": "00038228",
+    "disease_group_name": "VIÊM GAN A+B",
+    "product_name": "TWINRIX VIA 1ML"
+  },
+  {
+    "sku": "00039298",
+    "disease_group_name": null,
+    "product_name": "DỊCH VỤ TIÊM CHỦNG - PREVENAR 13 0.5ML INJ"
+  },
+  {
+    "sku": "00050623",
+    "disease_group_name": "NÃO MÔ CẦU AC",
+    "product_name": "MENINGOCOCCAL A+C"
+  },
+  {
+    "sku": "00038242",
+    "disease_group_name": "VIÊM GAN A",
+    "product_name": "AVAXIM 80U PEDIATRIC"
+  },
+  {
+    "sku": "00038250",
+    "disease_group_name": "4 TRONG 1",
+    "product_name": "TETRAXIM"
+  },
+  {
+    "sku": "00049352",
+    "disease_group_name": null,
+    "product_name": "BARYCELA INJ"
+  },
+  {
+    "sku": "00043237",
+    "disease_group_name": "NÃO MÔ CẦU B",
+    "product_name": "BEXSERO"
+  },
+  {
+    "sku": "00049351",
+    "disease_group_name": "VIRUS HỢP BÀO HÔ HẤP (RSV)",
+    "product_name": "ABRYSVO"
+  },
+  {
+    "sku": "00038256",
+    "disease_group_name": "DẠI",
+    "product_name": "VERORAB 0.5ML"
+  },
+  {
+    "sku": "00038277",
+    "disease_group_name": "TIÊU CHẢY DO ROTA VIRUS",
+    "product_name": "ROTATEQ 2ML"
+  },
+  {
+    "sku": "00045856",
+    "disease_group_name": "SỐT XUẤT HUYẾT",
+    "product_name": "QDENGA"
+  },
+  {
+    "sku": "00049350",
+    "disease_group_name": null,
+    "product_name": "NIMENRIX"
+  },
+  {
+    "sku": "00043977",
+    "disease_group_name": "BỆNH DO PHẾ CẦU",
+    "product_name": "VAXNEUVANCE (PCV15)"
+  },
+  {
+    "sku": "00038226",
+    "disease_group_name": "TIÊU CHẢY DO ROTA VIRUS",
+    "product_name": "ROTARIX VIAL 1.5ML 1'S"
+  },
+  {
+    "sku": "00038246",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "IMOJEV"
+  },
+  {
+    "sku": "00038264",
+    "disease_group_name": "VIÊM GAN A",
+    "product_name": "HAVAX 0.5ML"
+  },
+  {
+    "sku": "00038233",
+    "disease_group_name": "NÃO MÔ CẦU BC",
+    "product_name": "VA-MENGOC BC"
+  },
+  {
+    "sku": "00038269",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "GENE HBVAX 1ML"
+  },
+  {
+    "sku": "00038239",
+    "disease_group_name": "THỦY ĐẬU",
+    "product_name": "VARIVAX"
+  },
+  {
+    "sku": "00038263",
+    "disease_group_name": "SỞI",
+    "product_name": "MVVAC"
+  },
+  {
+    "sku": "00038261",
+    "disease_group_name": "CÚM",
+    "product_name": "IVACFLU-S 0.5ML"
+  },
+  {
+    "sku": "00038267",
+    "disease_group_name": "DẠI",
+    "product_name": "ABHAYRAB 0.5ML"
+  },
+  {
+    "sku": "00038271",
+    "disease_group_name": "VIÊM GAN B",
+    "product_name": "HEBERBIOVAC 0.5ML"
+  },
+  {
+    "sku": "00038259",
+    "disease_group_name": "LAO",
+    "product_name": "IVACTUBER (BCG)"
+  },
+  {
+    "sku": "00038229",
+    "disease_group_name": "THỦY ĐẬU",
+    "product_name": "VARILRIX 0.5ML"
+  },
+  {
+    "sku": "00038241",
+    "disease_group_name": "BẠCH HẦU, HO GÀ, UỐN VÁN",
+    "product_name": "ADACEL"
+  },
+  {
+    "sku": "00049349",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA, THỦY ĐẬU",
+    "product_name": "PROQUAD"
+  },
+  {
+    "sku": "00038227",
+    "disease_group_name": "BỆNH DO PHẾ CẦU",
+    "product_name": "SYNFLORIX INJ 0.5ML"
+  },
+  {
+    "sku": "00038272",
+    "disease_group_name": "BẠCH HẦU, UỐN VÁN",
+    "product_name": "UỐN VÁN BẠCH HẦU HẤP PHỤ (Td) 1 LIỀU"
+  },
+  {
+    "sku": "00049587",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "MMR II"
+  },
+  {
+    "sku": "00043978",
+    "disease_group_name": "BỆNH DO PHẾ CẦU",
+    "product_name": "PREVENAR 20 (PCV20)"
+  },
+  {
+    "sku": "00038237",
+    "disease_group_name": "SỞI, QUAI BỊ, RUBELLA",
+    "product_name": "MMR II"
+  },
+  {
+    "sku": "00049353",
+    "disease_group_name": "VIRUS HỢP BÀO HÔ HẤP (RSV)",
+    "product_name": "AREXVY"
+  },
+  {
+    "sku": "00038247",
+    "disease_group_name": "NÃO MÔ CẦU ACYW",
+    "product_name": "MENACTRA"
+  },
+  {
+    "sku": "00038151",
+    "disease_group_name": "VIÊM NÃO NHẬT BẢN",
+    "product_name": "JEEV 6MCG/0.5ML"
+  }
+]

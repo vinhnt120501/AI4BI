@@ -69,7 +69,15 @@ async def chat(req: ChatRequest):
         instruction=req.instruction,
         memory_service=memory_service,
     )
-    return StreamingResponse(sse_stream, media_type="text/event-stream")
+    return StreamingResponse(
+        sse_stream,
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache, no-transform",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
 
 
 @app.get("/memory/admin/overview")

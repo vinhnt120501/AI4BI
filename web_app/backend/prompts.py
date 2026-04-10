@@ -105,17 +105,21 @@ VIS_CONFIG:[block1, block2, ...]
 === CÁC LOẠI BLOCK ===
 
 1. stat_cards — KPI tóm tắt (luôn đặt đầu tiên)
-   {"type":"stat_cards","items":[{"label":"Tổng DT","value":"500 tỷ","subtitle":"Tăng 12%","color":"green","trend":"up"},...]}
-   color: "blue","green","red","orange","purple","cyan"
-   trend: "up" (tăng, mũi tên xanh), "down" (giảm, mũi tên đỏ), "neutral" (ổn định) — optional
+   {"type":"stat_cards","items":[{"label":"Tổng DT","value":"500 tỷ","subtitle":"so với kỳ trước","color":"#16a34a","borderColor":"#22c55e","trendIcon":"↑","trendLabel":"Tăng 12%","trendColor":"#16a34a"},...]}
+   - color: hex color cho giá trị (VD: "#2563eb" xanh dương, "#16a34a" xanh lá, "#ef4444" đỏ, "#f97316" cam, "#7c3aed" tím)
+   - borderColor: hex color cho viền trên card
+   - trendIcon: icon tự do (VD: "↑","↓","→","⚡","🔥")
+   - trendLabel: text tự do (VD: "Tăng 12%", "-5.2% MoM", "+3K đơn")
+   - trendColor: hex color cho trend text (xanh=#16a34a khi tốt, đỏ=#ef4444 khi xấu, xám=#64748b khi trung lập)
 
 2. chart — Biểu đồ dynamic
-   {"type":"chart","chartType":"<type>","xKey":"<cột>","yKeys":["<cột_số>"],"title":"...","purpose":"...","size":"full|half","options":{...},"series":[...],"referenceLine":{...},"config":{...}}
+   {"type":"chart","chartType":"<type>","xKey":"<cột>","yKeys":["<cột_số>"],"title":"...","purpose":"...","size":"full|half","height":400,"colors":["#6366f1","#10b981"],"options":{...},"series":[...],"referenceLine":{...},"config":{...}}
 
    chartType: "bar"|"line"|"area"|"pie"|"scatter"|"composed"|"radar"|"radial_bar"|"treemap"|"funnel"|"waterfall"
-
+   colors: mảng hex color cho các series (AI tự chọn palette phù hợp với data)
+   height: chiều cao chart (px), tự chọn theo loại chart và lượng data
    options (tuỳ chọn): {"layout":"vertical","stacked":true,"stackOffset":"expand","dualAxis":true,"brush":true,"innerRadius":"40%","zField":"col","gradient":true,"dashed":true}
-   series (với composed): [{"key":"col","renderAs":"bar|line|area","yAxisId":"left|right"}]
+   series (với composed): [{"key":"col","renderAs":"bar|line|area","yAxisId":"left|right","color":"#hex"}]
    referenceLine: {"value":0,"label":"Baseline","color":"#ef4444"}
    config (data transform): {"x_field":"col","y_fields":["col"],"color_field":"col","group_by":"col","aggregate":"sum|avg|count","sort_by":"col","sort_order":"desc","limit":10}
 
@@ -133,18 +137,30 @@ VIS_CONFIG:[block1, block2, ...]
    - sortBy + sortOrder: sắp xếp theo cột nào
    - limit: giới hạn top N dòng
 
-4. detail_cards — {"type":"detail_cards","items":[{"name":"...","metrics":{...},"tag":"...","tagColor":"green|red"}]}
+4. detail_cards — {"type":"detail_cards","items":[{"name":"...","metrics":{...},"tag":"...","tagColor":"#16a34a"}]}
+   - tagColor: hex color cho tag (VD: "#16a34a" xanh, "#ef4444" đỏ, "#f97316" cam)
 
 5. heading — {"type":"heading","text":"...","level":"h3"}
 
-=== QUY TẮC ===
-- xKey, yKeys PHẢI KHỚP CHÍNH XÁC tên cột trong data.
+=== QUY TẮC BẮT BUỘC ===
+- xKey, yKeys PHẢI KHỚP CHÍNH XÁC tên cột trong "Danh sách cột" được cung cấp. KIỂM TRA LẠI trước khi trả.
 - yKeys là MẢNG. stat_cards value là SỐ TÓM TẮT.
 - Data ≤ 1 dòng → CHỈ stat_cards.
 - Chart 1 trong dashboard PHẢI là "composed" nếu data có ≥2 cột số scale khác nhau.
 
+⚠️ SAI LẦM THƯỜNG GẶP — TUYỆT ĐỐI TRÁNH:
+1. ĐỂ QUÁ NHIỀU cột vào yKeys (>3 cột) → chart rối, không đọc được. Mỗi chart CHỈ NÊN có 1-3 yKeys.
+   → Nếu data có 8 cột số, CHIA thành 2-3 chart riêng biệt, mỗi chart focus 1-2 metric.
+2. xKey bị TRÙNG giá trị (VD: "Miền Bắc" xuất hiện 3 lần vì GROUP BY thang + region)
+   → Dùng config.group_by + config.aggregate để gom lại TRƯỚC khi vẽ, HOẶC dùng config.color_field để pivot.
+   → HOẶC chọn xKey là cột có giá trị UNIQUE (shop_code, thang, province_name).
+3. Line chart mà xKey là số (1, 2, 3) không có label → PHẢI chọn xKey là cột text/label có ý nghĩa.
+   VD: nếu data có cột "thang" (1,2,3) và cột "region_name" → xKey = region_name, dùng config.color_field = "thang" để mỗi tháng 1 series.
+4. Bar chart nằm ngang (vertical) mà hiển thị TẤT CẢ cột → chỉ chọn 1-2 cột quan trọng nhất.
+5. KHÔNG dùng tên cột kỹ thuật làm title chart. VD: "ty_le_khach_goi_tren_khach_le_trong_ky" → đổi thành "Tỷ lệ chuyển đổi gói (%)".
+
 === VÍ DỤ BẮT BUỘC THAM KHẢO ===
 
 VÍ DỤ — Dashboard hoàn chỉnh (data có: shop, province, doanh_thu, so_don, growth):
-VIS_CONFIG:[{"type":"stat_cards","items":[{"label":"Tổng DT","value":"170 tỷ","color":"green","trend":"up"},{"label":"Tổng đơn","value":"26K","color":"blue","trend":"up"},{"label":"Tăng trưởng","value":"+8.5%","color":"green","trend":"up"}]},{"type":"chart","chartType":"composed","xKey":"shop","yKeys":["doanh_thu","so_don"],"title":"Doanh thu & số đơn theo shop","purpose":"Bar doanh thu (trục trái) + Line số đơn (trục phải)","size":"full","options":{"dualAxis":true},"series":[{"key":"doanh_thu","renderAs":"bar","yAxisId":"left"},{"key":"so_don","renderAs":"line","yAxisId":"right"}]},{"type":"chart","chartType":"bar","xKey":"shop","yKeys":["growth"],"title":"Tốc độ tăng trưởng","purpose":"Đường baseline 0% để thấy shop nào âm","size":"half","referenceLine":{"value":0,"label":"0%","color":"#ef4444"}},{"type":"chart","chartType":"pie","xKey":"shop","yKeys":["doanh_thu"],"title":"Tỷ trọng doanh thu","purpose":"Donut xem tỷ trọng","size":"half","options":{"innerRadius":"40%"}},{"type":"table","title":"Chi tiết theo shop","columns":[{"key":"shop","label":"Shop"},{"key":"province","label":"Tỉnh"},{"key":"doanh_thu","label":"Doanh thu","format":"currency"},{"key":"so_don","label":"Số đơn","format":"number"},{"key":"growth","label":"Tăng trưởng","format":"percent","highlight":"positive_negative"}],"sortBy":"growth","sortOrder":"asc","limit":10},{"type":"detail_cards","items":[{"name":"Shop A","metrics":{"DT":"85 tỷ","Growth":"+15%"},"tag":"Top","tagColor":"green"},{"name":"Shop C","metrics":{"DT":"23 tỷ","Growth":"-3%"},"tag":"Yếu","tagColor":"red"}]}]
+VIS_CONFIG:[{"type":"stat_cards","items":[{"label":"Tổng DT","value":"170 tỷ","color":"#16a34a","borderColor":"#22c55e","trendIcon":"↑","trendLabel":"Tăng 15%","trendColor":"#16a34a"},{"label":"Tổng đơn","value":"26K","color":"#2563eb","borderColor":"#3b82f6","trendIcon":"↑","trendLabel":"+2.1K đơn","trendColor":"#16a34a"},{"label":"Tăng trưởng","value":"+8.5%","color":"#16a34a","borderColor":"#22c55e","trendIcon":"⚡","trendLabel":"Vượt KH","trendColor":"#16a34a"}]},{"type":"chart","chartType":"composed","xKey":"shop","yKeys":["doanh_thu","so_don"],"title":"Doanh thu & số đơn theo shop","purpose":"Bar doanh thu (trục trái) + Line số đơn (trục phải)","size":"full","height":400,"colors":["#6366f1","#10b981"],"options":{"dualAxis":true},"series":[{"key":"doanh_thu","renderAs":"bar","yAxisId":"left","color":"#6366f1"},{"key":"so_don","renderAs":"line","yAxisId":"right","color":"#10b981"}]},{"type":"chart","chartType":"bar","xKey":"shop","yKeys":["growth"],"title":"Tốc độ tăng trưởng","purpose":"Đường baseline 0% để thấy shop nào âm","size":"half","colors":["#3b82f6"],"referenceLine":{"value":0,"label":"0%","color":"#ef4444"}},{"type":"chart","chartType":"pie","xKey":"shop","yKeys":["doanh_thu"],"title":"Tỷ trọng doanh thu","purpose":"Donut xem tỷ trọng","size":"half","colors":["#6366f1","#10b981","#f59e0b","#ef4444","#8b5cf6"],"options":{"innerRadius":"40%"}},{"type":"table","title":"Chi tiết theo shop","columns":[{"key":"shop","label":"Shop"},{"key":"province","label":"Tỉnh"},{"key":"doanh_thu","label":"Doanh thu","format":"currency"},{"key":"so_don","label":"Số đơn","format":"number"},{"key":"growth","label":"Tăng trưởng","format":"percent","highlight":"positive_negative"}],"sortBy":"growth","sortOrder":"asc","limit":10},{"type":"detail_cards","items":[{"name":"Shop A","metrics":{"DT":"85 tỷ","Growth":"+15%"},"tag":"Top","tagColor":"#16a34a"},{"name":"Shop C","metrics":{"DT":"23 tỷ","Growth":"-3%"},"tag":"Yếu","tagColor":"#ef4444"}]}]
 """

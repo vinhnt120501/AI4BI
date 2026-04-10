@@ -183,11 +183,15 @@ export default function ChatPage() {
                 }),
             });
 
+            if (!res.ok) {
+                throw new Error(`Backend error: ${res.status}`);
+            }
             const reader = res.body?.getReader();
             const decoder = new TextDecoder();
             if (!reader) throw new Error('No stream');
 
             let buffer = '';
+            let currentEvent = '';
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
@@ -195,8 +199,6 @@ export default function ChatPage() {
                 buffer += decoder.decode(value, { stream: true });
                 const lines = buffer.split('\n');
                 buffer = lines.pop() || '';
-
-                let currentEvent = '';
                 for (const line of lines) {
                     if (line.startsWith('event: ')) {
                         currentEvent = line.slice(7);
@@ -209,12 +211,17 @@ export default function ChatPage() {
                     }
                 }
             }
+            // Stream ended — ensure isDone is set even if 'done' event was missed
+            setMessages((prev) =>
+                prev.map((m) => m.id === aiMsgId ? { ...m, isDone: true } : m)
+            );
             setIsTyping(false);
-        } catch {
+        } catch (err) {
+            console.error('[Chat SSE Error]', err);
             setMessages((prev) =>
                 prev.map((m) =>
                     m.id === aiMsgId
-                        ? { ...m, content: 'Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại.' }
+                        ? { ...m, content: `Lỗi kết nối: ${err instanceof Error ? err.message : 'Unknown error'}. Vui lòng thử lại.`, isDone: true }
                         : m
                 )
             );

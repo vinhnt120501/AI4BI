@@ -13,13 +13,13 @@ export default function TokenSection({ tokenUsage, replyTokenUsage }: { tokenUsa
     <CollapsibleBox title="Token usage" badge={`${totalAll.toLocaleString()} total`} defaultOpen={false}>
       <div className="px-4 py-3 text-sm font-mono text-slate-500 space-y-1">
         <div className="font-medium text-slate-600 mb-1">SQL Generation:</div>
-        <div className="pl-2">Input    : {tokenUsage.input.toLocaleString()}</div>
-        <div className="pl-4">Schema     : {tokenUsage.schema.toLocaleString()}</div>
-        <div className="pl-4">Instruction: {tokenUsage.instruction.toLocaleString()}</div>
-        <div className="pl-4">Question   : {tokenUsage.question.toLocaleString()}</div>
-        {tokenUsage.thinking > 0 && <div className="pl-2">Thinking : {tokenUsage.thinking.toLocaleString()}</div>}
-        <div className="pl-2">Output   : {tokenUsage.output.toLocaleString()}</div>
-        <div className="pl-2">Subtotal : {tokenUsage.total.toLocaleString()}</div>
+        <div className="pl-2">Input    : {(tokenUsage.input ?? 0).toLocaleString()}</div>
+        <div className="pl-4">Schema     : {(tokenUsage.schema ?? 0).toLocaleString()}</div>
+        <div className="pl-4">Instruction: {(tokenUsage.instruction ?? 0).toLocaleString()}</div>
+        <div className="pl-4">Question   : {(tokenUsage.question ?? 0).toLocaleString()}</div>
+        {(tokenUsage.thinking ?? 0) > 0 && <div className="pl-2">Thinking : {tokenUsage.thinking.toLocaleString()}</div>}
+        <div className="pl-2">Output   : {(tokenUsage.output ?? 0).toLocaleString()}</div>
+        <div className="pl-2">Subtotal : {(tokenUsage.total ?? 0).toLocaleString()}</div>
 
         {replyTokenUsage && (
           <>

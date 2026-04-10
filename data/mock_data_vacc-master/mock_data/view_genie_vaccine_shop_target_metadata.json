@@ -1,0 +1,92 @@
+{
+  "table": {
+    "name": "view_genie_vaccine_shop_target",
+    "type": "dimension_table",
+    "description": "Bảng chiều lưu thông tin KPI / chỉ tiêu doanh thu hàng tháng cho từng cửa hàng/trung tâm tiêm chủng. Mỗi bản ghi xác định chỉ tiêu doanh số cụ thể của một shop trong một tháng-năm cụ thể. Dùng để so sánh doanh thu thực tế với kế hoạch.",
+    "estimated_rows": 7920,
+    "primary_key": [
+      "shop_code",
+      "month",
+      "year"
+    ],
+    "database": "MySQL",
+    "coverage": "Tất cả 330 shop × 12 tháng × 2 năm (2024–2025) = 7.920 bản ghi"
+  },
+  "columns": [
+    {
+      "column_name": "shop_code",
+      "data_type": "VARCHAR(5)",
+      "nullable": false,
+      "unique": false,
+      "is_primary_key": true,
+      "is_foreign_key": true,
+      "references": "view_genie_shop.shop_code",
+      "description": "Mã cửa hàng/trung tâm tiêm chủng gắn với chỉ tiêu doanh thu. Foreign key tham chiếu đến bảng view_genie_shop.",
+      "format": "Chuỗi 5 chữ số (VD: 58018). Khớp với shop_code trong view_genie_shop.",
+      "example": "58018"
+    },
+    {
+      "column_name": "month",
+      "data_type": "INT",
+      "nullable": false,
+      "unique": false,
+      "is_primary_key": true,
+      "description": "Tháng áp dụng chỉ tiêu doanh thu. Kết hợp với year tạo thành khóa thời gian.",
+      "allowed_values": "1–12 (tháng 1 đến tháng 12)",
+      "seasonal_notes": {
+        "high_months": [
+          1,
+          7,
+          8,
+          12
+        ],
+        "low_months": [
+          2
+        ],
+        "description": "Tháng 1 (trước Tết) và tháng 7–8 (hè) thường có chỉ tiêu cao hơn. Tháng 2 (Tết) thường thấp hơn do lịch nghỉ lễ."
+      }
+    },
+    {
+      "column_name": "year",
+      "data_type": "INT",
+      "nullable": false,
+      "unique": false,
+      "is_primary_key": true,
+      "description": "Năm áp dụng chỉ tiêu doanh thu.",
+      "allowed_values": [
+        2024,
+        2025
+      ],
+      "notes": "Chỉ tiêu 2025 thường cao hơn 2024 khoảng 3–8% do tăng trưởng kế hoạch."
+    },
+    {
+      "column_name": "target_sales",
+      "data_type": "BIGINT",
+      "nullable": false,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Chỉ tiêu doanh số chung của trung tâm trong từng tháng. Đơn vị: VND (đồng). Dùng để tính tỷ lệ hoàn thành = actual_sales / target_sales.",
+      "unit": "VND",
+      "format": "Số nguyên, bội số của 1.000.000 (1 triệu VND)",
+      "statistics": {
+        "min": 120000000,
+        "max": 3861000000,
+        "mean_approx": 1144000000,
+        "distribution_by_tier": {
+          "Hà Nội / HCM urban (900M–2.8B base)": "120 shop × 24 tháng = 2.880 records",
+          "Hà Nội / HCM rural (350M–1.1B base)": "88 shop × 24 tháng = 2.112 records (ước)",
+          "Tỉnh thành lớn (500M–1.8B base)": "varies",
+          "Tỉnh nhỏ (150M–700M base)": "varies"
+        }
+      },
+      "examples": [
+        980000000,
+        1058000000,
+        1085000000,
+        1116000000,
+        1140000000,
+        2015000000
+      ]
+    }
+  ]
+}

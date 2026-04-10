@@ -1,0 +1,138 @@
+{
+  "table": {
+    "name": "view_genie_vaccine_product",
+    "type": "dimension_table",
+    "description": "Bảng chiều lưu thông tin sản phẩm vaccine và dịch vụ tiêm chủng. Mỗi bản ghi đại diện cho một SKU sản phẩm cụ thể, bao gồm vaccine đơn lẻ, huyết thanh, gói combo dịch vụ tiêm chủng, và vật tư đi kèm. Dữ liệu được dùng để tra cứu tên sản phẩm và nhóm bệnh trong các báo cáo.",
+    "estimated_rows": 283,
+    "primary_key": "sku",
+    "database": "MySQL",
+    "source": "Trích xuất từ hệ thống quản lý sản phẩm vaccine nội bộ"
+  },
+  "columns": [
+    {
+      "column_name": "sku",
+      "data_type": "VARCHAR(20)",
+      "nullable": false,
+      "unique": true,
+      "is_primary_key": true,
+      "description": "Mã SKU (Stock Keeping Unit) định danh duy nhất cho từng sản phẩm vaccine hoặc dịch vụ tiêm chủng trong hệ thống.",
+      "format": "Thường là chuỗi 8 chữ số (VD: 00039301). Một số SKU đặc biệt có tiền tố chữ cái (VD: A052300000484).",
+      "examples": [
+        "00039301",
+        "00045683",
+        "A052300000484"
+      ]
+    },
+    {
+      "column_name": "disease_group_name",
+      "data_type": "VARCHAR(200)",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Tên nhóm bệnh mà vaccine/sản phẩm phòng ngừa hoặc điều trị. Giá trị NULL thường xuất hiện ở các gói combo dịch vụ tiêm chủng, vật tư pha tiêm, hoặc các SKU test/thử nghiệm không được phân nhóm bệnh.",
+      "notes": "121/283 bản ghi có giá trị NULL. Các sản phẩm là gói COMBO hoặc DỊCH VỤ TIÊM CHỦNG thường để NULL.",
+      "distinct_values_summary": {
+        "total_non_null_groups": 39,
+        "top_groups": [
+          {
+            "group": "VIÊM GAN B",
+            "count": 22
+          },
+          {
+            "group": "VIÊM NÃO NHẬT BẢN",
+            "count": 11
+          },
+          {
+            "group": "CÚM",
+            "count": 10
+          },
+          {
+            "group": "THƯƠNG HÀN",
+            "count": 10
+          },
+          {
+            "group": "DẠI",
+            "count": 8
+          },
+          {
+            "group": "SỞI, QUAI BỊ, RUBELLA",
+            "count": 8
+          },
+          {
+            "group": "VIÊM GAN A",
+            "count": 6
+          },
+          {
+            "group": "HUYẾT THANH UỐN VÁN",
+            "count": 6
+          },
+          {
+            "group": "5 TRONG 1 (Bạch hầu, Ho gà, Uốn ván, Hib, Viêm gan B)",
+            "count": 6
+          }
+        ]
+      }
+    },
+    {
+      "column_name": "product_name",
+      "data_type": "VARCHAR(300)",
+      "nullable": false,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Tên đầy đủ của sản phẩm vaccine hoặc dịch vụ tiêm chủng. Có thể bao gồm: tên thương mại vaccine, tên gói combo (GÓI COMBO X THÁNG), tên dịch vụ tiêm chủng (DỊCH VỤ TIÊM CHỦNG - ...), hoặc tên vật tư đi kèm (dung môi, nước pha tiêm).",
+      "product_categories": [
+        {
+          "category": "Vaccine đơn lẻ",
+          "description": "Tên thương mại của từng loại vaccine",
+          "examples": [
+            "ENGERIX-B 20mcg/1ml",
+            "GARDASIL 9 0.5ML",
+            "BCG"
+          ]
+        },
+        {
+          "category": "Dịch vụ tiêm chủng",
+          "description": "Prefix: 'DỊCH VỤ TIÊM CHỦNG -'",
+          "examples": [
+            "DỊCH VỤ TIÊM CHỦNG - HEXAXIM",
+            "DỊCH VỤ TIÊM CHỦNG - MMR II"
+          ]
+        },
+        {
+          "category": "Gói combo",
+          "description": "Prefix: 'GÓI COMBO' hoặc 'GÓI ...'",
+          "examples": [
+            "GÓI COMBO 1 - GÓI DỊCH VỤ TIÊM CHỦNG 12 THÁNG",
+            "GÓI PHỤ NỮ TRƯỚC KHI MANG THAI"
+          ]
+        },
+        {
+          "category": "Huyết thanh / sinh phẩm",
+          "description": "Kháng huyết thanh và huyết thanh đặc hiệu",
+          "examples": [
+            "HUYẾT THANH HEPABIG INJ",
+            "SAR 1000IU",
+            "FAVIRAB"
+          ]
+        },
+        {
+          "category": "Vật tư đi kèm",
+          "description": "Dung môi, nước pha tiêm",
+          "examples": [
+            "NƯỚC PHA TIÊM 6ML DÙNG CHO VẮC XIN MVVAC 10 LỌ",
+            "DUNG MÔI NƯỚC CẤT PHA TIÊM DÙNG CHO VẮC XIN MMR 50 LỌ"
+          ]
+        },
+        {
+          "category": "Dữ liệu test",
+          "description": "Bản ghi test/thử nghiệm hệ thống, không phải sản phẩm thực",
+          "examples": [
+            "data tàu ngành vaccine (23/11)",
+            "Test Vaccine",
+            "data test tàu combo vaccine"
+          ]
+        }
+      ]
+    }
+  ]
+}

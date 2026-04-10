@@ -56,8 +56,11 @@ export interface StatCardItem {
     label: string;
     value: string;
     subtitle?: string;
-    color?: string;
-    trend?: 'up' | 'down' | 'neutral';
+    color?: string;         // hex color cho value, e.g. "#2563eb"
+    borderColor?: string;   // hex color cho border-top
+    trendIcon?: string;     // icon tự do, e.g. "↑", "↓", "→", "🔥"
+    trendLabel?: string;    // label tự do, e.g. "Tăng 12%", "+5.2%"
+    trendColor?: string;    // hex color cho trend text
 }
 
 export interface DetailCardItem {
@@ -76,6 +79,7 @@ export interface SeriesConfig {
     key: string;
     renderAs: 'bar' | 'line' | 'area';
     yAxisId?: 'left' | 'right';
+    color?: string;             // hex color cho series này
 }
 
 export interface ReferenceLineConfig {
@@ -105,6 +109,8 @@ export interface ChartBlock {
     title?: string;
     purpose?: string;
     size?: 'full' | 'half';
+    height?: number;
+    colors?: string[];          // AI tự chọn palette hex, e.g. ["#6366f1","#10b981"]
     options?: ChartOptions;
     series?: SeriesConfig[];
     referenceLine?: ReferenceLineConfig;

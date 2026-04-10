@@ -52,6 +52,7 @@ async def process_chat(message: str, session_id: str, user_id: str,
 
             # Step 1: SQL generation
             yield sse_event("status", {"step": 1, "text": "Đang phân tích câu hỏi và tạo truy vấn SQL..."})
+            await asyncio.sleep(0)
             t = time.perf_counter()
             sql_result = await asyncio.to_thread(
                 text_to_sql_detailed, message, sql_memory_context, instruction
@@ -59,10 +60,12 @@ async def process_chat(message: str, session_id: str, user_id: str,
             timings_ms["sql_stage"] = _ms(t)
             yield sse_event("thinking", {"thinking": sql_result["thinking"]})
             yield sse_event("sql", {"sql": sql_result["sql"], "token_usage": sql_result["token_usage"]})
+            await asyncio.sleep(0)
 
             # Step 2: Data
             yield sse_event("status", {"step": 2, "text": "Đã nhận dữ liệu từ database..."})
             yield sse_event("data", {"columns": sql_result["columns"], "rows": sql_result["rows"]})
+            await asyncio.sleep(0)
 
             # Step 2.5: Agentic
             additional_data = []
@@ -119,6 +122,7 @@ async def process_chat(message: str, session_id: str, user_id: str,
             ):
                 if part["type"] == "text":
                     yield sse_event("reply_chunk", {"text": part["content"]})
+                    await asyncio.sleep(0)  # flush SSE to client
                 elif part["type"] == "final":
                     reply_result = part
                     yield sse_event("reply", {

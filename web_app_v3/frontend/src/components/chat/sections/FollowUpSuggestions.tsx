@@ -11,17 +11,30 @@ export default function FollowUpSuggestions({ suggestions, onSelect }: FollowUpS
   if (!suggestions || suggestions.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-2">
-      {suggestions.map((text, idx) => (
-        <button
-          key={`${idx}-${text}`}
-          onClick={() => onSelect(text)}
-          className="px-3 py-1.5 rounded-full border border-slate-200 bg-white text-slate-700 text-sm hover:bg-slate-50 hover:border-slate-300 transition-colors"
-          title="Gửi câu hỏi gợi ý"
-        >
-          {text}
-        </button>
-      ))}
+    <div className="w-full">
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+        {suggestions.map((text, idx) => (
+          <button
+            key={`${idx}-${text}`}
+            type="button"
+            onClick={() => onSelect(text)}
+            title={text}
+            className="group flex w-full items-start rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left shadow-sm shadow-slate-900/5 transition-colors hover:border-slate-300 hover:bg-slate-50/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900/10"
+          >
+            <span
+              className="min-w-0 flex-1 text-[13px] leading-snug text-slate-800"
+              style={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+              }}
+            >
+              {text}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

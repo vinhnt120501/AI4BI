@@ -130,7 +130,7 @@ export default function MessageBubble({
                 </ReactMarkdown>
               </MarkdownTableWrapper>
             ) : (
-              <StreamingText text={displayContent} speed={12} />
+              <StreamingText text={displayContent} />
             )}
           </div>
           {canCopy && (

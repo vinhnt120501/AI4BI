@@ -364,7 +364,7 @@ export default function FeedRail({ activeId, activeHistorySessionId, onSelect, o
   }, [filter, signalsStatus, signalsHasMore, signalsLoadingMore, signalItems.length, loadSignals]);
 
   return (
-    <aside className="w-[320px] md:w-[360px] shrink-0 border-r border-[color:var(--color-border-tertiary)] bg-[var(--color-background-primary)]">
+    <aside className="w-[320px] md:w-[360px] shrink-0 overflow-x-hidden border-r border-[color:var(--color-border-tertiary)] bg-[var(--color-background-primary)]">
       <div className="flex h-full flex-col">
         <div className="px-4 pb-3 pt-4">
           <p className="mb-3 text-[14px] font-semibold text-[color:var(--color-text-primary)]">Hôm nay</p>
@@ -395,7 +395,7 @@ export default function FeedRail({ activeId, activeHistorySessionId, onSelect, o
         <div
           ref={historyScrollRef}
           onScroll={handleScroll}
-          className="flex-1 overflow-y-auto px-2 pb-4"
+          className="flex-1 overflow-x-hidden overflow-y-auto px-2 pb-4"
         >
           {filter === 'insight' ? (
             <>
@@ -533,7 +533,7 @@ export default function FeedRail({ activeId, activeHistorySessionId, onSelect, o
           >
             Nhịp đập
           </p>
-          <div className="max-h-[240px] overflow-y-auto">
+          <div className="max-h-[240px] overflow-x-hidden overflow-y-auto">
           <div className="grid grid-cols-2 gap-x-6 gap-y-6">
             {heartbeatItems.map((kpi) => {
               const color = kpi.trend === 'up' ? C.pos : kpi.trend === 'down' ? C.red : 'var(--color-text-secondary)';
@@ -549,8 +549,8 @@ export default function FeedRail({ activeId, activeHistorySessionId, onSelect, o
                   aria-label={`Phân tích KPI ${kpi.label}`}
                 >
                   <p className="mb-1 text-[11px] text-[color:var(--color-text-secondary)]">{kpi.label}</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-[26px] font-semibold leading-none text-[color:var(--color-text-primary)]">{kpi.value}</span>
+                  <div className="flex min-w-0 flex-wrap items-baseline gap-x-1 gap-y-0.5">
+                    <span className="max-w-full break-words text-[26px] font-semibold leading-none text-[color:var(--color-text-primary)]">{kpi.value}</span>
                     {kpi.delta ? (
                       <span className="text-[12px] font-semibold" style={{ color }}>
                         {kpi.delta}

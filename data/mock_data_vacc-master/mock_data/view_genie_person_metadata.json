@@ -1,0 +1,119 @@
+{
+  "table": {
+    "name": "view_genie_person",
+    "type": "dimension_table",
+    "description": "Bảng chiều lưu thông tin khách hàng thụ hưởng mũi tiêm (beneficiary). Mỗi bản ghi đại diện cho một người được tiêm vaccine, có thể trùng hoặc khác với người mua đơn hàng (customer_id). Phạm vi đối tượng bao gồm trẻ sơ sinh (0–24 tháng) đến người trung niên (60 tuổi).",
+    "estimated_rows": 300,
+    "primary_key": "lcv_id",
+    "database": "MySQL"
+  },
+  "columns": [
+    {
+      "column_name": "lcv_id",
+      "data_type": "VARCHAR(15)",
+      "nullable": false,
+      "unique": true,
+      "is_primary_key": true,
+      "description": "Mã định danh duy nhất của người thụ hưởng mũi tiêm trong hệ thống LCV. Dùng để liên kết với các bảng liên quan đến lịch tiêm và hồ sơ sức khỏe.",
+      "format": "Chuỗi 15 ký tự, bắt đầu bằng tiền tố 'LCV', tiếp theo là 12 ký tự gồm chữ cái in hoa (A-Z) và chữ số (0-9).",
+      "example": "LCVM7B5C81JHUWB"
+    },
+    {
+      "column_name": "customer_id",
+      "data_type": "VARCHAR(24)",
+      "nullable": false,
+      "unique": true,
+      "is_primary_key": false,
+      "description": "Mã định danh của người mua đơn hàng (người đặt lịch tiêm). Có thể là chính người được tiêm hoặc người thân đặt hộ. Dùng để liên kết với bảng đơn hàng và tài khoản khách hàng.",
+      "format": "Chuỗi 24 ký tự gồm chữ cái thường (a-z) và chữ số (0-9), không có ký tự đặc biệt, không có chữ in hoa.",
+      "example": "s53skf7i8skch8jwwdxvugw6"
+    },
+    {
+      "column_name": "name",
+      "data_type": "VARCHAR(100)",
+      "nullable": false,
+      "unique": true,
+      "is_primary_key": false,
+      "description": "Họ và tên đầy đủ của khách hàng thụ hưởng. Dữ liệu là tên người Việt Nam, gồm họ + tên đệm + tên, viết có dấu chuẩn Unicode.",
+      "format": "Chuỗi họ tên tiếng Việt đầy đủ theo định dạng: [Họ] [Tên đệm] [Tên].",
+      "example": "Nguyễn Thị Lan"
+    },
+    {
+      "column_name": "date_of_birth",
+      "data_type": "DATE",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Ngày tháng năm sinh của khách hàng thụ hưởng. Dùng để xác định độ tuổi và nhóm vaccine phù hợp. Phân bổ đều giữa 5 nhóm tuổi: sơ sinh (0–24 tháng), thiếu nhi (2–12 tuổi), thiếu niên (13–18 tuổi), người trẻ (20–40 tuổi), trung niên (40–60 tuổi).",
+      "format": "ISO 8601: YYYY-MM-DD",
+      "example": "1990-05-20",
+      "age_groups": [
+        {
+          "group": "Sơ sinh",
+          "range": "0–24 tháng",
+          "approx_dob_range": "2024-03-18 đến 2026-03-18"
+        },
+        {
+          "group": "Thiếu nhi",
+          "range": "2–12 tuổi",
+          "approx_dob_range": "2014-03-19 đến 2024-03-17"
+        },
+        {
+          "group": "Thiếu niên",
+          "range": "13–18 tuổi",
+          "approx_dob_range": "2008-03-19 đến 2013-03-17"
+        },
+        {
+          "group": "Người trẻ",
+          "range": "20–40 tuổi",
+          "approx_dob_range": "1986-03-19 đến 2006-03-17"
+        },
+        {
+          "group": "Trung niên",
+          "range": "40–60 tuổi",
+          "approx_dob_range": "1966-03-19 đến 1986-03-17"
+        }
+      ]
+    },
+    {
+      "column_name": "gender",
+      "data_type": "TINYINT(1)",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Giới tính của khách hàng thụ hưởng. Dùng để thống kê và lọc danh sách theo giới tính.",
+      "allowed_values": [
+        {
+          "value": 0,
+          "label": "Nam",
+          "distribution": "49%"
+        },
+        {
+          "value": 1,
+          "label": "Nữ",
+          "distribution": "49%"
+        },
+        {
+          "value": 2,
+          "label": "Khác",
+          "distribution": "2%"
+        }
+      ]
+    },
+    {
+      "column_name": "note",
+      "data_type": "TEXT",
+      "nullable": true,
+      "unique": false,
+      "is_primary_key": false,
+      "description": "Ghi chú bổ sung về khách hàng. Bao gồm thông tin khách hàng có được giới thiệu bởi người khác không, nguồn tìm đến dịch vụ, hoặc các lưu ý đặc biệt khác. Giá trị NULL có nghĩa là không có ghi chú.",
+      "example_values": [
+        "Được giới thiệu bởi Nguyễn Văn An",
+        "Được giới thiệu qua chương trình referral của trung tâm",
+        "Khách hàng tự tìm đến, không có người giới thiệu",
+        "Được bác sĩ tại phòng khám ABC giới thiệu",
+        null
+      ]
+    }
+  ]
+}

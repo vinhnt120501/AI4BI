@@ -1,0 +1,166 @@
+{
+  "table": {
+    "name": "view_genie_vaccine_sales_order_detail",
+    "type": "fact_table",
+    "description": "Bảng dữ liệu chi tiết đơn hàng bán vaccine. Mỗi bản ghi là một line item (một loại vaccine) trong một đơn hàng. Một đơn hàng (order_code) có thể có nhiều line item (nhiều mũi tiêm khác nhau). Người mua (customer_id) có thể khác người thụ hưởng mũi tiêm (lcv_id).",
+    "estimated_rows": 10000,
+    "primary_key": "attachment_code",
+    "database": "MySQL",
+    "coverage": "2024-01-01 đến 2025-12-31",
+    "active_shops": 130,
+    "design_notes": [
+      "50% shop đạt chỉ tiêu (achiever): target_sales được điều chỉnh = actual × 0.80-0.95",
+      "50% shop không đạt (non-achiever): target_sales được điều chỉnh = actual × 1.10-1.50",
+      "view_genie_vaccine_shop_target đã được cập nhật đồng bộ để phản ánh tỉ lệ 50-50 này",
+      "34.9% đơn hàng là self-purchase (customer == beneficiary), 65.1% mua hộ người khác"
+    ]
+  },
+  "columns": [
+    {
+      "column_name": "customer_id",
+      "data_type": "VARCHAR(24)",
+      "nullable": false,
+      "is_foreign_key": true,
+      "references": "view_genie_person.customer_id",
+      "description": "Mã khách hàng dùng để định danh người mua/đặt đơn hàng. Có thể là người trực tiếp tiêm hoặc người thân mua hộ (VD: phụ huynh mua cho con).",
+      "format": "24 ký tự chữ thường và số (a-z, 0-9)"
+    },
+    {
+      "column_name": "lcv_id",
+      "data_type": "VARCHAR(15)",
+      "nullable": false,
+      "is_foreign_key": true,
+      "references": "view_genie_person.lcv_id",
+      "description": "Mã định danh người thụ hưởng mũi tiêm (người được tiêm vaccine). Có thể trùng hoặc khác customer_id. Trường hợp khác: phụ huynh (customer_id) mua vaccine cho con nhỏ (lcv_id).",
+      "format": "15 ký tự, bắt đầu bằng 'LCV' + 12 ký tự in hoa và số",
+      "distribution": "34.9% cùng người (self-purchase), 65.1% khác người (mua hộ)"
+    },
+    {
+      "column_name": "shop_code",
+      "data_type": "VARCHAR(5)",
+      "nullable": false,
+      "is_foreign_key": true,
+      "references": "view_genie_shop.shop_code",
+      "description": "Mã cửa hàng/trung tâm tiêm chủng nơi đơn hàng được thực hiện."
+    },
+    {
+      "column_name": "order_code",
+      "data_type": "VARCHAR(23)",
+      "nullable": false,
+      "unique": false,
+      "description": "Mã định danh đơn hàng. Một order_code có thể xuất hiện nhiều lần (nhiều line items) vì một đơn hàng có thể gồm nhiều mũi tiêm khác nhau. Mỗi mũi tiêm là một bản ghi riêng biệt.",
+      "format": "23 chữ số (VD: 58060599551760323056648)",
+      "notes": "Dùng COUNT(DISTINCT order_code) để đếm số đơn hàng, không dùng COUNT(*)"
+    },
+    {
+      "column_name": "sku",
+      "data_type": "VARCHAR(20)",
+      "nullable": false,
+      "is_foreign_key": true,
+      "references": "view_genie_vaccine_product.sku",
+      "description": "Mã SKU của sản phẩm vaccine được mua trong line item này."
+    },
+    {
+      "column_name": "package_type",
+      "data_type": "VARCHAR(3)",
+      "nullable": false,
+      "description": "Loại hình mua vaccine. LE = mua lẻ (single purchase, giá thấp hơn). GOI = mua theo gói (package purchase, cao hơn 5% so với LE do phí lưu trữ đảm bảo luôn có hàng).",
+      "allowed_values": [
+        {
+          "value": "LE",
+          "meaning": "Vaccine mua lẻ (single purchase)",
+          "distribution": "~60%"
+        },
+        {
+          "value": "GOI",
+          "meaning": "Vaccine mua theo gói (package purchase, +5%)",
+          "distribution": "~40%"
+        }
+      ]
+    },
+    {
+      "column_name": "attachment_code",
+      "data_type": "VARCHAR(16)",
+      "nullable": false,
+      "unique": true,
+      "is_primary_key": true,
+      "description": "Mã định danh duy nhất cho từng mũi tiêm cụ thể. Mỗi line item (mỗi mũi) có một attachment_code riêng, kể cả khi cùng order_code.",
+      "format": "16 ký tự alphanumeric hỗn hợp chữ hoa/thường/số (VD: sRLK1oOy9k2Yh9Yw)"
+    },
+    {
+      "column_name": "line_item_amount_after_discount",
+      "data_type": "BIGINT",
+      "nullable": false,
+      "description": "Giá trị tiền thực tế của line item sau khi đã trừ chiết khấu/giảm giá. Tính theo mũi tiêm (line_item_quantity × đơn giá × (1 ± biến động ±7%)). Đơn vị: VND.",
+      "unit": "VND",
+      "notes": "GOI price = LE price × 1.05 (phí lưu trữ gói). Biến động ±7% phản ánh chính sách giá từng shop.",
+      "statistics": {
+        "min": 79000,
+        "max": 14688000,
+        "avg_approx": 719000,
+        "price_range_by_group": {
+          "Vaccine cơ bản (LAO, UỐN VÁN, SỞI...)": "79K–300K",
+          "Vaccine thông thường (CÚM, VIÊM GAN B, BẠI LIỆT...)": "250K–600K",
+          "Vaccine trung cấp (MMR, THỦY ĐẬU, 5-IN-1...)": "500K–1.3M",
+          "Vaccine cao cấp (6-IN-1, PHẾ CẦU, HPV4, DENGUE...)": "1M–2M",
+          "Vaccine đặc biệt (HPV9, SHINGRIX, RSV...)": "3M–5M"
+        }
+      }
+    },
+    {
+      "column_name": "line_item_quantity",
+      "data_type": "INT",
+      "nullable": false,
+      "description": "Số lượng mũi tiêm của cùng một loại vaccine trong line item này. Thông thường là 1 (một mũi). Có thể là 2-3 trong trường hợp mua thêm liều dự phòng.",
+      "distribution": {
+        "1": "85%",
+        "2": "12%",
+        "3": "3%"
+      }
+    },
+    {
+      "column_name": "order_completion_date",
+      "data_type": "DATE",
+      "nullable": true,
+      "description": "Ngày đơn hàng hoàn tất (ngày tiêm thực tế hoặc ngày xác nhận hoàn thành dịch vụ). Luôn ≥ order_creation_date.",
+      "format": "ISO 8601: YYYY-MM-DD",
+      "coverage": "2024-01-01 đến 2025-12-31",
+      "notes": "Phần lớn hoàn tất cùng ngày (40%) hoặc trong 1-3 ngày. Một số trường hợp lên đến 30 ngày (đặt lịch trước)."
+    },
+    {
+      "column_name": "order_creation_date",
+      "data_type": "DATE",
+      "nullable": true,
+      "description": "Ngày tạo đơn hàng (ngày khách hàng đặt lịch/mua). Luôn ≤ order_completion_date.",
+      "format": "ISO 8601: YYYY-MM-DD",
+      "coverage": "2024-01-01 đến 2025-12-31"
+    }
+  ],
+  "relationships": [
+    {
+      "column": "customer_id",
+      "joins_to": "view_genie_person.customer_id",
+      "type": "many-to-one"
+    },
+    {
+      "column": "lcv_id",
+      "joins_to": "view_genie_person.lcv_id",
+      "type": "many-to-one"
+    },
+    {
+      "column": "shop_code",
+      "joins_to": "view_genie_shop.shop_code",
+      "type": "many-to-one"
+    },
+    {
+      "column": "sku",
+      "joins_to": "view_genie_vaccine_product.sku",
+      "type": "many-to-one"
+    },
+    {
+      "column": "shop_code + MONTH(order_completion_date) + YEAR(order_completion_date)",
+      "joins_to": "view_genie_vaccine_shop_target.(shop_code, month, year)",
+      "type": "many-to-one"
+    }
+  ]
+}

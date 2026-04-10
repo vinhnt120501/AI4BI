@@ -4,3 +4,7 @@ __pycache__/
 .env
 .env.local
 .env.*
+
+# IDE and temp files
+*.drawio*
+*.bkp

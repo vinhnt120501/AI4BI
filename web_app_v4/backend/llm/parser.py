@@ -3,10 +3,33 @@ import re
 
 
 def clean_sql(text: str) -> str:
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
-    return text
+    raw = (text or "").strip()
+    if not raw:
+        return ""
+
+    # Remove markdown fences if any.
+    if raw.startswith("```"):
+        raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+
+    # Some models prepend a language tag line.
+    if raw.lower().startswith("sql\n"):
+        raw = raw.split("\n", 1)[1].strip()
+
+    # Keep only from the first SQL keyword onward.
+    m = re.search(r"\b(with|select)\b", raw, flags=re.IGNORECASE)
+    if m:
+        raw = raw[m.start():].strip()
+
+    # Keep only the first statement; models sometimes append explanations after ';'.
+    if ";" in raw:
+        raw = raw.split(";", 1)[0].strip()
+
+    # Heuristic cleanup for a very common failure mode: trailing UNION ALL with no following SELECT.
+    raw_upper = raw.upper().rstrip()
+    if raw_upper.endswith("UNION ALL"):
+        raw = raw[: -len("UNION ALL")].rstrip()
+
+    return raw.strip()
 
 
 def parse_vis_config(text: str) -> tuple[str, dict | None, list | None]:

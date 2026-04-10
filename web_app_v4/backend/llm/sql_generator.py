@@ -157,6 +157,8 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
 
     retry_count = 0
     max_retries = int(os.getenv("SQL_MAX_RETRIES", "2"))
+    extra_repair_retries = int(os.getenv("SQL_REPAIR_RETRIES", "1"))
+    repaired = 0
 
     while True:
         try:
@@ -166,6 +168,13 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
             timing[f"db_exec_{retry_count or 1}"] = round((time.perf_counter() - t) * 1000, 1)
             break
         except Exception as e:
+            # Try a cheap deterministic cleanup once before spending another LLM call.
+            if repaired < extra_repair_retries:
+                repaired += 1
+                cleaned = clean_sql(sql)
+                if cleaned and cleaned != sql:
+                    sql = cleaned
+                    continue
             retry_count += 1
             if retry_count > max_retries:
                 raise

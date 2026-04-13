@@ -83,44 +83,70 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
     return (latestUser?.content || query || '').trim();
   }, [messages, query]);
 
-  // Track meaningful content changes (new messages, new blocks, streaming text)
-  // to auto-scroll as content appears progressively
-  const lastMessage = messages[messages.length - 1];
-  const scrollTrigger = useMemo(() => {
-    if (!lastMessage) return '';
-    const blocksLen = lastMessage.blocks?.length ?? 0;
-    const contentLen = lastMessage.content?.length ?? 0;
-    const isDone = lastMessage.isDone ? 1 : 0;
-    return `${messages.length}-${blocksLen}-${Math.floor(contentLen / 80)}-${isDone}`;
-  }, [messages.length, lastMessage?.blocks?.length, lastMessage?.content?.length, lastMessage?.isDone, lastMessage]);
-
   // Internal scroll handling to prevent global page "jumping"
   const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const pinnedToBottomRef = useRef(true);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior });
+    });
+  }, []);
+
+  const handleSend = useCallback((prompt: string) => {
+    const trimmed = (prompt || '').trim();
+    if (!trimmed) return;
+    // User intent: jump to the active chat and stay at the bottom.
+    pinnedToBottomRef.current = true;
+    scrollToBottom('smooth');
+    onSend(trimmed);
+  }, [onSend, scrollToBottom]);
+
+  const updatePinnedState = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
+    pinnedToBottomRef.current = distance <= 220;
+  }, []);
 
   useEffect(() => {
-    if (scrollRef.current) {
-      const target = scrollRef.current;
-      // Force scroll to bottom immediately if busy just started or it's a new message structure
-      const isNewMessage = messages.length > 0 && messages[messages.length - 1].role === 'user';
-      
-      if (busy || isNewMessage) {
-        target.scrollTo({
-          top: target.scrollHeight,
-          behavior: 'smooth'
-        });
-      } else {
-        // Progressive scroll as content streams
-        const { scrollTop, scrollHeight, clientHeight } = target;
-        const isNearBottom = scrollHeight - scrollTop <= clientHeight + 250;
-        if (isNearBottom) {
-          target.scrollTo({
-            top: target.scrollHeight,
-            behavior: 'smooth'
-          });
-        }
-      }
-    }
-  }, [scrollTrigger, busy, messages.length]);
+    const el = scrollRef.current;
+    if (!el) return;
+    // Keep pinned state in sync with user scroll.
+    updatePinnedState();
+    el.addEventListener('scroll', updatePinnedState, { passive: true });
+    return () => el.removeEventListener('scroll', updatePinnedState);
+  }, [updatePinnedState]);
+
+  // Scroll immediately when a new message pair is appended or when analysis starts.
+  useEffect(() => {
+    if (messages.length === 0) return;
+    pinnedToBottomRef.current = true;
+    scrollToBottom('smooth');
+  }, [messages.length, scrollToBottom]);
+
+  // Progressive scroll while streaming — but only if user is already near bottom.
+  const lastMessage = messages[messages.length - 1];
+  useEffect(() => {
+    if (!busy) return;
+    if (!pinnedToBottomRef.current) return;
+    scrollToBottom('auto');
+  }, [busy, lastMessage?.content, lastMessage?.blocks?.length, lastMessage?.isDone, scrollToBottom]);
+
+  // Observe layout changes (charts, images, progressive block reveals) and keep view pinned.
+  useEffect(() => {
+    const contentEl = contentRef.current;
+    if (!contentEl) return;
+    const ro = new ResizeObserver(() => {
+      if (!pinnedToBottomRef.current) return;
+      scrollToBottom('auto');
+    });
+    ro.observe(contentEl);
+    return () => ro.disconnect();
+  }, [scrollToBottom]);
 
   useEffect(() => {
     return () => {
@@ -138,7 +164,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
       return;
     }
     if (busy) return;
-    onSend(prompt);
+    handleSend(prompt);
     setInput('');
   };
 
@@ -174,7 +200,9 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
           height: '100%'
         }}
       >
-        <div style={{ 
+        <div
+          ref={contentRef}
+          style={{ 
           width: '100%', 
           maxWidth: '100%', 
           margin: '0 auto', 
@@ -185,7 +213,8 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
           justifyContent: isLanding ? 'center' : 'flex-start',
           alignItems: isLanding ? 'center' : 'stretch',
           transition: 'max-width 0.25s ease' 
-        }}>
+        }}
+        >
           {isLanding ? (
             <div className="flex w-full max-h-full flex-col items-center justify-center py-4 text-center">
               <div className="flex-shrink-0">
@@ -200,7 +229,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
               <div className="flex w-full min-h-0 max-w-[1000px] flex-col overflow-hidden">
                 <div className="mb-4 flex-shrink-0">
                   <div className="mx-auto w-full max-w-[760px]">
-                    <FollowUpSuggestions suggestions={landingSuggestions} onSelect={onSend} variant="landing" loading={landingSuggestionsLoading} />
+                    <FollowUpSuggestions suggestions={landingSuggestions} onSelect={handleSend} variant="landing" loading={landingSuggestionsLoading} />
                   </div>
                 </div>
 
@@ -215,7 +244,11 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
                           <button
                             key={`${idx}-${item.sessionId}`}
                             type="button"
-                            onClick={() => onSelectHistory?.(item.sessionId)}
+                            onClick={() => {
+                              pinnedToBottomRef.current = true;
+                              scrollToBottom('auto');
+                              onSelectHistory?.(item.sessionId);
+                            }}
                             title={item.question}
                             className="group flex min-h-[44px] items-center rounded-2xl border border-slate-200 bg-white px-4 py-2 text-left shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50"
                           >
@@ -247,17 +280,18 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
                   <MessageBubble
                     message={message}
                     copyText={message.role === 'assistant' ? copyParts.join('\n\n') : undefined}
-                    onRetry={message.role === 'assistant' && previousUserMessage ? () => onSend(previousUserMessage.content) : undefined}
+                    onRetry={message.role === 'assistant' && previousUserMessage ? () => handleSend(previousUserMessage.content) : undefined}
                   />
                   {message.role === 'assistant' && message.isDone && (message.followUpSuggestions || []).length > 0 && (
                     <div className="mt-4">
-                      <FollowUpSuggestions suggestions={message.followUpSuggestions || []} onSelect={onSend} />
+                      <FollowUpSuggestions suggestions={message.followUpSuggestions || []} onSelect={handleSend} />
                     </div>
                   )}
                 </div>
               );
             })
           )}
+          <div ref={endRef} />
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-from .sql import SQL_ROBOT_RULES
+from .sql import SQL_ROBOT_RULES, SQL_RECENCY_REWRITE_USER_PROMPT, SQL_EXEC_ERROR_RETRY_USER_PROMPT
 from .visualization import VISUALIZATION_PROMPT_RULES
 from .agentic import AGENTIC_PLANNING_PROMPT
 from .followup import FOLLOWUP_SYSTEM_PROMPT

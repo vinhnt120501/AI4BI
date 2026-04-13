@@ -1,9 +1,73 @@
 import os
+import re
 import time
 from db import get_schema_context, execute_sql
-from prompts import SQL_ROBOT_RULES
+from prompts import SQL_ROBOT_RULES, SQL_RECENCY_REWRITE_USER_PROMPT, SQL_EXEC_ERROR_RETRY_USER_PROMPT
 from .client import count_tokens, extract_thinking, extract_token_usage, generate_chat, message_text
 from .parser import clean_sql
+
+
+_BANNED_CALENDAR_FUNC_RE = r"\b(NOW|CURDATE|CURRENT_DATE|CURRENT_TIMESTAMP|LOCALTIMESTAMP|LOCALTIME)\b"
+
+
+def _has_banned_calendar_functions(sql: str) -> bool:
+    if not sql:
+        return False
+    in_single = False
+    in_double = False
+    escape_next = False
+    buf = []
+
+    def flush_segment(seg: str) -> bool:
+        return bool(re.search(_BANNED_CALENDAR_FUNC_RE, seg, flags=re.I))
+
+    for ch in sql:
+        if escape_next:
+            escape_next = False
+            buf.append(ch)
+            continue
+
+        if ch == "\\":
+            escape_next = True
+            buf.append(ch)
+            continue
+
+        if not in_double and ch == "'":
+            if not in_single and flush_segment("".join(buf)):
+                return True
+            buf = []
+            in_single = not in_single
+            continue
+
+        if not in_single and ch == '"':
+            if not in_double and flush_segment("".join(buf)):
+                return True
+            buf = []
+            in_double = not in_double
+            continue
+
+        if not in_single and not in_double:
+            buf.append(ch)
+
+    return flush_segment("".join(buf))
+
+
+def _rewrite_sql_follow_recency(system_prompt: str, question: str, sql: str) -> tuple[str, str]:
+    """
+    If the model generated calendar-anchored SQL, ask it to rewrite using MAX(date) as-of logic.
+    Returns (sql, extra_thinking_note)
+    """
+    if not _has_banned_calendar_functions(sql):
+        return sql, ""
+
+    rewrite = generate_chat(
+        system_prompt,
+        SQL_RECENCY_REWRITE_USER_PROMPT.format(question=question, sql=sql),
+        temperature=0,
+    )
+    new_sql = clean_sql(message_text(rewrite.choices[0].message))
+    note = "\n\n[Rewrite] Đã rewrite SQL để neo theo MAX(date) trong DB (không dùng NOW/CURDATE...)."
+    return new_sql, note
 
 
 def build_sql_system_prompt(custom_instruction: str = "", memory_context: str = "") -> dict:
@@ -41,21 +105,27 @@ def text_to_sql(question: str, memory_context: str = "", custom_instruction: str
     usage["question"] = count_tokens(question)
 
     sql = clean_sql(message_text(response.choices[0].message))
+    sql, rewrite_note = _rewrite_sql_follow_recency(system_prompt, question, sql)
     thinking = extract_thinking(response)
+    if rewrite_note:
+        thinking += rewrite_note
 
     try:
         db_result = execute_sql(sql)
     except Exception as e:
         retry_response = generate_chat(
             system_prompt,
-            f"{question}\n\nSQL trước đó bị lỗi: {e}\nViết lại SQL khác, tránh lỗi này.",
+            SQL_EXEC_ERROR_RETRY_USER_PROMPT.format(question=question, error=str(e)),
             temperature=0,
         )
         retry_usage = extract_token_usage(retry_response.usage)
         for k in ("input", "thinking", "output", "total"):
             usage[k] += retry_usage[k]
         sql = clean_sql(message_text(retry_response.choices[0].message))
+        sql, rewrite_note = _rewrite_sql_follow_recency(system_prompt, question, sql)
         thinking += "\n\n[Retry] " + extract_thinking(retry_response)
+        if rewrite_note:
+            thinking += rewrite_note
         db_result = execute_sql(sql)
 
     return {
@@ -85,7 +155,10 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
     usage["question"] = count_tokens(question)
 
     sql = clean_sql(message_text(response.choices[0].message))
+    sql, rewrite_note = _rewrite_sql_follow_recency(system_prompt, question, sql)
     thinking = extract_thinking(response)
+    if rewrite_note:
+        thinking += rewrite_note
 
     retry_count = 0
     max_retries = int(os.getenv("SQL_MAX_RETRIES", "2"))
@@ -103,7 +176,7 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
             t = time.perf_counter()
             retry_response = generate_chat(
                 system_prompt,
-                f"{question}\n\nSQL trước đó bị lỗi: {e}\nViết lại SQL khác, tránh lỗi này.",
+                SQL_EXEC_ERROR_RETRY_USER_PROMPT.format(question=question, error=str(e)),
                 temperature=0,
             )
             timing[f"llm_sql_retry_{retry_count}"] = round((time.perf_counter() - t) * 1000, 1)
@@ -111,7 +184,10 @@ def text_to_sql_detailed(question: str, memory_context: str = "", custom_instruc
             for k in ("input", "thinking", "output", "total"):
                 usage[k] += retry_usage[k]
             sql = clean_sql(message_text(retry_response.choices[0].message))
+            sql, rewrite_note = _rewrite_sql_follow_recency(system_prompt, question, sql)
             thinking += f"\n\n[Retry {retry_count}] " + extract_thinking(retry_response)
+            if rewrite_note:
+                thinking += rewrite_note
 
     timing["retry_count"] = float(retry_count)
     timing["total"] = round((time.perf_counter() - t_total) * 1000, 1)
@@ -166,6 +242,9 @@ async def stream_text_to_sql(question: str, memory_context: str = "", custom_ins
             thinking = match.group(1).strip()
     
     sql = clean_sql(full_text)
+    sql, rewrite_note = _rewrite_sql_follow_recency(system_prompt, question, sql)
+    if rewrite_note:
+        thinking += rewrite_note
     
     # Execute SQL (this part is still blocking, but we already yielded thinking)
     try:

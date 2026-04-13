@@ -18,29 +18,26 @@ const THEMES: Record<string, { accent: string; bg: string; border: string; badge
 
 const COLOR_CYCLE = ['blue', 'teal', 'indigo', 'purple', 'green', 'orange', 'cyan'];
 
-const MIN_CARD_PX = 260;
 const GAP_PX = 16; // Tailwind `gap-4`
 
-function pickIdealColumns(containerWidth: number) {
-  if (!containerWidth || containerWidth <= 0) return 1;
-
-  // Keep columns such that cards don't get too narrow.
-  // 1 col: < 2*min + 1*gap
-  // 2 col: < 3*min + 2*gap
-  // 3 col: < 4*min + 3*gap
-  if (containerWidth < MIN_CARD_PX * 2 + GAP_PX * 1) return 1;
-  if (containerWidth < MIN_CARD_PX * 3 + GAP_PX * 2) return 2;
-  if (containerWidth < MIN_CARD_PX * 4 + GAP_PX * 3) return 3;
-  return 4;
+function getMinCardPx(containerWidth: number) {
+  // Slightly denser on large screens to avoid unused whitespace.
+  if (containerWidth >= 1280) return 220;
+  return 240;
 }
 
-function balanceColumns(itemCount: number, ideal: number) {
+function computeColumns(containerWidth: number, itemCount: number) {
+  if (!containerWidth || containerWidth <= 0) return 1;
   if (itemCount <= 1) return 1;
-  let cols = Math.max(1, Math.min(ideal, itemCount));
+
+  const minPx = getMinCardPx(containerWidth);
+  const maxCols = 4;
+  const raw = Math.floor((containerWidth + GAP_PX) / (minPx + GAP_PX));
+  let cols = Math.max(1, Math.min(maxCols, Math.min(itemCount, raw)));
+
   // Avoid ugly orphan rows like 3+1 for 4 cards (or 4+1 for 5 cards, etc.)
-  // but keep 2+1 for 3 cards (that's a normal layout).
-  while (cols > 2 && itemCount % cols === 1) cols -= 1;
-  return cols;
+  if (cols >= 3 && itemCount % cols === 1) cols -= 1;
+  return Math.max(1, cols);
 }
 
 function TrendBadge({ trend }: { trend: string }) {
@@ -75,6 +72,19 @@ export default function StatCard({ items }: { items?: StatCardItem[] }) {
     const el = containerRef.current;
     if (!el) return;
 
+    // Ensure we have an initial width even if ResizeObserver doesn't fire immediately.
+    const initialWidth = el.getBoundingClientRect().width;
+    if (initialWidth && !Number.isNaN(initialWidth)) setContainerWidth(initialWidth);
+
+    if (typeof ResizeObserver === 'undefined') {
+      const onResize = () => {
+        const w = el.getBoundingClientRect().width;
+        if (w && !Number.isNaN(w)) setContainerWidth(w);
+      };
+      window.addEventListener('resize', onResize, { passive: true });
+      return () => window.removeEventListener('resize', onResize);
+    }
+
     const ro = new ResizeObserver((entries) => {
       const w = entries?.[0]?.contentRect?.width;
       if (typeof w === 'number' && !Number.isNaN(w)) setContainerWidth(w);
@@ -83,8 +93,7 @@ export default function StatCard({ items }: { items?: StatCardItem[] }) {
     return () => ro.disconnect();
   }, []);
 
-  const idealCols = pickIdealColumns(containerWidth);
-  const cols = balanceColumns(items.length, idealCols);
+  const cols = computeColumns(containerWidth, items.length);
 
   return (
     <div
@@ -95,11 +104,17 @@ export default function StatCard({ items }: { items?: StatCardItem[] }) {
       {items.map((item, i) => {
         const colorKey = item.color || COLOR_CYCLE[i % COLOR_CYCLE.length];
         const theme = THEMES[colorKey] || THEMES.slate;
+        const isLonelyLast = cols === 2 && items.length % cols === 1 && i === items.length - 1;
 
         return (
           <div
             key={i}
             className={`relative overflow-hidden border ${theme.border} rounded-2xl px-5 py-5 ${theme.bg} transition-all hover:shadow-lg hover:-translate-y-0.5 duration-300 group min-h-[112px]`}
+            style={
+              isLonelyLast
+                ? { gridColumn: 'span 2 / span 2', justifySelf: 'center', width: '100%', maxWidth: 640 }
+                : undefined
+            }
           >
             {/* Decorative gradient blob */}
             <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full ${theme.bg} opacity-40 blur-xl group-hover:scale-125 transition-transform duration-700`} />

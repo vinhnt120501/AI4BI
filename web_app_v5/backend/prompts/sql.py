@@ -40,4 +40,26 @@ Bạn tuyệt đối phải đối chiếu đồng thời hai thông tin [Schema
 - Nếu cần so sánh với một tập giá trị từ bảng khác, hãy dùng các điều kiện `JOIN` hoặc di chuyển điều kiện đó vào mệnh đề `WHERE`.
 - Đảm bảo SQL tương thích với MySQL 8.0/TiDB.
 </database_constraints>
+
+<data_recency>
+Dữ liệu trong DB có độ trễ (không realtime).
+Nếu câu hỏi dùng thời gian tương đối ("hôm nay", "tháng này", "tuần này", "gần nhất", "mới nhất") thì phải neo theo ngày dữ liệu mới nhất trong DB: `as_of_date = MAX(date_column)` của đúng bảng/cột ngày liên quan.
+</data_recency>
+"""
+
+
+SQL_RECENCY_REWRITE_USER_PROMPT = """{question}
+
+SQL hiện tại đang neo theo lịch hệ thống (NOW/CURDATE/CURRENT_DATE/CURRENT_TIMESTAMP...).
+Viết lại để thời gian tương đối ("hôm nay/tháng này/tuần này/gần nhất") neo theo `as_of_date = MAX(date_column)` trong DB, theo quy tắc <data_recency>.
+
+SQL cũ:
+{sql}
+"""
+
+
+SQL_EXEC_ERROR_RETRY_USER_PROMPT = """{question}
+
+SQL bị lỗi: {error}
+Viết lại SQL khác, tránh lỗi này (giữ đúng rules + schema).
 """

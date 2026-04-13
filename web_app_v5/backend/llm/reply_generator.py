@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import time
 from prompts import VISUALIZATION_PROMPT_RULES
@@ -12,21 +13,31 @@ from .parser import parse_vis_config
 def build_reply_contents(question: str, columns: list, rows: list,
                          memory_context: str = "", additional_data: list[dict] | None = None) -> dict:
     """Truyền thẳng toàn bộ kết quả SQL cho LLM. SQL đã tính toán hết."""
-    data_text = json.dumps({"columns": columns, "rows": rows}, ensure_ascii=False)
+    max_rows = max(50, min(int(os.getenv("LLM_MAX_ROWS", "250") or 250), 2000))
+    total_rows = len(rows or [])
+    trimmed_rows = (rows or [])[:max_rows]
+    data_text = json.dumps({"columns": columns, "rows": trimmed_rows}, ensure_ascii=False)
     memory = (memory_context or "").strip()
 
     contents = ""
     if memory:
         contents += f"Memory Context:\n{memory}\n\n"
     contents += f"Câu hỏi: {question}\n\n"
-    contents += f"Kết quả SQL ({len(rows)} rows):\n{data_text}"
+    if total_rows > len(trimmed_rows):
+        contents += f"Kết quả SQL (tổng {total_rows} rows, gửi {len(trimmed_rows)} rows để phân tích):\n{data_text}"
+        contents += "\n\nLưu ý: Không được in/dump lại dữ liệu thô (rows/columns) vào output."
+    else:
+        contents += f"Kết quả SQL ({total_rows} rows):\n{data_text}"
 
     if additional_data:
         for i, extra in enumerate(additional_data, 1):
             contents += f"\n\n--- Dữ liệu bổ sung #{i} (Lý do: {extra.get('reason', 'drill-down')}) ---\n"
             contents += f"SQL: {extra.get('sql', '')}\n"
-            contents += f"Kết quả ({len(extra['rows'])} rows): "
-            contents += json.dumps({"columns": extra["columns"], "rows": extra["rows"]}, ensure_ascii=False)
+            extra_rows = extra.get("rows") or []
+            extra_total = len(extra_rows)
+            extra_trimmed = extra_rows[:max_rows]
+            contents += f"Kết quả (tổng {extra_total} rows, gửi {len(extra_trimmed)} rows): "
+            contents += json.dumps({"columns": extra.get("columns") or [], "rows": extra_trimmed}, ensure_ascii=False)
 
     return {
         "contents": contents,
@@ -61,6 +72,7 @@ def stream_reply(question: str, columns: list, rows: list, memory_context: str =
     vis_config_ended = False
 
     last_blocks_count = 0
+    last_stream_blocks: list[dict] = []
     for chunk in response:
         delta = chunk.choices[0].delta.content if chunk.choices[0].delta.content else ""
         reasoning = ""
@@ -84,6 +96,7 @@ def stream_reply(question: str, columns: list, rows: list, memory_context: str =
             
             if len(current_blocks) > last_blocks_count:
                 last_blocks_count = len(current_blocks)
+                last_stream_blocks = current_blocks
                 chart_config = None
                 for b in current_blocks:
                     if b.get("type") == "chart":
@@ -99,34 +112,38 @@ def stream_reply(question: str, columns: list, rows: list, memory_context: str =
                 
                 yield {"type": "early_chart", "blocks": current_blocks, "chart_config": chart_config}
 
-            # Detection logic: Find VIS_CONFIG or give up if text gets too long without it
-            if "VIS_CONFIG" not in full_text:
-                if len(full_text) > 500: # Increased threshold for conversational filler
-                    vis_config_ended = True
-                    yield {"type": "text", "content": full_text}
-            else:
-                # We found it, now wait for the balancing ']'
-                vis_match = re.search(r'VIS_CONFIG\s*:\s*\[', full_text, re.I)
+            # Detection logic: if VIS_CONFIG exists, suppress it from streaming text.
+            # We only start streaming narrative after the VIS_CONFIG JSON array is closed.
+            if re.search(r"VIS_CONFIG\s*[:=]\s*\[", full_text, re.I):
+                vis_match = re.search(r"VIS_CONFIG\s*[:=]\s*\[", full_text, re.I)
                 if vis_match:
-                    start_json = vis_match.end() - 1
+                    start_json = vis_match.end() - 1  # include '['
                     json_part = full_text[start_json:]
                     bracket_count = 0
                     in_string = False
                     escape_next = False
                     end_of_vis = -1
-                    
+
                     for i, char in enumerate(json_part):
-                        if escape_next: escape_next = False; continue
-                        if char == '\\': escape_next = True; continue
-                        if char == '"': in_string = not in_string; continue
-                        if not in_string:
-                            if char == '[': bracket_count += 1
-                            elif char == ']':
-                                bracket_count -= 1
-                                if bracket_count == 0:
-                                    end_of_vis = i + 1
-                                    break
-                    
+                        if escape_next:
+                            escape_next = False
+                            continue
+                        if char == "\\":
+                            escape_next = True
+                            continue
+                        if char == '"':
+                            in_string = not in_string
+                            continue
+                        if in_string:
+                            continue
+                        if char == "[":
+                            bracket_count += 1
+                        elif char == "]":
+                            bracket_count -= 1
+                            if bracket_count == 0:
+                                end_of_vis = i + 1
+                                break
+
                     if end_of_vis != -1:
                         vis_config_ended = True
                         after_vis = json_part[end_of_vis:].lstrip()
@@ -136,6 +153,22 @@ def stream_reply(question: str, columns: list, rows: list, memory_context: str =
             yield {"type": "text", "content": delta}
 
     clean_text, chart_config, blocks = parse_vis_config(full_text)
+    # Fallback: if final parse failed but we streamed blocks, keep them to avoid wiping the dashboard.
+    if (not blocks) and last_stream_blocks:
+        blocks = last_stream_blocks
+        if not chart_config:
+            for b in last_stream_blocks:
+                if isinstance(b, dict) and b.get("type") == "chart":
+                    chart_config = {
+                        "type": b.get("chartType", "bar"),
+                        "xKey": b.get("xKey", ""),
+                        "yKeys": b.get("yKeys", []),
+                        "options": b.get("options"),
+                    }
+                    if chart_config["yKeys"]:
+                        chart_config["yKey"] = chart_config["yKeys"][0]
+                    break
+
     usage = {
         "input": reply_data["counts"]["question"] + reply_data["counts"]["data"] + reply_data["counts"]["memory"],
         "thinking": count_tokens(full_thinking),

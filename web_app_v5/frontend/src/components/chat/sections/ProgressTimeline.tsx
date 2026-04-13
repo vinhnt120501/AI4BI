@@ -170,8 +170,8 @@ function TokenBreakdown({ title, usage }: { title: string; usage: TokenUsage }) 
         <TokenRow label="Input" value={usage.input} />
         <TokenRow label="- Schema" value={usage.schema} indent />
         <TokenRow label="- Rules" value={usage.rules} indent />
-        {usage.instruction > 0 && <TokenRow label="- Instruction" value={usage.instruction} indent />}
-        {usage.memory > 0 && <TokenRow label="- Memory" value={usage.memory} indent />}
+        {(usage.instruction ?? 0) > 0 && <TokenRow label="- Instruction" value={usage.instruction} indent />}
+        {(usage.memory ?? 0) > 0 && <TokenRow label="- Memory" value={usage.memory} indent />}
         <TokenRow label="- Question" value={usage.question} indent />
         <TokenRow label="- Data" value={usage.data} indent />
         {usage.thinking > 0 ? <TokenRow label="Thinking" value={usage.thinking} /> : null}

@@ -115,7 +115,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ pat
 
   // SSE streams (like /chat) need a longer initial connection timeout
   const isStream = path === 'chat';
-  const timeoutMs = isStream ? 120000 : 15000;
+  const isLong = isStream || path === 'tokens/count';
+  const timeoutMs = isLong ? 120000 : 15000;
 
   try {
     const res = await fetchBackend(req, backendUrl, timeoutMs);

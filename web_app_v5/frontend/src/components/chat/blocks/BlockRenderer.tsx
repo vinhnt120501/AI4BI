@@ -1,12 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import DynamicChart from '../DynamicChart';
 import StatCard from './StatCard';
 import { Block, ChartBlock } from '@/types/types';
 import Heading from './Heading';
 import AnalysisTable from './AnalysisTable';
 import ProgressTimeline from '../sections/ProgressTimeline';
+import { formatAssistantText } from '../shared/formatAssistantText';
 
 interface BlockRendererProps {
   blocks: Block[];
@@ -64,19 +67,24 @@ export default function BlockRenderer({ blocks, columns, rows, instant }: BlockR
               slate: 'text-slate-600',
             };
             const textColor = colorMap[block.color || ''] || 'text-slate-600';
-            const lines = (block.content || '').split('\n').filter(l => l.trim() !== '');
+            const md = formatAssistantText(block.content || '');
             
             return (
               <div key={i} className="px-1 animate-in fade-in slide-in-from-bottom-3 duration-400">
-                <div className={`text-[14px] leading-relaxed flex flex-col gap-2 ${textColor}`}>
-                  {lines.map((line, idx) => (
-                    <p 
-                      key={idx}
-                      dangerouslySetInnerHTML={{ 
-                        __html: line.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-slate-800">$1</strong>') 
-                      }} 
-                    />
-                  ))}
+                <div className={`markdown-output prose prose-slate max-w-none text-[14px] leading-relaxed ${textColor} prose-p:my-2 prose-li:my-1 prose-ol:my-2 prose-ul:my-2 prose-strong:text-slate-900 prose-a:text-blue-700`}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      // Keep lists compact in dashboard blocks
+                      ul: ({ children }) => <ul className="pl-5 list-disc">{children}</ul>,
+                      ol: ({ children }) => <ol className="pl-5 list-decimal">{children}</ol>,
+                      li: ({ children }) => <li>{children}</li>,
+                      p: ({ children }) => <p>{children}</p>,
+                      strong: ({ children }) => <strong className="font-semibold text-slate-900">{children}</strong>,
+                    }}
+                  >
+                    {md}
+                  </ReactMarkdown>
                 </div>
               </div>
             );

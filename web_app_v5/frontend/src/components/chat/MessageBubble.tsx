@@ -40,6 +40,55 @@ function detectChartConfig(columns: string[], rows: string[][]): ChartBlock | nu
   return { type: 'chart', chartType, xKey, yKeys, options, title: 'Auto-detected chart' };
 }
 
+function stripVisConfigInline(input: string): string {
+  if (!input) return input;
+  const m = /VIS_CONFIG\s*[:=]\s*\[/i.exec(input);
+  if (!m || m.index === undefined) return input;
+
+  const start = m.index;
+  const arrayStart = input.indexOf('[', m.index);
+  if (arrayStart < 0) return input;
+
+  let bracket = 0;
+  let inString = false;
+  let escapeNext = false;
+  let end = -1;
+
+  for (let i = arrayStart; i < input.length; i++) {
+    const ch = input[i];
+    if (escapeNext) {
+      escapeNext = false;
+      continue;
+    }
+    if (ch === '\\') {
+      escapeNext = true;
+      continue;
+    }
+    if (ch === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (ch === '[') bracket += 1;
+    if (ch === ']') {
+      bracket -= 1;
+      if (bracket === 0) {
+        end = i + 1;
+        break;
+      }
+    }
+  }
+
+  if (end < 0) return input;
+  const out = (input.slice(0, start) + input.slice(end)).trim();
+  // Remove stray standalone braces left by some model wrappers.
+  return out
+    .split('\n')
+    .filter((line) => !/^\s*[{}]\s*,?\s*$/.test(line))
+    .join('\n')
+    .trim();
+}
+
 export default function MessageBubble({
   message,
   copyText,
@@ -71,7 +120,21 @@ export default function MessageBubble({
   const strippedContent = displayContent
     ? stripFollowUpSection(displayContent, message.followUpSuggestions || [])
     : displayContent;
-  const formattedDoneContent = strippedContent ? formatAssistantText(strippedContent) : strippedContent;
+
+  let processedContent = strippedContent;
+  if (strippedContent && strippedContent.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(strippedContent);
+      if (parsed.type === 'text' && typeof parsed.content === 'string') {
+        processedContent = parsed.content;
+      }
+    } catch (e) {
+      // Not valid JSON or different structure, keep original
+    }
+  }
+
+  const sanitizedContent = processedContent ? stripVisConfigInline(processedContent) : processedContent;
+  const formattedDoneContent = sanitizedContent ? formatAssistantText(sanitizedContent) : sanitizedContent;
 
   // Fallback: nếu không có blocks, tạo ChartBlock từ chartConfig hoặc auto-detect
   // Chỉ render fallback sau khi pipeline hoàn tất (tránh hiển thị chart "tạm" sơ sài khi mới có data).

@@ -150,7 +150,7 @@ export default function AnalysisTable({ block, data }: AnalysisTableProps) {
         </div>
       )}
 
-      <div className="max-h-[600px] overflow-auto scrollbar-thin scrollbar-thumb-slate-200">
+      <div className="max-h-[400px] overflow-auto scrollbar-thin scrollbar-thumb-slate-200">
         <table className="w-full text-sm border-collapse">
           <thead className="sticky top-0 z-20">
             <tr className="bg-white/95 backdrop-blur-md">

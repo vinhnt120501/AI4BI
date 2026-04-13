@@ -1,6 +1,8 @@
 import os
 import json
 import re
+from collections import OrderedDict
+import hashlib
 from pathlib import Path
 from datetime import date, datetime, timedelta, timezone
 from dotenv import load_dotenv
@@ -84,12 +86,35 @@ class FileIngestRequest(BaseModel):
     sessionId: str = ""
     files: list[FileIngestItem] = []
 
+class TokenCountRequest(BaseModel):
+    text: str = ""
+    model: str | None = None
+
 
 def _guard_admin(x_admin_token: str | None):
     if not ADMIN_TOKEN:
         raise HTTPException(status_code=500, detail="MEMORY_ADMIN_TOKEN is not configured")
     if x_admin_token != ADMIN_TOKEN:
         raise HTTPException(status_code=401, detail="Invalid admin token")
+
+
+_TOKEN_COUNT_CACHE: "OrderedDict[str, dict]" = OrderedDict()
+_TOKEN_COUNT_CACHE_MAX = 128
+
+
+def _token_cache_get(key: str) -> dict | None:
+    v = _TOKEN_COUNT_CACHE.get(key)
+    if v is None:
+        return None
+    _TOKEN_COUNT_CACHE.move_to_end(key)
+    return v
+
+
+def _token_cache_set(key: str, value: dict) -> None:
+    _TOKEN_COUNT_CACHE[key] = value
+    _TOKEN_COUNT_CACHE.move_to_end(key)
+    while len(_TOKEN_COUNT_CACHE) > _TOKEN_COUNT_CACHE_MAX:
+        _TOKEN_COUNT_CACHE.popitem(last=False)
 
 def _maybe_json(value):
     if value is None:
@@ -719,6 +744,62 @@ async def chat(req: ChatRequest):
             "Connection": "keep-alive",
         },
     )
+
+
+@app.post("/tokens/count")
+def tokens_count(req: TokenCountRequest):
+    text = req.text or ""
+    model_override = (req.model or "").strip()
+    env_model = (os.getenv("OPENROUTER_MODEL") or "").strip()
+    model = model_override or env_model
+
+    # Cache by (model + text)
+    key_src = f"{model}\n{text}"
+    cache_key = hashlib.sha256(key_src.encode("utf-8")).hexdigest()
+    cached = _token_cache_get(cache_key)
+    if cached is not None:
+        return cached
+
+    # Count via provider usage to match the actual model tokenizer.
+    # NOTE: This triggers a tiny completion request (max_tokens=1) and may incur latency/cost.
+    tokens: int | None = None
+    exact = False
+    error: str | None = None
+    resolved_model: str | None = model or None
+
+    try:
+        from llm.client import client as llm_client, EXTRA_HEADERS, OPENROUTER_MODEL
+
+        resolved_model = model or OPENROUTER_MODEL
+        res = llm_client.chat.completions.create(
+            model=resolved_model,
+            temperature=0,
+            max_tokens=1,
+            messages=[
+                {"role": "system", "content": "Reply with OK."},
+                {"role": "user", "content": text},
+            ],
+            extra_headers=EXTRA_HEADERS,
+        )
+        usage = getattr(res, "usage", None)
+        prompt_tokens = getattr(usage, "prompt_tokens", None) if usage else None
+        if isinstance(prompt_tokens, int):
+            tokens = int(prompt_tokens)
+            exact = True
+        else:
+            error = "Provider did not return prompt token usage."
+    except Exception as e:
+        error = str(e)
+
+    payload = {
+        "tokens": tokens,
+        "exact": exact,
+        "model": resolved_model,
+        "error": error,
+    }
+    _token_cache_set(cache_key, payload)
+    return payload
+
 
 @app.get("/chat/history")
 def chat_history(userId: str = "default_user", limit: int = 10, offset: int = 0):

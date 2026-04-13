@@ -99,18 +99,28 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
 
   useEffect(() => {
     if (scrollRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-      const isAtBottom = scrollHeight - scrollTop <= clientHeight + 150;
+      const target = scrollRef.current;
+      // Force scroll to bottom immediately if busy just started or it's a new message structure
+      const isNewMessage = messages.length > 0 && messages[messages.length - 1].role === 'user';
       
-      // Auto-scroll only if new messages arrive AND user is already at bottom, or if it's the very first message
-      if (isAtBottom || (messages.length > 0 && messages.length <= 2)) {
-        scrollRef.current.scrollTo({
-          top: scrollRef.current.scrollHeight,
+      if (busy || isNewMessage) {
+        target.scrollTo({
+          top: target.scrollHeight,
           behavior: 'smooth'
         });
+      } else {
+        // Progressive scroll as content streams
+        const { scrollTop, scrollHeight, clientHeight } = target;
+        const isNearBottom = scrollHeight - scrollTop <= clientHeight + 250;
+        if (isNearBottom) {
+          target.scrollTo({
+            top: target.scrollHeight,
+            behavior: 'smooth'
+          });
+        }
       }
     }
-  }, [scrollTrigger]);
+  }, [scrollTrigger, busy, messages.length]);
 
   useEffect(() => {
     return () => {
@@ -168,7 +178,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
           width: '100%', 
           maxWidth: '100%', 
           margin: '0 auto', 
-          padding: isLanding ? '0 16px' : '20px 16px 180px', 
+          padding: isLanding ? '0 16px' : '20px 16px 60px', 
           height: isLanding ? '100%' : 'auto',
           display: isLanding ? 'flex' : 'block',
           flexDirection: 'column',

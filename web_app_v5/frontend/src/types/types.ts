@@ -15,7 +15,7 @@ export interface TokenUsage {
 }
 
 // 1.2. Chart config từ AI
-// 45 chart types — 12 Recharts containers + 33 biến thể render riêng biệt
+// 46 chart types — 12 Recharts containers + 34 biến thể render riêng biệt
 // LLM có thể gửi bất kỳ string nào, frontend normalizeChartType() sẽ map về type phù hợp
 export type KnownChartType =
   // ─── 12 Recharts base containers ───

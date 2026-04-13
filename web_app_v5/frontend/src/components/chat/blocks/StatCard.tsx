@@ -18,6 +18,31 @@ const THEMES: Record<string, { accent: string; bg: string; border: string; badge
 
 const COLOR_CYCLE = ['blue', 'teal', 'indigo', 'purple', 'green', 'orange', 'cyan'];
 
+const MIN_CARD_PX = 260;
+const GAP_PX = 16; // Tailwind `gap-4`
+
+function pickIdealColumns(containerWidth: number) {
+  if (!containerWidth || containerWidth <= 0) return 1;
+
+  // Keep columns such that cards don't get too narrow.
+  // 1 col: < 2*min + 1*gap
+  // 2 col: < 3*min + 2*gap
+  // 3 col: < 4*min + 3*gap
+  if (containerWidth < MIN_CARD_PX * 2 + GAP_PX * 1) return 1;
+  if (containerWidth < MIN_CARD_PX * 3 + GAP_PX * 2) return 2;
+  if (containerWidth < MIN_CARD_PX * 4 + GAP_PX * 3) return 3;
+  return 4;
+}
+
+function balanceColumns(itemCount: number, ideal: number) {
+  if (itemCount <= 1) return 1;
+  let cols = Math.max(1, Math.min(ideal, itemCount));
+  // Avoid ugly orphan rows like 3+1 for 4 cards (or 4+1 for 5 cards, etc.)
+  // but keep 2+1 for 3 cards (that's a normal layout).
+  while (cols > 2 && itemCount % cols === 1) cols -= 1;
+  return cols;
+}
+
 function TrendBadge({ trend }: { trend: string }) {
   if (trend === 'neutral') {
     return (
@@ -43,8 +68,30 @@ function TrendBadge({ trend }: { trend: string }) {
 export default function StatCard({ items }: { items?: StatCardItem[] }) {
   if (!items || items.length === 0) return null;
 
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
+
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const ro = new ResizeObserver((entries) => {
+      const w = entries?.[0]?.contentRect?.width;
+      if (typeof w === 'number' && !Number.isNaN(w)) setContainerWidth(w);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  const idealCols = pickIdealColumns(containerWidth);
+  const cols = balanceColumns(items.length, idealCols);
+
   return (
-    <div className="flex w-full flex-wrap gap-4">
+    <div
+      ref={containerRef}
+      className="grid w-full gap-4 grid-flow-row-dense"
+      style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+    >
       {items.map((item, i) => {
         const colorKey = item.color || COLOR_CYCLE[i % COLOR_CYCLE.length];
         const theme = THEMES[colorKey] || THEMES.slate;
@@ -52,7 +99,7 @@ export default function StatCard({ items }: { items?: StatCardItem[] }) {
         return (
           <div
             key={i}
-            className={`relative flex-1 min-w-[280px] overflow-hidden border ${theme.border} rounded-2xl px-5 py-5 ${theme.bg} transition-all hover:shadow-lg hover:-translate-y-0.5 duration-300 group`}
+            className={`relative overflow-hidden border ${theme.border} rounded-2xl px-5 py-5 ${theme.bg} transition-all hover:shadow-lg hover:-translate-y-0.5 duration-300 group min-h-[112px]`}
           >
             {/* Decorative gradient blob */}
             <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full ${theme.bg} opacity-40 blur-xl group-hover:scale-125 transition-transform duration-700`} />
@@ -65,7 +112,7 @@ export default function StatCard({ items }: { items?: StatCardItem[] }) {
 
               {/* Value + Trend */}
               <div className="flex items-center gap-2.5">
-                <div className={`text-[26px] font-extrabold ${theme.accent} tracking-tight leading-none`}>
+                <div className={`text-[24px] md:text-[28px] font-extrabold ${theme.accent} tracking-tight leading-none break-words`}>
                   {item.value}
                 </div>
                 {item.trend && <TrendBadge trend={item.trend} />}

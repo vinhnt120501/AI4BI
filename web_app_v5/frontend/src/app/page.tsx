@@ -104,9 +104,79 @@ export default function ChatPage() {
   const [tempText, setTempText] = useState('');
   const [files, setFiles] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const MAX_TOKENS = 2500;
-  const tokenCount = tempText.trim() === '' ? 0 : Math.ceil(tempText.length / 4);
-  const actualTokenCount = instructionText.trim() === '' ? 0 : Math.ceil(instructionText.length / 4);
+  const tokenCacheRef = useRef(new Map<string, number>());
+  const [tempTokenCount, setTempTokenCount] = useState<number | null>(0);
+  const [tempTokenBusy, setTempTokenBusy] = useState(false);
+  const [instructionTokenCount, setInstructionTokenCount] = useState<number | null>(0);
+  const [instructionTokenBusy, setInstructionTokenBusy] = useState(false);
+
+  const fetchExactTokenCount = useCallback(async (text: string, signal?: AbortSignal) => {
+    const trimmed = text ?? '';
+    if (!trimmed) return 0;
+    const cached = tokenCacheRef.current.get(trimmed);
+    if (typeof cached === 'number') return cached;
+
+    const res = await fetch(buildApiUrl('/tokens/count'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: trimmed }),
+      signal,
+    });
+    const data = await res.json().catch(() => null);
+    const tokens = typeof data?.tokens === 'number' ? data.tokens : null;
+    if (typeof tokens === 'number') {
+      tokenCacheRef.current.set(trimmed, tokens);
+      return tokens;
+    }
+    return null;
+  }, []);
+
+  // Count tokens for instruction text (saved) – debounced + cancellable.
+  useEffect(() => {
+    const text = instructionText || '';
+    if (!text.trim()) {
+      setInstructionTokenCount(0);
+      setInstructionTokenBusy(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const id = setTimeout(async () => {
+      setInstructionTokenBusy(true);
+      const tokens = await fetchExactTokenCount(text, controller.signal).catch(() => null);
+      setInstructionTokenCount(typeof tokens === 'number' ? tokens : null);
+      setInstructionTokenBusy(false);
+    }, 650);
+
+    return () => {
+      controller.abort();
+      clearTimeout(id);
+    };
+  }, [instructionText, fetchExactTokenCount]);
+
+  // Count tokens while editing in the modal (tempText) – debounced + cancellable.
+  useEffect(() => {
+    if (!isModalOpen) return;
+    const text = tempText || '';
+    if (!text.trim()) {
+      setTempTokenCount(0);
+      setTempTokenBusy(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const id = setTimeout(async () => {
+      setTempTokenBusy(true);
+      const tokens = await fetchExactTokenCount(text, controller.signal).catch(() => null);
+      setTempTokenCount(typeof tokens === 'number' ? tokens : null);
+      setTempTokenBusy(false);
+    }, 650);
+
+    return () => {
+      controller.abort();
+      clearTimeout(id);
+    };
+  }, [tempText, isModalOpen, fetchExactTokenCount]);
 
   const handleSave = useCallback(() => {
     setInstructionText(tempText);
@@ -333,9 +403,9 @@ export default function ChatPage() {
     if (eventType === 'reply') {
       updateAssistantMessage(assistantId, (message) => ({
         ...appendEvent(message),
-        content: data.reply || message.content,
-        blocks: data.blocks || [],
-        chartConfig: data.chart_config || undefined,
+        content: typeof data.reply === 'string' ? data.reply : message.content,
+        blocks: Array.isArray(data.blocks) ? data.blocks : (message.blocks || []),
+        chartConfig: data.chart_config ?? message.chartConfig,
         replyTokenUsage: data.reply_token_usage || undefined,
       }));
       return;
@@ -622,7 +692,7 @@ export default function ChatPage() {
                 <p className="mb-6 text-[13px] leading-relaxed text-slate-500">
                   Provide AI4BI with relevant instructions and information for chats.
                 </p>
-                <div className={`relative overflow-hidden rounded-xl border-2 ${tokenCount > MAX_TOKENS ? 'border-red-400' : 'border-slate-200 focus-within:border-black'}`}>
+                <div className="relative overflow-hidden rounded-xl border-2 border-slate-200 focus-within:border-black">
                   <textarea
                     className="h-[500px] w-full resize-none bg-white p-4 font-mono text-[14px] leading-relaxed text-slate-700 focus:outline-none"
                     placeholder="# Custom Instructions..."
@@ -630,8 +700,8 @@ export default function ChatPage() {
                     onChange={(event) => setTempText(event.target.value)}
                     autoFocus
                   />
-                  <div className={`absolute bottom-3 right-4 rounded border px-2 py-1 text-[11px] font-medium ${tokenCount > MAX_TOKENS ? 'border-red-200 bg-red-50 text-red-600' : 'border-slate-100 bg-slate-50 text-slate-400'}`}>
-                    {tokenCount} / {MAX_TOKENS} tokens
+                  <div className="absolute bottom-3 right-4 rounded border border-slate-100 bg-slate-50 px-2 py-1 text-[11px] font-medium text-slate-400">
+                    {tempTokenBusy ? 'Đang đếm token…' : (typeof tempTokenCount === 'number' ? `${tempTokenCount} tokens` : 'Không đếm được token')}
                   </div>
                 </div>
               </div>
@@ -703,11 +773,6 @@ export default function ChatPage() {
                         <InstructionToggleIcon open={isRightPanelOpen} />
                       </button>
                       <h3 className="text-[15px] font-semibold text-slate-900">Instructions</h3>
-                      {actualTokenCount > MAX_TOKENS ? (
-                        <span className="animate-pulse rounded border border-red-100 bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-500">
-                          Limit exceeded
-                        </span>
-                      ) : null}
                     </div>
                     <div className="flex items-center gap-1.5">
                       {instructionText ? (
@@ -735,9 +800,7 @@ export default function ChatPage() {
               <div className={isRightPanelOpen ? 'flex-1 overflow-y-auto p-6' : 'hidden'}>
                 <div className="mb-12">
                   {instructionText ? (
-                    <div className={`max-h-48 overflow-y-auto whitespace-pre-wrap rounded-xl border p-3 text-[13px] leading-relaxed ${
-                      actualTokenCount > MAX_TOKENS ? 'border-red-100 bg-red-50/30 text-red-700' : 'border-slate-100 bg-slate-50/80 text-slate-600'
-                    }`}>
+                    <div className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-100 bg-slate-50/80 p-3 text-[13px] leading-relaxed text-slate-600">
                       {instructionText}
                     </div>
                   ) : (
@@ -747,8 +810,8 @@ export default function ChatPage() {
                   )}
 
                   {instructionText ? (
-                    <div className={`mt-2 text-[11px] font-medium ${actualTokenCount > MAX_TOKENS ? 'text-red-500' : 'text-slate-400'}`}>
-                      {actualTokenCount} / {MAX_TOKENS} tokens
+                    <div className="mt-2 text-[11px] font-medium text-slate-400">
+                      {instructionTokenBusy ? 'Đang đếm token…' : (typeof instructionTokenCount === 'number' ? `${instructionTokenCount} tokens` : 'Không đếm được token')}
                     </div>
                   ) : null}
                 </div>

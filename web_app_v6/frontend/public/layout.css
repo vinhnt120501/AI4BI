@@ -1,0 +1,2 @@
+/* Intentionally empty.
+   Some dev environments request /layout.css directly; serving this avoids noisy 404s. */

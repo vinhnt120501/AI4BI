@@ -1,0 +1,6346 @@
+{
+  "question": "Doanh thu tại Hà Nội tháng 2 2026",
+  "events": [
+    {
+      "event": "status",
+      "time": "0.0s",
+      "data": {
+        "step": 0,
+        "text": "Đang chuẩn bị ngữ cảnh và bộ nhớ..."
+      }
+    },
+    {
+      "event": "debug_payload",
+      "time": "0.6s",
+      "data": {
+        "stage": "sql",
+        "model": "ai4bi-combo",
+        "system_prompt": "\n<goal>\nChuyển câu hỏi tiếng Việt thành truy vấn SQL lấy đúng dữ liệu trả lời câu hỏi.\n</goal>\n\n<intent>\nBạn là Senior Data Engineer MySQL/TiDB với nhiều năm kinh nghiệm trong việc hiểu rõ nghiệp vụ kinh doanh bằng ngôn ngữ tự nhiên, và chuyển đổi chính xác thành các thông tin truy vấn SQL để lấy dữ liệu trả lời cho các câu hỏi.\n\nÁp dụng quy tắc từ [Instructions] để đảm bảo SQL đúng nghiệp vụ.\n</intent>\n\n<success_criteria>\nTruy vấn thành công khi:\n- Thực thi không lỗi\n- Trả về data trả lời câu hỏi người dùng\n- Áp dụng đúng quy tắc từ [Instructions]\n- Dùng đúng schema từ [Schema]\n</success_criteria>\n\n<input>\nBạn NHẬN:\n1. Câu hỏi tiếng Việt của người dùng\n2. [Schema] - Cấu trúc database\n3. [Instructions] - Quy tắc kinh doanh\n\nDùng cả hai nguồn để viết SQL đúng kỹ thuật VÀ đúng nghiệp vụ.\n</input>\n\n<output>\nTrả về 2 phần:\n\nPhần 1 - Thinking (trong thẻ <thinking>):\n- Phân tích câu hỏi\n- Xác định tables/columns cần thiết\n- Áp dụng quy tắc từ [Instructions]\n- Cân nhắc edge cases\n\nPhần 2 - SQL query:\n- Raw SQL only\n- Wrap tables/columns trong backticks (`)\n</output>\n\n<database_constraints>\n- Compatible với database được mô tả trong [Schema]\n- Chỉ SELECT queries\n</database_constraints>\n\n<validation>\nTrước khi trả SQL, tự kiểm tra:\n- Đã áp dụng quy tắc từ [Instructions]?\n- Dùng đúng tables/columns từ [Schema]?\n- Query an toàn?\n</validation>\n\n\nMemory Context:\n[Static Memory]\n\n<static_rules>\nĐây là các quy tắc nền tảng áp dụng cho \"MỌI\" bước trong pipeline phân tích.\nDù bạn đang tạo SQL, đánh giá data, viết phân tích, hay gợi ý câu hỏi, luôn tuân thủ:\n\n1. Đối tượng phục vụ: \"Quản Lý Cấp Cao\", mọi output phải phù hợp cho người ra quyết định kinh doanh.\n2. Phong cách trả lời: chi tiết làm rõ các thông tin, data-driven, insight và khuyến nghị hành động trước, raw data sau.\n3. Ngôn ngữ: tiếng Việt chuyên nghiệp, rõ ràng, không dùng thuật ngữ kỹ thuật khi không cần thiết.\n</static_rules>\n\n\n[Fact Memory]\n- (business_context, importance=5) Hệ thống BI đang phân tích doanh thu vaccine dựa trên các bảng chi tiết đơn hàng và trả hàng, với các KPI chính: gross_sales_amount, returned_sales_amount, net_revenue_amount.\n- (domain_knowledge, importance=5) Doanh thu thuần (net_revenue) được tính = gross_sales_after_discount - returned_sales_after_discount và có thêm chỉ số return_rate_by_value = returned_sales / gross_sales\n- (user_preference, importance=5) Ưu tiên tính doanh thu ròng (net revenue) bằng gross sales trừ returned sales/hoàn trả.\n\nSchema:\nTABLE: `chat_history`\n- `id` | type=int | Mô tả: dữ liệu của cột `id`.\n- `user_id` | type=varchar | Mô tả: dữ liệu của cột `user_id`.\n- `session_id` | type=varchar | Mô tả: dữ liệu của cột `session_id`.\n- `created_at` | type=datetime | Mô tả: dữ liệu của cột `created_at`.\n- `question` | type=text | Mô tả: dữ liệu của cột `question`.\n- `sql_generated` | type=text | Mô tả: dữ liệu của cột `sql_generated`.\n- `thinking` | type=text | Mô tả: dữ liệu của cột `thinking`.\n- `reply` | type=text | Mô tả: dữ liệu của cột `reply`.\n- `columns_data` | type=json | Mô tả: dữ liệu của cột `columns_data`.\n- `rows_data` | type=json | Mô tả: dữ liệu của cột `rows_data`.\n- `chart_config` | type=json | Mô tả: dữ liệu của cột `chart_config`.\n- `token_sql_input` | type=int | Mô tả: dữ liệu của cột `token_sql_input`.\n- `token_sql_thinking` | type=int | Mô tả: dữ liệu của cột `token_sql_thinking`.\n- `token_sql_output` | type=int | Mô tả: dữ liệu của cột `token_sql_output`.\n- `token_sql_total` | type=int | Mô tả: dữ liệu của cột `token_sql_total`.\n- `token_reply_input` | type=int | Mô tả: dữ liệu của cột `token_reply_input`.\n- `token_reply_thinking` | type=int | Mô tả: dữ liệu của cột `token_reply_thinking`.\n- `token_reply_output` | type=int | Mô tả: dữ liệu của cột `token_reply_output`.\n- `token_reply_total` | type=int | Mô tả: dữ liệu của cột `token_reply_total`.\n- `token_grand_total` | type=int | Mô tả: dữ liệu của cột `token_grand_total`.\n\nTABLE: `memory_facts`\n- `id` | type=int | Mô tả: dữ liệu của cột `id`.\n- `user_id` | type=varchar | Mô tả: dữ liệu của cột `user_id`.\n- `session_id` | type=varchar | Mô tả: dữ liệu của cột `session_id`.\n- `category` | type=varchar | Mô tả: dữ liệu của cột `category`.\n- `content` | type=text | Mô tả: dữ liệu của cột `content`.\n- `importance` | type=tinyint | Mô tả: dữ liệu của cột `importance`.\n- `source_type` | type=varchar | Mô tả: dữ liệu của cột `source_type`.\n- `created_at` | type=datetime | Mô tả: dữ liệu của cột `created_at`.\n\nTABLE: `sample_central_rabie`\n- `month` | type=varchar | Mô tả: dữ liệu của cột `month`.\n- `province_name` | type=varchar | Mô tả: dữ liệu của cột `province_name`.\n- `unique_vaccinated_customers` | type=varchar | Mô tả: dữ liệu của cột `unique_vaccinated_customers`.\n\nTABLE: `view_genie_person`\n- `lcv_id` | type=varchar | Mã định danh người thụ hưởng (bắt đầu bằng LCV)\n- `customer_id` | type=varchar | Mã định danh người mua đơn hàng (24 ký tự alphanumeric)\n- `name` | type=varchar | Họ và tên đầy đủ (tiếng Việt, duy nhất)\n- `date_of_birth` | type=date | Ngày sinh (YYYY-MM-DD)\n- `gender` | type=tinyint | 0=Nam, 1=Nữ, 2=Khác\n- `note` | type=text | Ghi chú bổ sung (thường null)\n\nTABLE: `view_genie_shop`\n- `shop_code` | type=varchar | Mã cửa hàng duy nhất (5 chữ số)\n- `province_name` | type=varchar | Tên tỉnh/thành phố (63 tỉnh thành VN)\n- `district_name` | type=varchar | Tên quận/huyện\n- `ward_name` | type=varchar | Tên phường/xã\n- `address` | type=varchar | Địa chỉ đầy đủ\n- `area_name` | type=varchar | Vùng kinh tế (7 vùng)\n- `region_name` | type=varchar | Miền địa lý: Miền Bắc | Miền Trung | Miền Nam\n\nTABLE: `view_genie_vaccine_product`\n- `sku` | type=varchar | Mã SKU sản phẩm duy nhất\n- `disease_group_name` | type=varchar | Nhóm bệnh (null với combo/dịch vụ/test)\n- `product_name` | type=varchar | Tên đầy đủ sản phẩm vaccine\n\nTABLE: `view_genie_vaccine_returned_order_detail`\n- `attachment_code` | type=varchar | FK liên kết về đơn hàng gốc\n- `customer_id` | type=varchar | Mã người mua (bắt buộc)\n- `lcv_id` | type=varchar | Mã người thụ hưởng (có thể null ~1%)\n- `sku` | type=varchar | Mã sản phẩm vaccine\n- `package_type` | type=varchar | Loại mua: LE | GOI\n- `return_line_item_amount_after_discount` | type=bigint | Giá trị hoàn trả sau chiết khấu (VND)\n- `return_date` | type=date | Ngày trả hàng\n\nTABLE: `view_genie_vaccine_sales_order_detail`\n- `attachment_code` | type=varchar | Mã duy nhất của line item (PK)\n- `customer_id` | type=varchar | Mã người mua\n- `lcv_id` | type=varchar | Mã người thụ hưởng mũi tiêm\n- `shop_code` | type=varchar | Mã cửa hàng\n- `order_code` | type=varchar | Mã đơn hàng (23 chữ số, 1 order có thể nhiều line item)\n- `sku` | type=varchar | Mã sản phẩm vaccine\n- `package_type` | type=varchar | Loại mua: LE (lẻ) | GOI (gói, +5%)\n- `line_item_amount_after_discount` | type=bigint | Doanh thu line item sau chiết khấu (VND)\n- `line_item_quantity` | type=tinyint | Số lượng mũi tiêm (1-3)\n- `order_completion_date` | type=date | Ngày hoàn thành đơn hàng\n- `order_creation_date` | type=date | Ngày tạo đơn hàng\n\nTABLE: `view_genie_vaccine_shop_target`\n- `shop_code` | type=varchar | Mã cửa hàng\n- `month` | type=tinyint | Tháng (1-12)\n- `year` | type=smallint | Năm (2024-2025)\n- `target_sales` | type=bigint | Doanh thu mục tiêu (VND)",
+        "user_content": "Doanh thu tại Hà Nội tháng 2 2026",
+        "memory_context": "[Static Memory]\n\n<static_rules>\nĐây là các quy tắc nền tảng áp dụng cho \"MỌI\" bước trong pipeline phân tích.\nDù bạn đang tạo SQL, đánh giá data, viết phân tích, hay gợi ý câu hỏi, luôn tuân thủ:\n\n1. Đối tượng phục vụ: \"Quản Lý Cấp Cao\", mọi output phải phù hợp cho người ra quyết định kinh doanh.\n2. Phong cách trả lời: chi tiết làm rõ các thông tin, data-driven, insight và khuyến nghị hành động trước, raw data sau.\n3. Ngôn ngữ: tiếng Việt chuyên nghiệp, rõ ràng, không dùng thuật ngữ kỹ thuật khi không cần thiết.\n</static_rules>\n\n\n[Fact Memory]\n- (business_context, importance=5) Hệ thống BI đang phân tích doanh thu vaccine dựa trên các bảng chi tiết đơn hàng và trả hàng, với các KPI chính: gross_sales_amount, returned_sales_amount, net_revenue_amount.\n- (domain_knowledge, importance=5) Doanh thu thuần (net_revenue) được tính = gross_sales_after_discount - returned_sales_after_discount và có thêm chỉ số return_rate_by_value = returned_sales / gross_sales\n- (user_preference, importance=5) Ưu tiên tính doanh thu ròng (net revenue) bằng gross sales trừ returned sales/hoàn trả."
+      }
+    },
+    {
+      "event": "status",
+      "time": "0.6s",
+      "data": {
+        "step": 1,
+        "text": "Đang phân tích câu hỏi và tạo truy vấn SQL..."
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ">\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "C",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "âu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hỏi",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " cần",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " lấy",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " doanh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tại",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Hà",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Nội",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trong",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tháng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "2",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " năm",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "202",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "6",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ".\n\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "Ph",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ân",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tích",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " nghiệp",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " vụ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ":\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " “",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "Do",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "anh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "”",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " theo",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " quy",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " t",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ắc",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ưu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tiên",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " của",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hệ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thống",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " nên",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hiểu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " là",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " doanh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ần",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " =",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " doanh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " bán",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ra",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " sau",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " chi",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ết",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " kh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ấu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " -",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " doanh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hoàn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trả",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " sau",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " chi",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ết",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " kh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ấu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ".\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Ph",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ạm",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " vi",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " địa",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " lý",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ":",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Hà",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Nội",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ",",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " xác",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " định",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " qua",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "view",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_gen",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ie",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_shop",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`.`",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "province",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_name",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`.\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Th",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ời",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " gian",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ":\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " -",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " B",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "án",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ra",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ":",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " dùng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "order",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_completion",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_date",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trong",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tháng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "2",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "/",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "202",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "6",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ".\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " -",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Ho",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "àn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trả",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ":",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " dùng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "return",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_date",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trong",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tháng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "2",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "/",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "202",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "6",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ".\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " C",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ần",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " liên",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " kết",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hoàn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trả",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " về",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " đơn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hàng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " g",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ốc",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " qua",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "attachment",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_code",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " để",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " xác",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " định",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " cửa",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hàng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " của",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " đơn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hàng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " và",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " từ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " đó",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " lọ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "c",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Hà",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Nội",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ".\n\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "B",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ảng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "/c",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ột",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " cần",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " dùng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ":\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "view",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_gen",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ie",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_v",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "accine",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_sales",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_order",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_detail",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`:",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " doanh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " bán",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ra",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "view",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_gen",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ie",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_shop",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`:",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " lọ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "c",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tỉnh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "/th",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ành",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " là",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Hà",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Nội",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "view",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_gen",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ie",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_v",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "accine",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_return",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ed",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_order",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_detail",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`:",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " doanh",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hoàn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trả",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "\n\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "Edge",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " cases",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ":\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Có",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thể",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " không",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " có",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " dữ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " liệu",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " tháng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "2",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "/",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "202",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "6",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ",",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " cần",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trả",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " về",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " ",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "0",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thay",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " vì",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " null",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ".\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Ho",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "àn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trả",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " không",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " có",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "shop",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_code",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`,",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " nên",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " phải",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " join",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " về",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " bảng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " sales",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " qua",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " `",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "attachment",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "_code",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "`.\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "-",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " Một",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " số",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " dòng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hoàn",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " trả",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " có",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " thể",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " không",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " match",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " được",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " line",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " g",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ốc",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ",",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " nên",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " dùng",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " join",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " theo",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " line",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " item",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " g",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "ốc",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " là",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " phù",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hợp",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " nhất",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " với",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " schema",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " hiện",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": " có",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ".\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "</",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "thinking",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": ">\n\n",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "thinking",
+      "time": "19.3s",
+      "data": {
+        "thinking": "",
+        "stage": "sql"
+      }
+    },
+    {
+      "event": "sql",
+      "time": "19.3s",
+      "data": {
+        "sql": "WITH `sales_hanoi` AS (\n    SELECT\n        COALESCE(SUM(`s`.`line_item_amount_after_discount`), 0) AS `gross_sales_amount`\n    FROM `view_genie_vaccine_sales_order_detail` AS `s`\n    INNER JOIN `view_genie_shop` AS `sh`\n        ON `s`.`shop_code` = `sh`.`shop_code`\n    WHERE `sh`.`province_name` = 'Hà Nội'\n      AND `s`.`order_completion_date` >= '2026-02-01'\n      AND `s`.`order_completion_date` < '2026-03-01'\n),\n`returns_hanoi` AS (\n    SELECT\n        COALESCE(SUM(`r`.`return_line_item_amount_after_discount`), 0) AS `returned_sales_amount`\n    FROM `view_genie_vaccine_returned_order_detail` AS `r`\n    INNER JOIN `view_genie_vaccine_sales_order_detail` AS `s`\n        ON `r`.`attachment_code` = `s`.`attachment_code`\n    INNER JOIN `view_genie_shop` AS `sh`\n        ON `s`.`shop_code` = `sh`.`shop_code`\n    WHERE `sh`.`province_name` = 'Hà Nội'\n      AND `r`.`return_date` >= '2026-02-01'\n      AND `r`.`return_date` < '2026-03-01'\n)\nSELECT\n    'Hà Nội' AS `province_name`,\n    2 AS `month`,\n    2026 AS `year`,\n    `sales_hanoi`.`gross_sales_amount`,\n    `returns_hanoi`.`returned_sales_amount`,\n    (`sales_hanoi`.`gross_sales_amount` - `returns_hanoi`.`returned_sales_amount`) AS `net_revenue_amount`\nFROM `sales_hanoi`\nCROSS JOIN `returns_hanoi`;",
+        "token_usage": {
+          "schema": 1283,
+          "rules": 379,
+          "instruction": 0,
+          "memory": 301
+        }
+      }
+    },
+    {
+      "event": "status",
+      "time": "19.3s",
+      "data": {
+        "step": 2,
+        "text": "Đã nhận dữ liệu từ database..."
+      }
+    },
+    {
+      "event": "data",
+      "time": "19.3s",
+      "data": {
+        "columns": [
+          "province_name",
+          "month",
+          "year",
+          "gross_sales_amount",
+          "returned_sales_amount",
+          "net_revenue_amount"
+        ],
+        "rows": [
+          [
+            "Hà Nội",
+            2,
+            2026,
+            608711000.0,
+            78369000.0,
+            530342000.0
+          ]
+        ]
+      }
+    },
+    {
+      "event": "status",
+      "time": "19.3s",
+      "data": {
+        "step": 2,
+        "text": "Đang đánh giá thông tin và lập kế hoạch phân tích sâu..."
+      }
+    },
+    {
+      "event": "status",
+      "time": "53.4s",
+      "data": {
+        "step": 2,
+        "text": "Đang truy vấn thêm: Thiếu context so sánh MoM/YoY và ranking tỉnh/thành để đánh giá Hà Nội T2/2026 đang tăng/giảm và đứng ở đâu so với các địa phương khác..."
+      }
+    },
+    {
+      "event": "additional_data",
+      "time": "53.8s",
+      "data": {
+        "step": 1,
+        "reason": "Thiếu context so sánh MoM/YoY và ranking tỉnh/thành để đánh giá Hà Nội T2/2026 đang tăng/giảm và đứng ở đâu so với các địa phương khác",
+        "sql": "WITH `sales` AS ( SELECT `s`.`province_name`, YEAR(`d`.`order_completion_date`) AS `year`, MONTH(`d`.`order_completion_date`) AS `month`, SUM(`d`.`line_item_amount_after_discount`) AS `gross_sales_amount` FROM `view_genie_vaccine_sales_order_detail` `d` JOIN `view_genie_shop` `s` ON `s`.`shop_code` = `d`.`shop_code` WHERE (`d`.`order_completion_date` >= '2025-02-01' AND `d`.`order_completion_date` < '2026-03-01') GROUP BY `s`.`province_name`, YEAR(`d`.`order_completion_date`), MONTH(`d`.`order_completion_date`) ), `returns` AS ( SELECT `s`.`province_name`, YEAR(`r`.`return_date`) AS `year`, MONTH(`r`.`return_date`) AS `month`, SUM(`r`.`return_line_item_amount_after_discount`) AS `returned_sales_amount` FROM `view_genie_vaccine_returned_order_detail` `r` JOIN `view_genie_vaccine_sales_order_detail` `d` ON `d`.`attachment_code` = `r`.`attachment_code` JOIN `view_genie_shop` `s` ON `s`.`shop_code` = `d`.`shop_code` WHERE (`r`.`return_date` >= '2025-02-01' AND `r`.`return_date` < '2026-03-01') GROUP BY `s`.`province_name`, YEAR(`r`.`return_date`), MONTH(`r`.`return_date`) ), `keys` AS ( SELECT `province_name`, `year`, `month` FROM `sales` UNION SELECT `province_name`, `year`, `month` FROM `returns` ), `monthly` AS ( SELECT `k`.`province_name`, `k`.`year`, `k`.`month`, COALESCE(`s`.`gross_sales_amount`,0) AS `gross_sales_amount`, COALESCE(`re`.`returned_sales_amount`,0) AS `returned_sales_amount`, (COALESCE(`s`.`gross_sales_amount`,0) - COALESCE(`re`.`returned_sales_amount`,0)) AS `net_revenue_amount`, CASE WHEN COALESCE(`s`.`gross_sales_amount`,0) = 0 THEN NULL ELSE COALESCE(`re`.`returned_sales_amount`,0) / COALESCE(`s`.`gross_sales_amount`,0) END AS `return_rate_by_value` FROM `keys` `k` LEFT JOIN `sales` `s` ON `s`.`province_name` = `k`.`province_name` AND `s`.`year` = `k`.`year` AND `s`.`month` = `k`.`month` LEFT JOIN `returns` `re` ON `re`.`province_name` = `k`.`province_name` AND `re`.`year` = `k`.`year` AND `re`.`month` = `k`.`month` ) SELECT * FROM ( SELECT 'HN_MoM_YoY' AS `scope`, `province_name`, `month`, `year`, `gross_sales_amount`, `returned_sales_amount`, `net_revenue_amount`, `return_rate_by_value`, NULL AS `net_revenue_rank_feb_2026` FROM `monthly` WHERE `province_name` = 'Hà Nội' AND ( (`year` = 2026 AND `month` IN (1,2)) OR (`year` = 2025 AND `month` = 2) ) UNION ALL SELECT 'RANK_FEB_2026_TOP10' AS `scope`, `province_name`, `month`, `year`, `gross_sales_amount`, `returned_sales_amount`, `net_revenue_amount`, `return_rate_by_value`, DENSE_RANK() OVER (PARTITION BY `year`,`month` ORDER BY `net_revenue_amount` DESC) AS `net_revenue_rank_feb_2026` FROM `monthly` WHERE `year` = 2026 AND `month` = 2 ) `t` WHERE (`scope` = 'HN_MoM_YoY') OR (`scope` = 'RANK_FEB_2026_TOP10' AND `net_revenue_rank_feb_2026` <= 10) ORDER BY `scope`, `year`, `month`, `net_revenue_rank_feb_2026` LIMIT 200;",
+        "columns": [
+          "scope",
+          "province_name",
+          "month",
+          "year",
+          "gross_sales_amount",
+          "returned_sales_amount",
+          "net_revenue_amount",
+          "return_rate_by_value",
+          "net_revenue_rank_feb_2026"
+        ],
+        "rows": [
+          [
+            "HN_MoM_YoY",
+            "Hà Nội",
+            2,
+            2025,
+            264533000.0,
+            26058000.0,
+            238475000.0,
+            0.0985,
+            null
+          ],
+          [
+            "HN_MoM_YoY",
+            "Hà Nội",
+            1,
+            2026,
+            722668000.0,
+            63610000.0,
+            659058000.0,
+            0.088,
+            null
+          ],
+          [
+            "HN_MoM_YoY",
+            "Hà Nội",
+            2,
+            2026,
+            608711000.0,
+            78369000.0,
+            530342000.0,
+            0.1287,
+            null
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Hà Nội",
+            2,
+            2026,
+            608711000.0,
+            78369000.0,
+            530342000.0,
+            0.1287,
+            1
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Hồ Chí Minh",
+            2,
+            2026,
+            321094000.0,
+            35647000.0,
+            285447000.0,
+            0.111,
+            2
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Đắk Lắk",
+            2,
+            2026,
+            230364000.0,
+            31692000.0,
+            198672000.0,
+            0.1376,
+            3
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Lâm Đồng",
+            2,
+            2026,
+            218892000.0,
+            22651000.0,
+            196241000.0,
+            0.1035,
+            4
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Gia Lai",
+            2,
+            2026,
+            102163000.0,
+            10122000.0,
+            92041000.0,
+            0.0991,
+            5
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Kon Tum",
+            2,
+            2026,
+            69032000.0,
+            8200000.0,
+            60832000.0,
+            0.1188,
+            6
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Đắk Nông",
+            2,
+            2026,
+            16131000.0,
+            0.0,
+            16131000.0,
+            0.0,
+            7
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Ninh Thuận",
+            2,
+            2026,
+            18857000.0,
+            3495000.0,
+            15362000.0,
+            0.1853,
+            8
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Thái Bình",
+            2,
+            2026,
+            14824000.0,
+            0.0,
+            14824000.0,
+            0.0,
+            9
+          ],
+          [
+            "RANK_FEB_2026_TOP10",
+            "Thừa Thiên Huế",
+            2,
+            2026,
+            15569000.0,
+            936000.0,
+            14633000.0,
+            0.0601,
+            10
+          ]
+        ]
+      }
+    },
+    {
+      "event": "status",
+      "time": "92.7s",
+      "data": {
+        "step": 2,
+        "text": "Đang truy vấn thêm: Thiếu MoM, YoY và ranking theo tỉnh để tạo bối cảnh so sánh..."
+      }
+    },
+    {
+      "event": "additional_data",
+      "time": "93.1s",
+      "data": {
+        "step": 2,
+        "reason": "Thiếu MoM, YoY và ranking theo tỉnh để tạo bối cảnh so sánh",
+        "sql": "SELECT m.`province_name`, m.`month`, m.`year`, m.`gross_sales_amount`, COALESCE(r.`returned_sales_amount`, 0) AS `returned_sales_amount`, m.`gross_sales_amount` - COALESCE(r.`returned_sales_amount`, 0) AS `net_revenue_amount` FROM ( SELECT s.`province_name`, MONTH(v.`order_completion_date`) AS `month`, YEAR(v.`order_completion_date`) AS `year`, SUM(v.`line_item_amount_after_discount`) AS `gross_sales_amount` FROM `view_genie_vaccine_sales_order_detail` v JOIN `view_genie_shop` s ON v.`shop_code` = s.`shop_code` WHERE v.`order_completion_date` >= '2025-02-01' AND v.`order_completion_date` < '2026-03-01' GROUP BY s.`province_name`, MONTH(v.`order_completion_date`), YEAR(v.`order_completion_date`) ) m LEFT JOIN ( SELECT s.`province_name`, MONTH(r.`return_date`) AS `month`, YEAR(r.`return_date`) AS `year`, SUM(r.`return_line_item_amount_after_discount`) AS `returned_sales_amount` FROM `view_genie_vaccine_returned_order_detail` r JOIN `view_genie_vaccine_sales_order_detail` v ON r.`attachment_code` = v.`attachment_code` JOIN `view_genie_shop` s ON v.`shop_code` = s.`shop_code` WHERE r.`return_date` >= '2025-02-01' AND r.`return_date` < '2026-03-01' GROUP BY s.`province_name`, MONTH(r.`return_date`), YEAR(r.`return_date`) ) r ON m.`province_name` = r.`province_name` AND m.`month` = r.`month` AND m.`year` = r.`year` WHERE (m.`province_name` = 'Hà Nội' AND ((m.`year` = 2026 AND m.`month` IN (1, 2)) OR (m.`year` = 2025 AND m.`month` = 2))) OR (m.`year` = 2026 AND m.`month` = 2) LIMIT 1000;",
+        "columns": [
+          "province_name",
+          "month",
+          "year",
+          "gross_sales_amount",
+          "returned_sales_amount",
+          "net_revenue_amount"
+        ],
+        "rows": [
+          [
+            "Đắk Lắk",
+            2,
+            2026,
+            230364000.0,
+            31692000.0,
+            198672000.0
+          ],
+          [
+            "Bình Phước",
+            2,
+            2026,
+            4207000.0,
+            260000.0,
+            3947000.0
+          ],
+          [
+            "Cần Thơ",
+            2,
+            2026,
+            8652000.0,
+            666000.0,
+            7986000.0
+          ],
+          [
+            "Bình Dương",
+            2,
+            2026,
+            8002000.0,
+            474000.0,
+            7528000.0
+          ],
+          [
+            "Quảng Trị",
+            2,
+            2026,
+            9032000.0,
+            5879000.0,
+            3153000.0
+          ],
+          [
+            "Lạng Sơn",
+            2,
+            2026,
+            8683000.0,
+            609000.0,
+            8074000.0
+          ],
+          [
+            "Bắc Kạn",
+            2,
+            2026,
+            12631000.0,
+            1055000.0,
+            11576000.0
+          ],
+          [
+            "Hải Dương",
+            2,
+            2026,
+            10115000.0,
+            266000.0,
+            9849000.0
+          ],
+          [
+            "Hưng Yên",
+            2,
+            2026,
+            8383000.0,
+            879000.0,
+            7504000.0
+          ],
+          [
+            "Lào Cai",
+            2,
+            2026,
+            11715000.0,
+            562000.0,
+            11153000.0
+          ],
+          [
+            "Phú Thọ",
+            2,
+            2026,
+            4659000.0,
+            123000.0,
+            4536000.0
+          ],
+          [
+            "Hà Nam",
+            2,
+            2026,
+            6522000.0,
+            0.0,
+            6522000.0
+          ],
+          [
+            "An Giang",
+            2,
+            2026,
+            10370000.0,
+            733000.0,
+            9637000.0
+          ],
+          [
+            "Bạc Liêu",
+            2,
+            2026,
+            7439000.0,
+            260000.0,
+            7179000.0
+          ],
+          [
+            "Sóc Trăng",
+            2,
+            2026,
+            13002000.0,
+            934000.0,
+            12068000.0
+          ],
+          [
+            "Cao Bằng",
+            2,
+            2026,
+            6845000.0,
+            717000.0,
+            6128000.0
+          ],
+          [
+            "Ninh Bình",
+            2,
+            2026,
+            7374000.0,
+            0.0,
+            7374000.0
+          ],
+          [
+            "Lai Châu",
+            2,
+            2026,
+            11790000.0,
+            2015000.0,
+            9775000.0
+          ],
+          [
+            "Bắc Ninh",
+            2,
+            2026,
+            8259000.0,
+            513000.0,
+            7746000.0
+          ],
+          [
+            "Gia Lai",
+            2,
+            2026,
+            102163000.0,
+            10122000.0,
+            92041000.0
+          ],
+          [
+            "Tây Ninh",
+            2,
+            2026,
+            7281000.0,
+            0.0,
+            7281000.0
+          ],
+          [
+            "Đà Nẵng",
+            2,
+            2026,
+            9966000.0,
+            0.0,
+            9966000.0
+          ],
+          [
+            "Long An",
+            2,
+            2026,
+            9650000.0,
+            0.0,
+            9650000.0
+          ],
+          [
+            "Hậu Giang",
+            2,
+            2026,
+            8344000.0,
+            119000.0,
+            8225000.0
+          ],
+          [
+            "Hồ Chí Minh",
+            2,
+            2026,
+            321094000.0,
+            35647000.0,
+            285447000.0
+          ],
+          [
+            "Quảng Ngãi",
+            2,
+            2026,
+            13701000.0,
+            866000.0,
+            12835000.0
+          ],
+          [
+            "Sơn La",
+            2,
+            2026,
+            5960000.0,
+            0.0,
+            5960000.0
+          ],
+          [
+            "Yên Bái",
+            2,
+            2026,
+            11026000.0,
+            0.0,
+            11026000.0
+          ],
+          [
+            "Lâm Đồng",
+            2,
+            2026,
+            218892000.0,
+            22651000.0,
+            196241000.0
+          ],
+          [
+            "Nam Định",
+            2,
+            2026,
+            9477000.0,
+            0.0,
+            9477000.0
+          ],
+          [
+            "Quảng Nam",
+            2,
+            2026,
+            9916000.0,
+            610000.0,
+            9306000.0
+          ],
+          [
+            "Quảng Ninh",
+            2,
+            2026,
+            11580000.0,
+            0.0,
+            11580000.0
+          ],
+          [
+            "Đồng Tháp",
+            2,
+            2026,
+            12067000.0,
+            0.0,
+            12067000.0
+          ],
+          [
+            "Đắk Nông",
+            2,
+            2026,
+            16131000.0,
+            0.0,
+            16131000.0
+          ],
+          [
+            "Hải Phòng",
+            2,
+            2026,
+            11847000.0,
+            0.0,
+            11847000.0
+          ],
+          [
+            "Quảng Bình",
+            2,
+            2026,
+            12983000.0,
+            248000.0,
+            12735000.0
+          ],
+          [
+            "Hà Nội",
+            2,
+            2026,
+            608711000.0,
+            78369000.0,
+            530342000.0
+          ],
+          [
+            "Thái Bình",
+            2,
+            2026,
+            14824000.0,
+            0.0,
+            14824000.0
+          ],
+          [
+            "Bình Thuận",
+            2,
+            2026,
+            7012000.0,
+            1844000.0,
+            5168000.0
+          ],
+          [
+            "Kon Tum",
+            2,
+            2026,
+            69032000.0,
+            8200000.0,
+            60832000.0
+          ],
+          [
+            "Kiên Giang",
+            2,
+            2026,
+            6754000.0,
+            1655000.0,
+            5099000.0
+          ],
+          [
+            "Bắc Giang",
+            2,
+            2026,
+            6700000.0,
+            743000.0,
+            5957000.0
+          ],
+          [
+            "Hà Nội",
+            1,
+            2026,
+            722668000.0,
+            63610000.0,
+            659058000.0
+          ],
+          [
+            "Tiền Giang",
+            2,
+            2026,
+            8825000.0,
+            236000.0,
+            8589000.0
+          ],
+          [
+            "Vĩnh Long",
+            2,
+            2026,
+            14714000.0,
+            2895000.0,
+            11819000.0
+          ],
+          [
+            "Bà Rịa - Vũng Tàu",
+            2,
+            2026,
+            10121000.0,
+            551000.0,
+            9570000.0
+          ],
+          [
+            "Vĩnh Phúc",
+            2,
+            2026,
+            9220000.0,
+            435000.0,
+            8785000.0
+          ],
+          [
+            "Phú Yên",
+            2,
+            2026,
+            11926000.0,
+            1119000.0,
+            10807000.0
+          ],
+          [
+            "Hòa Bình",
+            2,
+            2026,
+            6226000.0,
+            430000.0,
+            5796000.0
+          ],
+          [
+            "Thanh Hóa",
+            2,
+            2026,
+            8661000.0,
+            1978000.0,
+            6683000.0
+          ],
+          [
+            "Hà Giang",
+            2,
+            2026,
+            5097000.0,
+            261000.0,
+            4836000.0
+          ],
+          [
+            "Nghệ An",
+            2,
+            2026,
+            13324000.0,
+            3734000.0,
+            9590000.0
+          ],
+          [
+            "Hà Nội",
+            2,
+            2025,
+            264533000.0,
+            26058000.0,
+            238475000.0
+          ],
+          [
+            "Khánh Hòa",
+            2,
+            2026,
+            7119000.0,
+            1260000.0,
+            5859000.0
+          ],
+          [
+            "Thừa Thiên Huế",
+            2,
+            2026,
+            15569000.0,
+            936000.0,
+            14633000.0
+          ],
+          [
+            "Đồng Nai",
+            2,
+            2026,
+            10956000.0,
+            1518000.0,
+            9438000.0
+          ],
+          [
+            "Cà Mau",
+            2,
+            2026,
+            11853000.0,
+            2115000.0,
+            9738000.0
+          ],
+          [
+            "Bến Tre",
+            2,
+            2026,
+            5552000.0,
+            0.0,
+            5552000.0
+          ],
+          [
+            "Ninh Thuận",
+            2,
+            2026,
+            18857000.0,
+            3495000.0,
+            15362000.0
+          ],
+          [
+            "Trà Vinh",
+            2,
+            2026,
+            8556000.0,
+            852000.0,
+            7704000.0
+          ],
+          [
+            "Thái Nguyên",
+            2,
+            2026,
+            7398000.0,
+            833000.0,
+            6565000.0
+          ],
+          [
+            "Hà Tĩnh",
+            2,
+            2026,
+            14098000.0,
+            0.0,
+            14098000.0
+          ],
+          [
+            "Bình Định",
+            2,
+            2026,
+            10138000.0,
+            275000.0,
+            9863000.0
+          ],
+          [
+            "Điện Biên",
+            2,
+            2026,
+            13551000.0,
+            2530000.0,
+            11021000.0
+          ],
+          [
+            "Tuyên Quang",
+            2,
+            2026,
+            10404000.0,
+            1143000.0,
+            9261000.0
+          ]
+        ]
+      }
+    },
+    {
+      "event": "status",
+      "time": "93.1s",
+      "data": {
+        "step": 3,
+        "text": "Đang tổng hợp dữ liệu và trực quan hóa phân tích..."
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          }
+        ],
+        "chart_config": null
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          }
+        ],
+        "chart_config": null
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          }
+        ],
+        "chart_config": null
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Hà Nội đạt doanh thu thuần 530.34 triệu trong tháng 2/2026, là địa phương cao nhất trong dữ liệu tháng này.\n- Tuy vẫn dẫn đầu, doanh thu thuần đã giảm 19.5% so với tháng 1/2026.\n- Nguyên nhân chính không chỉ đến từ doanh thu gộp giảm 15.8%, mà còn do hoàn trả tăng mạnh 23.2%, kéo tỷ lệ hoàn trả lên 12.87%.\n- So với cùng kỳ tháng 2/2025, Hà Nội tăng trưởng rất mạnh: doanh thu thuần tăng 122.4%; tuy nhiên mặt trái là giá trị hoàn trả tăng tới 200.8%.\n- Kết luận quản trị: Hà Nội đang là đầu tàu doanh thu, nhưng chất lượng doanh thu tháng 2 có dấu hiệu xấu đi do hoàn trả tăng rõ rệt."
+          }
+        ],
+        "chart_config": null
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Hà Nội đạt doanh thu thuần 530.34 triệu trong tháng 2/2026, là địa phương cao nhất trong dữ liệu tháng này.\n- Tuy vẫn dẫn đầu, doanh thu thuần đã giảm 19.5% so với tháng 1/2026.\n- Nguyên nhân chính không chỉ đến từ doanh thu gộp giảm 15.8%, mà còn do hoàn trả tăng mạnh 23.2%, kéo tỷ lệ hoàn trả lên 12.87%.\n- So với cùng kỳ tháng 2/2025, Hà Nội tăng trưởng rất mạnh: doanh thu thuần tăng 122.4%; tuy nhiên mặt trái là giá trị hoàn trả tăng tới 200.8%.\n- Kết luận quản trị: Hà Nội đang là đầu tàu doanh thu, nhưng chất lượng doanh thu tháng 2 có dấu hiệu xấu đi do hoàn trả tăng rõ rệt."
+          },
+          {
+            "type": "chart",
+            "chartType": "composed",
+            "xKey": "period",
+            "yKeys": [
+              "gross_sales_amount",
+              "returned_sales_amount",
+              "net_revenue_amount",
+              "return_rate_by_value"
+            ],
+            "title": "Hà Nội: diễn biến doanh thu và hoàn trả (T2/2025, T1/2026, T2/2026)",
+            "purpose": "Cho thấy tăng trưởng mạnh theo năm nhưng suy giảm theo tháng do hoàn trả tăng",
+            "size": "full",
+            "options": {
+              "dualAxis": true,
+              "showLegend": true,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#2563eb",
+                "#ef4444",
+                "#10b981",
+                "#f59e0b"
+              ],
+              "series": [
+                {
+                  "key": "gross_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "returned_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "net_revenue_amount",
+                  "renderAs": "line",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "return_rate_by_value",
+                  "renderAs": "line",
+                  "yAxisId": "right"
+                }
+              ],
+              "referenceLines": [
+                {
+                  "value": 0.1,
+                  "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                  "color": "#f59e0b",
+                  "axis": "y"
+                }
+              ]
+            },
+            "data": [
+              {
+                "period": "T2/2025",
+                "gross_sales_amount": 264533000,
+                "returned_sales_amount": 26058000,
+                "net_revenue_amount": 238475000,
+                "return_rate_by_value": 0.0985
+              },
+              {
+                "period": "T1/2026",
+                "gross_sales_amount": 722668000,
+                "returned_sales_amount": 63610000,
+                "net_revenue_amount": 659058000,
+                "return_rate_by_value": 0.088
+              },
+              {
+                "period": "T2/2026",
+                "gross_sales_amount": 608711000,
+                "returned_sales_amount": 78369000,
+                "net_revenue_amount": 530342000,
+                "return_rate_by_value": 0.1287
+              }
+            ]
+          }
+        ],
+        "chart_config": {
+          "type": "composed",
+          "xKey": "period",
+          "yKeys": [
+            "gross_sales_amount",
+            "returned_sales_amount",
+            "net_revenue_amount",
+            "return_rate_by_value"
+          ],
+          "options": {
+            "dualAxis": true,
+            "showLegend": true,
+            "showGrid": true,
+            "barRadius": 6,
+            "colors": [
+              "#2563eb",
+              "#ef4444",
+              "#10b981",
+              "#f59e0b"
+            ],
+            "series": [
+              {
+                "key": "gross_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "returned_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "net_revenue_amount",
+                "renderAs": "line",
+                "yAxisId": "left"
+              },
+              {
+                "key": "return_rate_by_value",
+                "renderAs": "line",
+                "yAxisId": "right"
+              }
+            ],
+            "referenceLines": [
+              {
+                "value": 0.1,
+                "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                "color": "#f59e0b",
+                "axis": "y"
+              }
+            ]
+          },
+          "yKey": "gross_sales_amount"
+        }
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Hà Nội đạt doanh thu thuần 530.34 triệu trong tháng 2/2026, là địa phương cao nhất trong dữ liệu tháng này.\n- Tuy vẫn dẫn đầu, doanh thu thuần đã giảm 19.5% so với tháng 1/2026.\n- Nguyên nhân chính không chỉ đến từ doanh thu gộp giảm 15.8%, mà còn do hoàn trả tăng mạnh 23.2%, kéo tỷ lệ hoàn trả lên 12.87%.\n- So với cùng kỳ tháng 2/2025, Hà Nội tăng trưởng rất mạnh: doanh thu thuần tăng 122.4%; tuy nhiên mặt trái là giá trị hoàn trả tăng tới 200.8%.\n- Kết luận quản trị: Hà Nội đang là đầu tàu doanh thu, nhưng chất lượng doanh thu tháng 2 có dấu hiệu xấu đi do hoàn trả tăng rõ rệt."
+          },
+          {
+            "type": "chart",
+            "chartType": "composed",
+            "xKey": "period",
+            "yKeys": [
+              "gross_sales_amount",
+              "returned_sales_amount",
+              "net_revenue_amount",
+              "return_rate_by_value"
+            ],
+            "title": "Hà Nội: diễn biến doanh thu và hoàn trả (T2/2025, T1/2026, T2/2026)",
+            "purpose": "Cho thấy tăng trưởng mạnh theo năm nhưng suy giảm theo tháng do hoàn trả tăng",
+            "size": "full",
+            "options": {
+              "dualAxis": true,
+              "showLegend": true,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#2563eb",
+                "#ef4444",
+                "#10b981",
+                "#f59e0b"
+              ],
+              "series": [
+                {
+                  "key": "gross_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "returned_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "net_revenue_amount",
+                  "renderAs": "line",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "return_rate_by_value",
+                  "renderAs": "line",
+                  "yAxisId": "right"
+                }
+              ],
+              "referenceLines": [
+                {
+                  "value": 0.1,
+                  "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                  "color": "#f59e0b",
+                  "axis": "y"
+                }
+              ]
+            },
+            "data": [
+              {
+                "period": "T2/2025",
+                "gross_sales_amount": 264533000,
+                "returned_sales_amount": 26058000,
+                "net_revenue_amount": 238475000,
+                "return_rate_by_value": 0.0985
+              },
+              {
+                "period": "T1/2026",
+                "gross_sales_amount": 722668000,
+                "returned_sales_amount": 63610000,
+                "net_revenue_amount": 659058000,
+                "return_rate_by_value": 0.088
+              },
+              {
+                "period": "T2/2026",
+                "gross_sales_amount": 608711000,
+                "returned_sales_amount": 78369000,
+                "net_revenue_amount": 530342000,
+                "return_rate_by_value": 0.1287
+              }
+            ]
+          },
+          {
+            "type": "chart",
+            "chartType": "horizontal_bar",
+            "xKey": "province_name",
+            "yKeys": [
+              "net_revenue_amount"
+            ],
+            "title": "Top 5 tỉnh/thành theo doanh thu thuần - T2/2026",
+            "purpose": "Đặt Hà Nội vào bối cảnh cạnh tranh giữa các địa phương",
+            "size": "half",
+            "options": {
+              "showLegend": false,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#10b981"
+              ],
+              "valueLabels": true
+            },
+            "data": [
+              {
+                "province_name": "Hà Nội",
+                "net_revenue_amount": 530342000
+              },
+              {
+                "province_name": "Hồ Chí Minh",
+                "net_revenue_amount": 285447000
+              },
+              {
+                "province_name": "Đắk Lắk",
+                "net_revenue_amount": 198672000
+              },
+              {
+                "province_name": "Lâm Đồng",
+                "net_revenue_amount": 196241000
+              },
+              {
+                "province_name": "Gia Lai",
+                "net_revenue_amount": 92041000
+              }
+            ]
+          }
+        ],
+        "chart_config": {
+          "type": "composed",
+          "xKey": "period",
+          "yKeys": [
+            "gross_sales_amount",
+            "returned_sales_amount",
+            "net_revenue_amount",
+            "return_rate_by_value"
+          ],
+          "options": {
+            "dualAxis": true,
+            "showLegend": true,
+            "showGrid": true,
+            "barRadius": 6,
+            "colors": [
+              "#2563eb",
+              "#ef4444",
+              "#10b981",
+              "#f59e0b"
+            ],
+            "series": [
+              {
+                "key": "gross_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "returned_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "net_revenue_amount",
+                "renderAs": "line",
+                "yAxisId": "left"
+              },
+              {
+                "key": "return_rate_by_value",
+                "renderAs": "line",
+                "yAxisId": "right"
+              }
+            ],
+            "referenceLines": [
+              {
+                "value": 0.1,
+                "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                "color": "#f59e0b",
+                "axis": "y"
+              }
+            ]
+          },
+          "yKey": "gross_sales_amount"
+        }
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Hà Nội đạt doanh thu thuần 530.34 triệu trong tháng 2/2026, là địa phương cao nhất trong dữ liệu tháng này.\n- Tuy vẫn dẫn đầu, doanh thu thuần đã giảm 19.5% so với tháng 1/2026.\n- Nguyên nhân chính không chỉ đến từ doanh thu gộp giảm 15.8%, mà còn do hoàn trả tăng mạnh 23.2%, kéo tỷ lệ hoàn trả lên 12.87%.\n- So với cùng kỳ tháng 2/2025, Hà Nội tăng trưởng rất mạnh: doanh thu thuần tăng 122.4%; tuy nhiên mặt trái là giá trị hoàn trả tăng tới 200.8%.\n- Kết luận quản trị: Hà Nội đang là đầu tàu doanh thu, nhưng chất lượng doanh thu tháng 2 có dấu hiệu xấu đi do hoàn trả tăng rõ rệt."
+          },
+          {
+            "type": "chart",
+            "chartType": "composed",
+            "xKey": "period",
+            "yKeys": [
+              "gross_sales_amount",
+              "returned_sales_amount",
+              "net_revenue_amount",
+              "return_rate_by_value"
+            ],
+            "title": "Hà Nội: diễn biến doanh thu và hoàn trả (T2/2025, T1/2026, T2/2026)",
+            "purpose": "Cho thấy tăng trưởng mạnh theo năm nhưng suy giảm theo tháng do hoàn trả tăng",
+            "size": "full",
+            "options": {
+              "dualAxis": true,
+              "showLegend": true,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#2563eb",
+                "#ef4444",
+                "#10b981",
+                "#f59e0b"
+              ],
+              "series": [
+                {
+                  "key": "gross_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "returned_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "net_revenue_amount",
+                  "renderAs": "line",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "return_rate_by_value",
+                  "renderAs": "line",
+                  "yAxisId": "right"
+                }
+              ],
+              "referenceLines": [
+                {
+                  "value": 0.1,
+                  "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                  "color": "#f59e0b",
+                  "axis": "y"
+                }
+              ]
+            },
+            "data": [
+              {
+                "period": "T2/2025",
+                "gross_sales_amount": 264533000,
+                "returned_sales_amount": 26058000,
+                "net_revenue_amount": 238475000,
+                "return_rate_by_value": 0.0985
+              },
+              {
+                "period": "T1/2026",
+                "gross_sales_amount": 722668000,
+                "returned_sales_amount": 63610000,
+                "net_revenue_amount": 659058000,
+                "return_rate_by_value": 0.088
+              },
+              {
+                "period": "T2/2026",
+                "gross_sales_amount": 608711000,
+                "returned_sales_amount": 78369000,
+                "net_revenue_amount": 530342000,
+                "return_rate_by_value": 0.1287
+              }
+            ]
+          },
+          {
+            "type": "chart",
+            "chartType": "horizontal_bar",
+            "xKey": "province_name",
+            "yKeys": [
+              "net_revenue_amount"
+            ],
+            "title": "Top 5 tỉnh/thành theo doanh thu thuần - T2/2026",
+            "purpose": "Đặt Hà Nội vào bối cảnh cạnh tranh giữa các địa phương",
+            "size": "half",
+            "options": {
+              "showLegend": false,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#10b981"
+              ],
+              "valueLabels": true
+            },
+            "data": [
+              {
+                "province_name": "Hà Nội",
+                "net_revenue_amount": 530342000
+              },
+              {
+                "province_name": "Hồ Chí Minh",
+                "net_revenue_amount": 285447000
+              },
+              {
+                "province_name": "Đắk Lắk",
+                "net_revenue_amount": 198672000
+              },
+              {
+                "province_name": "Lâm Đồng",
+                "net_revenue_amount": 196241000
+              },
+              {
+                "province_name": "Gia Lai",
+                "net_revenue_amount": 92041000
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "title": "Bảng so sánh nhanh Hà Nội qua các kỳ",
+            "columns": [
+              {
+                "key": "period",
+                "label": "Kỳ",
+                "format": "text"
+              },
+              {
+                "key": "gross_sales_amount",
+                "label": "Doanh thu gộp",
+                "format": "currency"
+              },
+              {
+                "key": "returned_sales_amount",
+                "label": "Hoàn trả",
+                "format": "currency"
+              },
+              {
+                "key": "net_revenue_amount",
+                "label": "Doanh thu thuần",
+                "format": "currency"
+              },
+              {
+                "key": "return_rate_by_value",
+                "label": "Tỷ lệ hoàn trả",
+                "format": "percent"
+              }
+            ],
+            "rows": [
+              [
+                "T2/2025",
+                264533000,
+                26058000,
+                238475000,
+                0.0985
+              ],
+              [
+                "T1/2026",
+                722668000,
+                63610000,
+                659058000,
+                0.088
+              ],
+              [
+                "T2/2026",
+                608711000,
+                78369000,
+                530342000,
+                0.1287
+              ]
+            ],
+            "sortBy": "period",
+            "sortOrder": "asc"
+          }
+        ],
+        "chart_config": {
+          "type": "composed",
+          "xKey": "period",
+          "yKeys": [
+            "gross_sales_amount",
+            "returned_sales_amount",
+            "net_revenue_amount",
+            "return_rate_by_value"
+          ],
+          "options": {
+            "dualAxis": true,
+            "showLegend": true,
+            "showGrid": true,
+            "barRadius": 6,
+            "colors": [
+              "#2563eb",
+              "#ef4444",
+              "#10b981",
+              "#f59e0b"
+            ],
+            "series": [
+              {
+                "key": "gross_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "returned_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "net_revenue_amount",
+                "renderAs": "line",
+                "yAxisId": "left"
+              },
+              {
+                "key": "return_rate_by_value",
+                "renderAs": "line",
+                "yAxisId": "right"
+              }
+            ],
+            "referenceLines": [
+              {
+                "value": 0.1,
+                "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                "color": "#f59e0b",
+                "axis": "y"
+              }
+            ]
+          },
+          "yKey": "gross_sales_amount"
+        }
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Hà Nội đạt doanh thu thuần 530.34 triệu trong tháng 2/2026, là địa phương cao nhất trong dữ liệu tháng này.\n- Tuy vẫn dẫn đầu, doanh thu thuần đã giảm 19.5% so với tháng 1/2026.\n- Nguyên nhân chính không chỉ đến từ doanh thu gộp giảm 15.8%, mà còn do hoàn trả tăng mạnh 23.2%, kéo tỷ lệ hoàn trả lên 12.87%.\n- So với cùng kỳ tháng 2/2025, Hà Nội tăng trưởng rất mạnh: doanh thu thuần tăng 122.4%; tuy nhiên mặt trái là giá trị hoàn trả tăng tới 200.8%.\n- Kết luận quản trị: Hà Nội đang là đầu tàu doanh thu, nhưng chất lượng doanh thu tháng 2 có dấu hiệu xấu đi do hoàn trả tăng rõ rệt."
+          },
+          {
+            "type": "chart",
+            "chartType": "composed",
+            "xKey": "period",
+            "yKeys": [
+              "gross_sales_amount",
+              "returned_sales_amount",
+              "net_revenue_amount",
+              "return_rate_by_value"
+            ],
+            "title": "Hà Nội: diễn biến doanh thu và hoàn trả (T2/2025, T1/2026, T2/2026)",
+            "purpose": "Cho thấy tăng trưởng mạnh theo năm nhưng suy giảm theo tháng do hoàn trả tăng",
+            "size": "full",
+            "options": {
+              "dualAxis": true,
+              "showLegend": true,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#2563eb",
+                "#ef4444",
+                "#10b981",
+                "#f59e0b"
+              ],
+              "series": [
+                {
+                  "key": "gross_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "returned_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "net_revenue_amount",
+                  "renderAs": "line",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "return_rate_by_value",
+                  "renderAs": "line",
+                  "yAxisId": "right"
+                }
+              ],
+              "referenceLines": [
+                {
+                  "value": 0.1,
+                  "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                  "color": "#f59e0b",
+                  "axis": "y"
+                }
+              ]
+            },
+            "data": [
+              {
+                "period": "T2/2025",
+                "gross_sales_amount": 264533000,
+                "returned_sales_amount": 26058000,
+                "net_revenue_amount": 238475000,
+                "return_rate_by_value": 0.0985
+              },
+              {
+                "period": "T1/2026",
+                "gross_sales_amount": 722668000,
+                "returned_sales_amount": 63610000,
+                "net_revenue_amount": 659058000,
+                "return_rate_by_value": 0.088
+              },
+              {
+                "period": "T2/2026",
+                "gross_sales_amount": 608711000,
+                "returned_sales_amount": 78369000,
+                "net_revenue_amount": 530342000,
+                "return_rate_by_value": 0.1287
+              }
+            ]
+          },
+          {
+            "type": "chart",
+            "chartType": "horizontal_bar",
+            "xKey": "province_name",
+            "yKeys": [
+              "net_revenue_amount"
+            ],
+            "title": "Top 5 tỉnh/thành theo doanh thu thuần - T2/2026",
+            "purpose": "Đặt Hà Nội vào bối cảnh cạnh tranh giữa các địa phương",
+            "size": "half",
+            "options": {
+              "showLegend": false,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#10b981"
+              ],
+              "valueLabels": true
+            },
+            "data": [
+              {
+                "province_name": "Hà Nội",
+                "net_revenue_amount": 530342000
+              },
+              {
+                "province_name": "Hồ Chí Minh",
+                "net_revenue_amount": 285447000
+              },
+              {
+                "province_name": "Đắk Lắk",
+                "net_revenue_amount": 198672000
+              },
+              {
+                "province_name": "Lâm Đồng",
+                "net_revenue_amount": 196241000
+              },
+              {
+                "province_name": "Gia Lai",
+                "net_revenue_amount": 92041000
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "title": "Bảng so sánh nhanh Hà Nội qua các kỳ",
+            "columns": [
+              {
+                "key": "period",
+                "label": "Kỳ",
+                "format": "text"
+              },
+              {
+                "key": "gross_sales_amount",
+                "label": "Doanh thu gộp",
+                "format": "currency"
+              },
+              {
+                "key": "returned_sales_amount",
+                "label": "Hoàn trả",
+                "format": "currency"
+              },
+              {
+                "key": "net_revenue_amount",
+                "label": "Doanh thu thuần",
+                "format": "currency"
+              },
+              {
+                "key": "return_rate_by_value",
+                "label": "Tỷ lệ hoàn trả",
+                "format": "percent"
+              }
+            ],
+            "rows": [
+              [
+                "T2/2025",
+                264533000,
+                26058000,
+                238475000,
+                0.0985
+              ],
+              [
+                "T1/2026",
+                722668000,
+                63610000,
+                659058000,
+                0.088
+              ],
+              [
+                "T2/2026",
+                608711000,
+                78369000,
+                530342000,
+                0.1287
+              ]
+            ],
+            "sortBy": "period",
+            "sortOrder": "asc"
+          },
+          {
+            "type": "heading",
+            "text": "Hàm ý kinh doanh và hành động ưu tiên",
+            "level": "h2"
+          }
+        ],
+        "chart_config": {
+          "type": "composed",
+          "xKey": "period",
+          "yKeys": [
+            "gross_sales_amount",
+            "returned_sales_amount",
+            "net_revenue_amount",
+            "return_rate_by_value"
+          ],
+          "options": {
+            "dualAxis": true,
+            "showLegend": true,
+            "showGrid": true,
+            "barRadius": 6,
+            "colors": [
+              "#2563eb",
+              "#ef4444",
+              "#10b981",
+              "#f59e0b"
+            ],
+            "series": [
+              {
+                "key": "gross_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "returned_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "net_revenue_amount",
+                "renderAs": "line",
+                "yAxisId": "left"
+              },
+              {
+                "key": "return_rate_by_value",
+                "renderAs": "line",
+                "yAxisId": "right"
+              }
+            ],
+            "referenceLines": [
+              {
+                "value": 0.1,
+                "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                "color": "#f59e0b",
+                "axis": "y"
+              }
+            ]
+          },
+          "yKey": "gross_sales_amount"
+        }
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Hà Nội đạt doanh thu thuần 530.34 triệu trong tháng 2/2026, là địa phương cao nhất trong dữ liệu tháng này.\n- Tuy vẫn dẫn đầu, doanh thu thuần đã giảm 19.5% so với tháng 1/2026.\n- Nguyên nhân chính không chỉ đến từ doanh thu gộp giảm 15.8%, mà còn do hoàn trả tăng mạnh 23.2%, kéo tỷ lệ hoàn trả lên 12.87%.\n- So với cùng kỳ tháng 2/2025, Hà Nội tăng trưởng rất mạnh: doanh thu thuần tăng 122.4%; tuy nhiên mặt trái là giá trị hoàn trả tăng tới 200.8%.\n- Kết luận quản trị: Hà Nội đang là đầu tàu doanh thu, nhưng chất lượng doanh thu tháng 2 có dấu hiệu xấu đi do hoàn trả tăng rõ rệt."
+          },
+          {
+            "type": "chart",
+            "chartType": "composed",
+            "xKey": "period",
+            "yKeys": [
+              "gross_sales_amount",
+              "returned_sales_amount",
+              "net_revenue_amount",
+              "return_rate_by_value"
+            ],
+            "title": "Hà Nội: diễn biến doanh thu và hoàn trả (T2/2025, T1/2026, T2/2026)",
+            "purpose": "Cho thấy tăng trưởng mạnh theo năm nhưng suy giảm theo tháng do hoàn trả tăng",
+            "size": "full",
+            "options": {
+              "dualAxis": true,
+              "showLegend": true,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#2563eb",
+                "#ef4444",
+                "#10b981",
+                "#f59e0b"
+              ],
+              "series": [
+                {
+                  "key": "gross_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "returned_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "net_revenue_amount",
+                  "renderAs": "line",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "return_rate_by_value",
+                  "renderAs": "line",
+                  "yAxisId": "right"
+                }
+              ],
+              "referenceLines": [
+                {
+                  "value": 0.1,
+                  "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                  "color": "#f59e0b",
+                  "axis": "y"
+                }
+              ]
+            },
+            "data": [
+              {
+                "period": "T2/2025",
+                "gross_sales_amount": 264533000,
+                "returned_sales_amount": 26058000,
+                "net_revenue_amount": 238475000,
+                "return_rate_by_value": 0.0985
+              },
+              {
+                "period": "T1/2026",
+                "gross_sales_amount": 722668000,
+                "returned_sales_amount": 63610000,
+                "net_revenue_amount": 659058000,
+                "return_rate_by_value": 0.088
+              },
+              {
+                "period": "T2/2026",
+                "gross_sales_amount": 608711000,
+                "returned_sales_amount": 78369000,
+                "net_revenue_amount": 530342000,
+                "return_rate_by_value": 0.1287
+              }
+            ]
+          },
+          {
+            "type": "chart",
+            "chartType": "horizontal_bar",
+            "xKey": "province_name",
+            "yKeys": [
+              "net_revenue_amount"
+            ],
+            "title": "Top 5 tỉnh/thành theo doanh thu thuần - T2/2026",
+            "purpose": "Đặt Hà Nội vào bối cảnh cạnh tranh giữa các địa phương",
+            "size": "half",
+            "options": {
+              "showLegend": false,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#10b981"
+              ],
+              "valueLabels": true
+            },
+            "data": [
+              {
+                "province_name": "Hà Nội",
+                "net_revenue_amount": 530342000
+              },
+              {
+                "province_name": "Hồ Chí Minh",
+                "net_revenue_amount": 285447000
+              },
+              {
+                "province_name": "Đắk Lắk",
+                "net_revenue_amount": 198672000
+              },
+              {
+                "province_name": "Lâm Đồng",
+                "net_revenue_amount": 196241000
+              },
+              {
+                "province_name": "Gia Lai",
+                "net_revenue_amount": 92041000
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "title": "Bảng so sánh nhanh Hà Nội qua các kỳ",
+            "columns": [
+              {
+                "key": "period",
+                "label": "Kỳ",
+                "format": "text"
+              },
+              {
+                "key": "gross_sales_amount",
+                "label": "Doanh thu gộp",
+                "format": "currency"
+              },
+              {
+                "key": "returned_sales_amount",
+                "label": "Hoàn trả",
+                "format": "currency"
+              },
+              {
+                "key": "net_revenue_amount",
+                "label": "Doanh thu thuần",
+                "format": "currency"
+              },
+              {
+                "key": "return_rate_by_value",
+                "label": "Tỷ lệ hoàn trả",
+                "format": "percent"
+              }
+            ],
+            "rows": [
+              [
+                "T2/2025",
+                264533000,
+                26058000,
+                238475000,
+                0.0985
+              ],
+              [
+                "T1/2026",
+                722668000,
+                63610000,
+                659058000,
+                0.088
+              ],
+              [
+                "T2/2026",
+                608711000,
+                78369000,
+                530342000,
+                0.1287
+              ]
+            ],
+            "sortBy": "period",
+            "sortOrder": "asc"
+          },
+          {
+            "type": "heading",
+            "text": "Hàm ý kinh doanh và hành động ưu tiên",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Vị thế thị trường: Hà Nội đứng #1 trong tháng 2/2026 và cao hơn TP.HCM khoảng 244.90 triệu doanh thu thuần, tương đương gấp 1.86 lần.\n- Vấn đề cần ưu tiên: tỷ lệ hoàn trả 12.87% đã vượt mức 10% và tăng 4.07 điểm % so với tháng trước; đây là tín hiệu đáng theo dõi ngay.\n- Nếu giữ được tỷ lệ hoàn trả như tháng 1/2026 (8.8%), doanh thu thuần tháng 2 của Hà Nội đã có thể cao hơn đáng kể. Điều này cho thấy phần sụt giảm doanh thu không chỉ do bán ít hơn mà còn do thất thoát sau bán.\n- Khuyến nghị hành động: drill-down theo sản phẩm vaccine, shop, nhóm khách hàng và nguyên nhân trả hàng để xác định đâu là nguồn phát sinh hoàn trả lớn nhất trong tháng 2.\n- Khuyến nghị quản trị: theo dõi song song 3 KPI tại Hà Nội mỗi tháng gồm doanh thu gộp, doanh thu thuần và tỷ lệ hoàn trả; tránh đánh giá tăng trưởng chỉ dựa trên doanh thu bán ra.\n- Mức độ tin cậy: kết luận hiện tại đủ tốt cho đánh giá nhanh theo tỉnh/tháng, nhưng chưa có phân rã theo kênh bán, sản phẩm hay nguyên nhân hoàn trả nên chưa thể chốt nguyên nhân gốc rễ."
+          }
+        ],
+        "chart_config": {
+          "type": "composed",
+          "xKey": "period",
+          "yKeys": [
+            "gross_sales_amount",
+            "returned_sales_amount",
+            "net_revenue_amount",
+            "return_rate_by_value"
+          ],
+          "options": {
+            "dualAxis": true,
+            "showLegend": true,
+            "showGrid": true,
+            "barRadius": 6,
+            "colors": [
+              "#2563eb",
+              "#ef4444",
+              "#10b981",
+              "#f59e0b"
+            ],
+            "series": [
+              {
+                "key": "gross_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "returned_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "net_revenue_amount",
+                "renderAs": "line",
+                "yAxisId": "left"
+              },
+              {
+                "key": "return_rate_by_value",
+                "renderAs": "line",
+                "yAxisId": "right"
+              }
+            ],
+            "referenceLines": [
+              {
+                "value": 0.1,
+                "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                "color": "#f59e0b",
+                "axis": "y"
+              }
+            ]
+          },
+          "yKey": "gross_sales_amount"
+        }
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "H"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "à"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " Nội"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " trong"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tháng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " "
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "2"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "/"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "202"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "6"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " ghi"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhận"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " doanh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " g"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ộ"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "p"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " "
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "608"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "."
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "71"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " triệu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ","
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hoàn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " trả"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " "
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "78"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "."
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "37"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " triệu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " và"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " doanh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ần"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " "
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "530"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "."
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "34"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " triệu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ".\n\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "Đi"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ểm"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " đáng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " chú"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " ý"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhất"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " là"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ":\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " Hà"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " Nội"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " vẫn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " là"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " địa"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " phương"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " dẫn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " đầu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " doanh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ần"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " trong"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tháng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " "
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "2"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "/"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "202"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "6"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ".\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " Tuy"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhiên"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ","
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hiệu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " quả"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " doanh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " đã"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " yếu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " đi"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " so"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " với"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tháng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " "
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "1"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "/"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "202"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "6"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " do"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hoàn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " trả"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tăng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhanh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hơn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " mức"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " giảm"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " bán"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " ra"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ".\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " T"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ăng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " trưởng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " năm"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " vẫn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " rất"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " mạnh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ","
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhưng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " chất"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " lượng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " doanh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " đang"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " chịu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " áp"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " lực"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ".\n\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "Nếu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " anh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "/ch"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ị"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " muốn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ","
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tôi"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " có"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thể"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tiếp"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tục"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " drill"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-down"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " Hà"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " Nội"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " theo"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ":\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " shop"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "/c"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ửa"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hàng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ",\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " sản"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " phẩm"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " vaccine"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ",\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhân"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " viên"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " bán"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hàng"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": ",\n"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "-"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hoặc"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " phân"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tích"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nguyên"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhân"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " hoàn"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " trả"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " để"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " tìm"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nơi"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " làm"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " doanh"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " thu"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "ần"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " bị"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " mất"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhiều"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": " nhất"
+      }
+    },
+    {
+      "event": "reply_chunk",
+      "time": "143.6s",
+      "data": {
+        "text": "."
+      }
+    },
+    {
+      "event": "reply",
+      "time": "143.6s",
+      "data": {
+        "reply": "Hà Nội trong tháng 2/2026 ghi nhận doanh thu gộp 608.71 triệu, hoàn trả 78.37 triệu và doanh thu thuần 530.34 triệu.\n\nĐiểm đáng chú ý nhất là:\n- Hà Nội vẫn là địa phương dẫn đầu doanh thu thuần trong tháng 2/2026.\n- Tuy nhiên, hiệu quả doanh thu đã yếu đi so với tháng 1/2026 do hoàn trả tăng nhanh hơn mức giảm bán ra.\n- Tăng trưởng năm vẫn rất mạnh, nhưng chất lượng doanh thu đang chịu áp lực.\n\nNếu anh/chị muốn, tôi có thể tiếp tục drill-down Hà Nội theo:\n- shop/cửa hàng,\n- sản phẩm vaccine,\n- nhân viên bán hàng,\n- hoặc phân tích nguyên nhân hoàn trả để tìm nơi làm doanh thu thuần bị mất nhiều nhất.",
+        "thinking": "",
+        "blocks": [
+          {
+            "type": "heading",
+            "text": "Doanh thu Hà Nội tháng 2/2026",
+            "level": "h1"
+          },
+          {
+            "type": "stat_cards",
+            "cards": [
+              {
+                "label": "Doanh thu thuần",
+                "value": "530,342,000",
+                "subtitle": "Hà Nội - T2/2026 | Xếp hạng #1 toàn quốc",
+                "trend": "up",
+                "color": "green"
+              },
+              {
+                "label": "Doanh thu gộp",
+                "value": "608,711,000",
+                "subtitle": "Trước hoàn trả",
+                "trend": "neutral",
+                "color": "blue"
+              },
+              {
+                "label": "Giá trị hoàn trả",
+                "value": "78,369,000",
+                "subtitle": "Tỷ lệ hoàn trả 12.87%",
+                "trend": "down",
+                "color": "red"
+              },
+              {
+                "label": "So với T1/2026",
+                "value": "-19.5%",
+                "subtitle": "Doanh thu thuần giảm 128,716,000",
+                "trend": "down",
+                "color": "orange"
+              },
+              {
+                "label": "So với T2/2025",
+                "value": "+122.4%",
+                "subtitle": "Doanh thu thuần tăng 291,867,000",
+                "trend": "up",
+                "color": "teal"
+              }
+            ]
+          },
+          {
+            "type": "heading",
+            "text": "Điểm chốt dành cho quản lý",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Hà Nội đạt doanh thu thuần 530.34 triệu trong tháng 2/2026, là địa phương cao nhất trong dữ liệu tháng này.\n- Tuy vẫn dẫn đầu, doanh thu thuần đã giảm 19.5% so với tháng 1/2026.\n- Nguyên nhân chính không chỉ đến từ doanh thu gộp giảm 15.8%, mà còn do hoàn trả tăng mạnh 23.2%, kéo tỷ lệ hoàn trả lên 12.87%.\n- So với cùng kỳ tháng 2/2025, Hà Nội tăng trưởng rất mạnh: doanh thu thuần tăng 122.4%; tuy nhiên mặt trái là giá trị hoàn trả tăng tới 200.8%.\n- Kết luận quản trị: Hà Nội đang là đầu tàu doanh thu, nhưng chất lượng doanh thu tháng 2 có dấu hiệu xấu đi do hoàn trả tăng rõ rệt."
+          },
+          {
+            "type": "chart",
+            "chartType": "composed",
+            "xKey": "period",
+            "yKeys": [
+              "gross_sales_amount",
+              "returned_sales_amount",
+              "net_revenue_amount",
+              "return_rate_by_value"
+            ],
+            "title": "Hà Nội: diễn biến doanh thu và hoàn trả (T2/2025, T1/2026, T2/2026)",
+            "purpose": "Cho thấy tăng trưởng mạnh theo năm nhưng suy giảm theo tháng do hoàn trả tăng",
+            "size": "full",
+            "options": {
+              "dualAxis": true,
+              "showLegend": true,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#2563eb",
+                "#ef4444",
+                "#10b981",
+                "#f59e0b"
+              ],
+              "series": [
+                {
+                  "key": "gross_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "returned_sales_amount",
+                  "renderAs": "bar",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "net_revenue_amount",
+                  "renderAs": "line",
+                  "yAxisId": "left"
+                },
+                {
+                  "key": "return_rate_by_value",
+                  "renderAs": "line",
+                  "yAxisId": "right"
+                }
+              ],
+              "referenceLines": [
+                {
+                  "value": 0.1,
+                  "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                  "color": "#f59e0b",
+                  "axis": "y"
+                }
+              ]
+            },
+            "data": [
+              {
+                "period": "T2/2025",
+                "gross_sales_amount": 264533000,
+                "returned_sales_amount": 26058000,
+                "net_revenue_amount": 238475000,
+                "return_rate_by_value": 0.0985
+              },
+              {
+                "period": "T1/2026",
+                "gross_sales_amount": 722668000,
+                "returned_sales_amount": 63610000,
+                "net_revenue_amount": 659058000,
+                "return_rate_by_value": 0.088
+              },
+              {
+                "period": "T2/2026",
+                "gross_sales_amount": 608711000,
+                "returned_sales_amount": 78369000,
+                "net_revenue_amount": 530342000,
+                "return_rate_by_value": 0.1287
+              }
+            ]
+          },
+          {
+            "type": "chart",
+            "chartType": "horizontal_bar",
+            "xKey": "province_name",
+            "yKeys": [
+              "net_revenue_amount"
+            ],
+            "title": "Top 5 tỉnh/thành theo doanh thu thuần - T2/2026",
+            "purpose": "Đặt Hà Nội vào bối cảnh cạnh tranh giữa các địa phương",
+            "size": "half",
+            "options": {
+              "showLegend": false,
+              "showGrid": true,
+              "barRadius": 6,
+              "colors": [
+                "#10b981"
+              ],
+              "valueLabels": true
+            },
+            "data": [
+              {
+                "province_name": "Hà Nội",
+                "net_revenue_amount": 530342000
+              },
+              {
+                "province_name": "Hồ Chí Minh",
+                "net_revenue_amount": 285447000
+              },
+              {
+                "province_name": "Đắk Lắk",
+                "net_revenue_amount": 198672000
+              },
+              {
+                "province_name": "Lâm Đồng",
+                "net_revenue_amount": 196241000
+              },
+              {
+                "province_name": "Gia Lai",
+                "net_revenue_amount": 92041000
+              }
+            ]
+          },
+          {
+            "type": "table",
+            "title": "Bảng so sánh nhanh Hà Nội qua các kỳ",
+            "columns": [
+              {
+                "key": "period",
+                "label": "Kỳ",
+                "format": "text"
+              },
+              {
+                "key": "gross_sales_amount",
+                "label": "Doanh thu gộp",
+                "format": "currency"
+              },
+              {
+                "key": "returned_sales_amount",
+                "label": "Hoàn trả",
+                "format": "currency"
+              },
+              {
+                "key": "net_revenue_amount",
+                "label": "Doanh thu thuần",
+                "format": "currency"
+              },
+              {
+                "key": "return_rate_by_value",
+                "label": "Tỷ lệ hoàn trả",
+                "format": "percent"
+              }
+            ],
+            "rows": [
+              [
+                "T2/2025",
+                264533000,
+                26058000,
+                238475000,
+                0.0985
+              ],
+              [
+                "T1/2026",
+                722668000,
+                63610000,
+                659058000,
+                0.088
+              ],
+              [
+                "T2/2026",
+                608711000,
+                78369000,
+                530342000,
+                0.1287
+              ]
+            ],
+            "sortBy": "period",
+            "sortOrder": "asc"
+          },
+          {
+            "type": "heading",
+            "text": "Hàm ý kinh doanh và hành động ưu tiên",
+            "level": "h2"
+          },
+          {
+            "type": "text",
+            "content": "- Vị thế thị trường: Hà Nội đứng #1 trong tháng 2/2026 và cao hơn TP.HCM khoảng 244.90 triệu doanh thu thuần, tương đương gấp 1.86 lần.\n- Vấn đề cần ưu tiên: tỷ lệ hoàn trả 12.87% đã vượt mức 10% và tăng 4.07 điểm % so với tháng trước; đây là tín hiệu đáng theo dõi ngay.\n- Nếu giữ được tỷ lệ hoàn trả như tháng 1/2026 (8.8%), doanh thu thuần tháng 2 của Hà Nội đã có thể cao hơn đáng kể. Điều này cho thấy phần sụt giảm doanh thu không chỉ do bán ít hơn mà còn do thất thoát sau bán.\n- Khuyến nghị hành động: drill-down theo sản phẩm vaccine, shop, nhóm khách hàng và nguyên nhân trả hàng để xác định đâu là nguồn phát sinh hoàn trả lớn nhất trong tháng 2.\n- Khuyến nghị quản trị: theo dõi song song 3 KPI tại Hà Nội mỗi tháng gồm doanh thu gộp, doanh thu thuần và tỷ lệ hoàn trả; tránh đánh giá tăng trưởng chỉ dựa trên doanh thu bán ra.\n- Mức độ tin cậy: kết luận hiện tại đủ tốt cho đánh giá nhanh theo tỉnh/tháng, nhưng chưa có phân rã theo kênh bán, sản phẩm hay nguyên nhân hoàn trả nên chưa thể chốt nguyên nhân gốc rễ."
+          }
+        ],
+        "chart_config": {
+          "type": "composed",
+          "xKey": "period",
+          "yKeys": [
+            "gross_sales_amount",
+            "returned_sales_amount",
+            "net_revenue_amount",
+            "return_rate_by_value"
+          ],
+          "options": {
+            "dualAxis": true,
+            "showLegend": true,
+            "showGrid": true,
+            "barRadius": 6,
+            "colors": [
+              "#2563eb",
+              "#ef4444",
+              "#10b981",
+              "#f59e0b"
+            ],
+            "series": [
+              {
+                "key": "gross_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "returned_sales_amount",
+                "renderAs": "bar",
+                "yAxisId": "left"
+              },
+              {
+                "key": "net_revenue_amount",
+                "renderAs": "line",
+                "yAxisId": "left"
+              },
+              {
+                "key": "return_rate_by_value",
+                "renderAs": "line",
+                "yAxisId": "right"
+              }
+            ],
+            "referenceLines": [
+              {
+                "value": 0.1,
+                "label": "Ngưỡng tỷ lệ hoàn trả 10%",
+                "color": "#f59e0b",
+                "axis": "y"
+              }
+            ]
+          },
+          "yKey": "gross_sales_amount"
+        },
+        "reply_token_usage": {
+          "input": 356,
+          "thinking": 0,
+          "output": 1543,
+          "total": 1899
+        }
+      }
+    },
+    {
+      "event": "done",
+      "time": "143.6s",
+      "data": {
+        "grand_total": {
+          "input": 356,
+          "thinking": 0,
+          "output": 1543,
+          "total": 1899
+        }
+      }
+    },
+    {
+      "event": "timing",
+      "time": "143.6s",
+      "data": {
+        "timings_ms": {
+          "memory_sql": 539.3,
+          "sql_stage": 18688.9,
+          "agentic_eval_1": 34115.9,
+          "agentic_exec_1": 357.7,
+          "agentic_eval_2": 38851.2,
+          "agentic_exec_2": 370.7,
+          "llm_reply": 50515.1,
+          "total": 143588.3
+        }
+      }
+    },
+    {
+      "event": "suggestions",
+      "time": "151.3s",
+      "data": {
+        "questions": [
+          "Tỷ lệ hoàn trả theo giá trị (returned_sales_amount/gross_sales_amount) của Hà Nội tháng 2/2026 là bao nhiêu và đang cao/thấp hơn tháng 1/2026 như thế nào?",
+          "Xu hướng 6 tháng gần nhất tại Hà Nội (gross, hoàn trả, net revenue) đang đi theo chiều nào và tháng 2/2026 đang lệch khỏi xu hướng ở điểm nào?",
+          "Hà Nội đóng góp bao nhiêu % doanh thu thuần toàn quốc trong tháng 2/2026 và mức đóng góp này thay đổi ra sao so với tháng 1/2026?",
+          "So sánh Hà Nội với 3 tỉnh/thành có doanh thu thuần cao nhất tháng 2/2026: chênh lệch nằm ở bán ra (gross) hay ở mức hoàn trả (returned), và tỉnh/thành nào có chất lượng doanh thu tốt nhất?"
+        ]
+      }
+    }
+  ]
+}

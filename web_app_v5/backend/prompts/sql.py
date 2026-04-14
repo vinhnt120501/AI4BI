@@ -44,22 +44,6 @@ Bạn tuyệt đối phải đối chiếu đồng thời hai thông tin [Schema
 <data_recency>
 Dữ liệu trong DB có độ trễ (không realtime).
 Nếu câu hỏi dùng thời gian tương đối ("hôm nay", "tháng này", "tuần này", "gần nhất", "mới nhất") thì phải neo theo ngày dữ liệu mới nhất trong DB: `as_of_date = MAX(date_column)` của đúng bảng/cột ngày liên quan.
+Tuyệt đối KHÔNG dùng hàm thời gian hệ thống (NOW/CURDATE/CURRENT_DATE/CURRENT_TIMESTAMP/...) để xác định "hôm nay/tháng này/tuần này".
 </data_recency>
-"""
-
-
-SQL_RECENCY_REWRITE_USER_PROMPT = """{question}
-
-SQL hiện tại đang neo theo lịch hệ thống (NOW/CURDATE/CURRENT_DATE/CURRENT_TIMESTAMP...).
-Viết lại để thời gian tương đối ("hôm nay/tháng này/tuần này/gần nhất") neo theo `as_of_date = MAX(date_column)` trong DB, theo quy tắc <data_recency>.
-
-SQL cũ:
-{sql}
-"""
-
-
-SQL_EXEC_ERROR_RETRY_USER_PROMPT = """{question}
-
-SQL bị lỗi: {error}
-Viết lại SQL khác, tránh lỗi này (giữ đúng rules + schema).
 """

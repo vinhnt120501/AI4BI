@@ -83,6 +83,10 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
     return (latestUser?.content || query || '').trim();
   }, [messages, query]);
 
+  const hasUserAsked = useMemo(() => {
+    return messages.some((message) => message.role === 'user' && message.content.trim());
+  }, [messages]);
+
   // Internal scroll handling to prevent global page "jumping"
   const scrollRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -310,7 +314,7 @@ export default function AnalysisPage({ busy, messages, query, onSend, onSelectHi
                   setInput(event.target.value);
                   if (inputError) setInputError('');
                 }}
-                placeholder={busy ? 'Đang xử lý...' : 'Tiếp tục phân tích...'}
+                placeholder={busy ? 'Đang xử lý...' : (hasUserAsked ? 'Tiếp tục phân tích...' : 'Nhập câu hỏi để phân tích')}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter') submit();
                 }}

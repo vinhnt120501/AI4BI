@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mcp_mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: secretpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./nova_consumer_sql:/docker-entrypoint-initdb.d

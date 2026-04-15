@@ -2,6 +2,10 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, Edit3, Plus } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import settingIcon from './mcp/images/setting.png';
+import sidebarLogo from '@/components/sidebar/images/sidebar.png';
 import AnalysisPage from '@/components/workspace/pages/AnalysisPage';
 import type { AnalysisTarget } from '@/components/workspace/types';
 import { FeedRail } from '@/components/sidebar';
@@ -80,17 +84,8 @@ function findSseBoundary(buffer: string) {
   };
 }
 
-function InstructionToggleIcon({ open }: { open: boolean }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3.5" y="6" width="17" height="12" rx="2.2" />
-      <path d="M10.75 6v12" />
-      {open ? <rect x="10.75" y="6" width="9.75" height="12" rx="2.2" fill="currentColor" opacity="0.10" stroke="none" /> : null}
-    </svg>
-  );
-}
-
 export default function ChatPage() {
+  const router = useRouter();
   const [messages, setMessages] = useState<Message[]>([]);
   const [analysisSessionId, setAnalysisSessionId] = useState(createSessionId());
   const [analysisQuery, setAnalysisQuery] = useState('');
@@ -770,7 +765,14 @@ export default function ChatPage() {
                         title="Toggle Instructions Panel"
                         aria-label="Thu gọn Instructions"
                       >
-                        <InstructionToggleIcon open={isRightPanelOpen} />
+                        <Image
+                          src={sidebarLogo}
+                          alt="Sidebar logo"
+                          width={26}
+                          height={26}
+                          className="opacity-90 hover:opacity-100"
+                          priority
+                        />
                       </button>
                       <h3 className="text-[15px] font-semibold text-slate-900">Instructions</h3>
                     </div>
@@ -787,12 +789,20 @@ export default function ChatPage() {
                   </>
                 ) : (
                   <button
+                    type="button"
                     onClick={() => setIsRightPanelOpen(true)}
                     className="cursor-pointer p-2 text-slate-900 transition-colors hover:text-slate-900"
                     title="Open Instructions Panel"
                     aria-label="Mở Instructions"
                   >
-                    <InstructionToggleIcon open={isRightPanelOpen} />
+                    <Image
+                      src={sidebarLogo}
+                      alt="Sidebar logo"
+                      width={26}
+                      height={26}
+                      className="opacity-90 hover:opacity-100"
+                      priority
+                    />
                   </button>
                 )}
               </div>
@@ -869,6 +879,32 @@ export default function ChatPage() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div
+                className={[
+                  'mt-auto shrink-0 bg-white',
+                  isRightPanelOpen ? 'px-5 py-3' : 'px-2 py-3',
+                ].join(' ')}
+              >
+                <button
+                  type="button"
+                  onClick={() => router.push('/mcp')}
+                  className={[
+                    'inline-flex cursor-pointer items-center justify-center rounded-xl',
+                    isRightPanelOpen ? 'h-11 w-11' : 'h-11 w-full',
+                  ].join(' ')}
+                  title="MCP Connectors"
+                  aria-label="Mở trang MCP Connectors"
+                >
+                  <Image
+                    src={settingIcon}
+                    alt="MCP settings"
+                    width={26}
+                    height={26}
+                    className="opacity-90 hover:opacity-100"
+                  />
+                </button>
               </div>
             </div>
           </div>

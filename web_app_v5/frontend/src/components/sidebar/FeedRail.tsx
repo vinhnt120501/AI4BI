@@ -218,14 +218,14 @@ export default function FeedRail({ activeId, onSelect, onSelectKpi }: FeedRailPr
 
   return (
     <aside className="w-[320px] md:w-[360px] shrink-0 overflow-x-hidden border-r border-[color:var(--color-border-tertiary)] bg-[var(--color-background-primary)]">
-      <div className="flex h-full flex-col">
-        <div className="px-4 pb-3 pt-4">
-          <div className="inline-flex items-center gap-1 rounded-full bg-[#19226D] px-3 py-1 text-[12px] font-medium text-white">
-            <span>Tín hiệu</span>
-            {typeof signalsCount === 'number' ? (
-              <span className="text-[10px] opacity-80">{formatCount(signalsCount)}</span>
-            ) : null}
-          </div>
+        <div className="flex h-full flex-col">
+          <div className="px-4 pb-3 pt-4">
+            <div className="inline-flex items-center gap-1 rounded-full bg-[#19226D] px-3 py-1 text-[12px] font-medium text-white">
+              <span>Tín hiệu</span>
+              {typeof signalsCount === 'number' ? (
+                <span className="text-[10px] opacity-80">{formatCount(signalsCount)}</span>
+              ) : null}
+            </div>
         </div>
 
         <div
